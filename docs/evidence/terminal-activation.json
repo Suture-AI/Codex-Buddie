@@ -1,0 +1,90 @@
+{
+  "scope": "Enable the existing tested native renderer in regular Codex CLI/Orca sessions; startup verification only, no new UI input.",
+  "recorded_at_utc": "2026-10-01T15:27:34.290417+00:00",
+  "profiles_updated": 9,
+  "orca_account_profiles": 7,
+  "main_profile_updated": true,
+  "shared_orca_profile_updated": true,
+  "restart_required": true,
+  "rollback_saved": true,
+  "app_access_grants_added": 0,
+  "vendor_files_changed": false,
+  "official_surfaces_preserved": [
+    "browser",
+    "computer"
+  ],
+  "checks": {
+    "main_profile": {
+      "status": "pass",
+      "server": "cua",
+      "runtimeStatus": "connected",
+      "tools": [
+        "js",
+        "js_reset",
+        "turn_ended"
+      ],
+      "nativeAppCount": 33,
+      "browserCount": 0,
+      "inventoryErrors": [
+        "Browsers: Error: Missing required Codex turn metadata: session_id, turn_id"
+      ],
+      "verifiedAtUtc": "2026-10-01T15:24:46Z",
+      "scope": "Registration and inventory only; no UI actions or app-access approvals"
+    },
+    "active_orca_profile": {
+      "status": "pass",
+      "server": "cua",
+      "runtimeStatus": "connected",
+      "tools": [
+        "js",
+        "js_reset",
+        "turn_ended"
+      ],
+      "nativeAppCount": 33,
+      "browserCount": 0,
+      "inventoryErrors": [
+        "Browsers: Error: Missing required Codex turn metadata: session_id, turn_id"
+      ],
+      "verifiedAtUtc": "2026-10-01T15:23:53Z",
+      "scope": "Registration and inventory only; no UI actions or app-access approvals"
+    },
+    "installed_launcher": {
+      "nativeAppCount": 33,
+      "inventoryErrors": [
+        "Browsers: Error: Missing required Codex turn metadata: session_id, turn_id"
+      ],
+      "renderer_loaded": true,
+      "saved_appearance_prepared": true,
+      "scope": "Installed terminal launcher; official first-call inventory only; no app input or approval"
+    }
+  },
+  "unit_tests": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p test_terminal_buddie.py -v",
+    "passed": 6
+  },
+  "source_sha256": {
+    "scripts/terminal-buddie.py": "d059bb21249e1790f115db50d1a4eda14a0598d1590903ff3b87efdb347ddc54",
+    "tests/test_terminal_buddie.py": "f6de5bde62aaea54b23a39486ecf018eb2fab3fb1e9b945b3b79fb13f6e370e0"
+  },
+  "installed_helper_matches_source": true,
+  "local_input_sha256": {
+    ".build/terminal-install/account-check.json": "b55cf099fb3e7ab7652c641dbe0d059616611108ffc7769ea25b2c8a51ba6aea",
+    ".build/terminal-install/check.py": "4d5542e90b9da01bced16211607cb926d7adf73659e88cd555723db9db3ae55e",
+    ".build/terminal-install/final-smoke/installed-launch.json": "91e12b2e048fa7ed1ccc5bcec356de4bb4d86d697daef6ba5feb5b9820041ac9",
+    ".build/terminal-install/final-smoke/installed-launch.log": "b4f48ad574a88cb1d4d270135bdfa1c1dd77bae9886c2aa8eaf9319f3175f0f2",
+    ".build/terminal-install/final-smoke/smoke.py": "af99754ae448bd9cdf934d67ba0abcb14105e95a5934e8f44a573a6729717e67",
+    ".build/terminal-install/installed-launch.json": "91e12b2e048fa7ed1ccc5bcec356de4bb4d86d697daef6ba5feb5b9820041ac9",
+    ".build/terminal-install/installed-launch.log": "b4f48ad574a88cb1d4d270135bdfa1c1dd77bae9886c2aa8eaf9319f3175f0f2",
+    ".build/terminal-install/main-check.json": "9dfaf656322f3b731fcc23808131cef5cbe6203f179c8c1c3df0c0920591e69b",
+    ".build/terminal-install/smoke.py": "af99754ae448bd9cdf934d67ba0abcb14105e95a5934e8f44a573a6729717e67"
+  },
+  "prepared_service": ".build/native-layout-fixed/Codex Buddie Runtime.app",
+  "native_rendering_evidence": "docs/evidence/native-layout.json",
+  "limits": [
+    "Existing connected sessions keep their old CUA process until restarted.",
+    "Browser inventory requires model-turn metadata absent from these probes; browser interaction was not retested.",
+    "Native input can show Bit; DOM automation does not move a native cursor.",
+    "The prepared copy must remain at its configured path.",
+    "Clean-machine installation, runtime-update compatibility, smooth native travel and click-event animation remain open."
+  ]
+}

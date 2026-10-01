@@ -133,6 +133,40 @@ its content-view assignment and substitutes our character view for either
 The native service is closed-source and has no custom-cursor API in the public
 interfaces inspected. This experiment depends on private implementation details.
 
+## Use Buddie from your regular terminals
+
+Once you have a tested, development-signed service copy, enable it for existing
+Codex CLI and Orca `cua` registrations:
+
+```sh
+python3 scripts/terminal-buddie.py enable \
+  --service '/absolute/path/to/Codex Buddie Runtime.app'
+```
+
+Restart the Codex session in your other terminal, or open a new one. Ask it to
+use **native CUA** for a normal computer task, such as opening Finder and clicking
+Downloads. Approve that app's usual access prompt if requested. The Lab does
+not need to be open. Its saved character selection still controls the cursor.
+
+This updates the main Codex profile and existing Orca account/shared profiles.
+It preserves official browser providers, tool settings and per-app permissions.
+Existing sessions keep their old connection until restarted. Browser actions
+that use DOM automation do not move a native cursor and will not show the buddy.
+The service path must remain available; moving or deleting that prepared copy
+breaks the registration until restored.
+
+To check or undo the switch:
+
+```sh
+python3 scripts/terminal-buddie.py status
+python3 scripts/terminal-buddie.py disable
+```
+
+Restart affected sessions after disabling too. The script saves the original
+CUA registration and preserves unrelated later settings. It refuses to overwrite
+a CUA stanza that has been edited since activation. The live renderer's
+[motion and compatibility limits](docs/native-layout.md) still apply.
+
 ## Prepare an isolated native experiment
 
 **Research only.** An existing Apple development identity was sufficient to sign
