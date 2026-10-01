@@ -44,7 +44,7 @@ static void InstallMenus(void) {
 static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     NSMutableArray *all=[NSMutableArray new];
     NSURL *root=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Characters"];
-    for(NSString *name in @[@"pip",@"pip-articulated",@"bit",@"sprout",@"mochi",@"orbit"]) {
+    for(NSString *name in @[@"pip",@"pip-articulated",@"bit",@"miso",@"sprout",@"mochi",@"orbit"]) {
         NSError *error=nil; BuddieCharacter *c=[BuddieCharacter loadPack:[root URLByAppendingPathComponent:name] error:&error];
         if(c) [all addObject:c];
     }
@@ -67,6 +67,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     BuddieJourney _journey;
     BuddiePoint _anchor;
     double _nextMove, _releaseAt;
+    BOOL _syncingControls;
 }
 @property NSWindow *window;
 @property NSWindow *cursor;
@@ -146,12 +147,14 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];
 }
 - (void)syncSliders {
+    _syncingControls=YES;
     BOOL sprite=self.character.clips.count>0,puppet=self.character.puppetParts.count>0;
     self.settingsHeading.stringValue=sprite ? @"MAKE IT YOURS":@"SHAPE & EXPRESSION";
     self.artNote.hidden=!sprite || puppet;
     self.artNote.stringValue=self.character.materials.count ? @"Your colors, with all the original shading. Save a copy to keep this look.":@"The face and outfit belong together. Import another buddy to try a different look.";
     self.artNote.frame=NSMakeRect(700,self.character.materials.count ? 202:315,218,65);
     for(NSView *control in self.materialControls) {
+        if([control isKindOfClass:NSTextField.class]) [(NSTextField *)control setDelegate:nil];
         if([control isKindOfClass:NSColorWell.class]) [(NSColorWell *)control deactivate];
         [control removeFromSuperview];
     }
@@ -187,8 +190,10 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
         [self.settingLabels[key] setFrameOrigin:NSMakePoint(700,y+6)];
     }
     self.status.stringValue=puppet ? @"Articulated character study • live Codex replacement is still under development":sprite ? @"Complete character poses • motion study • live Codex replacement is still under development":@"Character preview • live Codex replacement is still under development";
+    _syncingControls=NO;
 }
 - (void)paint:(NSColorWell *)sender {
+    if(_syncingControls || self.materialWells[sender.identifier]!=sender) return;
     NSColor *color=[[sender.color colorUsingColorSpace:NSColorSpace.sRGBColorSpace] colorWithAlphaComponent:1];
     NSTextField *hex=self.materialFields[sender.identifier];
     if(!hex.currentEditor) hex.stringValue=ColorHex(color);
@@ -199,12 +204,15 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [self.character prepareAppearance]; self.buddy.needsDisplay=YES;
 }
 - (void)controlTextDidChange:(NSNotification *)notification {
-    NSTextField *field=notification.object; NSColor *color=ColorFromHex(field.stringValue);
+    NSTextField *field=notification.object;
+    if(_syncingControls || self.materialFields[field.identifier]!=field) return;
+    NSColor *color=ColorFromHex(field.stringValue);
     NSColorWell *well=self.materialWells[field.identifier];
     if(color && well) { well.color=color; [self paint:well]; }
 }
 - (void)controlTextDidEndEditing:(NSNotification *)notification {
     NSTextField *field=notification.object; NSColorWell *well=self.materialWells[field.identifier];
+    if(_syncingControls || self.materialFields[field.identifier]!=field) return;
     if(well) { [self controlTextDidChange:notification]; field.stringValue=ColorHex(well.color); }
 }
 - (void)createCursor {
@@ -249,6 +257,10 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 - (void)clickPose:(id)sender { double now=NSProcessInfo.processInfo.systemUptime; [self.buddy press:YES atTime:now]; _releaseAt=now+.15; }
 - (void)reduce:(NSButton *)sender { self.buddy.reduceMotion=sender.state==NSControlStateValueOn; }
 - (void)selectCharacter:(id)sender {
+    // Commit an active color edit while it still belongs to the old buddy.
+    // Removing that field after replacing the model can otherwise repaint the
+    // new buddy when both packs use the same material id (e.g. "shell").
+    [self.window makeFirstResponder:nil];
     self.character=[self.collection[self.picker.indexOfSelectedItem] copy]; self.buddy.character=self.character; [self syncSliders];
 }
 - (void)tune:(NSSlider *)sender {
@@ -389,10 +401,10 @@ static NSBitmapImageRep *PuppetImageAtTime(BuddieCharacter *character,BuddiePose
 static NSBitmapImageRep *PuppetImage(BuddieCharacter *character,BuddiePose pose,double progress,BOOL desiredLeft) {
     return PuppetImageAtTime(character,pose,progress,desiredLeft,0,NO);
 }
-static int ExportFaces(NSString *path) {
+static int ExportFaces(NSString *path,NSString *identifier) {
     if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
     BuddieView *view=[[BuddieView alloc] initWithFrame:NSMakeRect(0,0,240,240)];
-    view.manualAnimation=YES; view.character=ArticulatedNamed(@"bit");
+    view.manualAnimation=YES; view.character=ArticulatedNamed(identifier); if(!view.character) return 1;
     double x=0;
     for(int i=0;i<420;i++) {
         double t=i/60.;
@@ -413,10 +425,10 @@ static NSBitmapImageRep *TurnImage(BuddieCharacter *character,double progress,BO
     pose.feet[0].x=-character.footSpacing; pose.feet[1].x=character.footSpacing;
     return PuppetImage(character,pose,progress,desiredLeft);
 }
-static int ExportGait(NSString *path) {
+static int ExportGait(NSString *path,NSString *identifier) {
     if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
     BuddieView *view=[[BuddieView alloc] initWithFrame:NSMakeRect(0,0,240,240)];
-    view.manualAnimation=YES; view.character=ArticulatedNamed(@"bit");
+    view.manualAnimation=YES; view.character=ArticulatedNamed(identifier); if(!view.character) return 1;
     for(int i=0;i<300;i++) {
         double t=i/60.,x=t<.25 ? 0:t<1.25 ? (t-.25)*24:t<1.75 ? 24+(t-1.25)*80:t<2.15 ? 64+(t-1.75)*16:t<2.8 ? 70.4:t<3.8 ? 70.4-(t-2.8)*24:46.4;
         double unit=view.character.spriteHeight/view.character.spriteCanvas.height*view.character.puppetMotionScale;
@@ -427,9 +439,9 @@ static int ExportGait(NSString *path) {
     }
     puts("Exported close-up Cocoa gait: walk, flight, moving landing, stop and reversal."); return 0;
 }
-static int ExportTurn(NSString *path) {
+static int ExportTurn(NSString *path,NSString *identifier) {
     if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
-    BuddieCharacter *bit=ArticulatedNamed(@"bit");
+    BuddieCharacter *bit=ArticulatedNamed(identifier); if(!bit) return 1;
     for(int i=0;i<96;i++) {
         double p=i<18 ? 0:i<36 ? (i-18)/18.:i<54 ? 1:i<72 ? 1-(i-54)/18.:0;
         NSBitmapImageRep *rep=TurnImage(bit,p,i<54);
@@ -460,12 +472,17 @@ static int ExportPuppet(NSString *path, NSString *identifier) {
     }
     unsigned int coats[]={0xD65378,0x668D4E,0x967AD3},boots[]={0x4A6394,0xF1AF46,0xEAD38E};
     NSArray *names=@[@"Rose",@"Moss",@"Lilac"];
+    BOOL miso=[identifier isEqual:@"miso"];
+    if(miso) {
+        unsigned int shells[]={0xF5ECDD,0xE8DFF3,0x52617E},suits[]={0x7C9A80,0x9C80B5,0xD88472};
+        memcpy(coats,shells,sizeof(coats)); memcpy(boots,suits,sizeof(boots)); names=@[@"Sage",@"Lilac",@"Midnight"];
+    }
     NSColor *(^color)(unsigned int)=^NSColor *(unsigned int n) { return [NSColor colorWithSRGBRed:((n>>16)&255)/255. green:((n>>8)&255)/255. blue:(n&255)/255. alpha:1]; };
     for(int i=0;i<3;i++) {
         still.character=ArticulatedNamed(identifier);
         NSMutableDictionary *colors=[still.character.materialColors mutableCopy];
         colors[still.character.materials[0][@"id"]]=color(coats[i]);
-        if(!pixel) colors[still.character.materials[1][@"id"]]=color(boots[i]);
+        if(!pixel || miso) colors[still.character.materials[1][@"id"]]=color(boots[i]);
         still.character.materialColors=colors; [still.character prepareAppearance];
         [still animateAtTime:100 anchor:(BuddiePoint){0,0}];
         if(!SaveView(still,[path stringByAppendingPathComponent:[names[i] stringByAppendingString:@".png"]])) return 1;
@@ -590,10 +607,43 @@ static void TestPuppet(BuddieView *view) {
     }
     }
     puts("PASS: 60 actual raster calf extensions/lifts connect both hips to boots without detached pixels");
+    BuddieCharacter *miso=ArticulatedNamed(@"miso"); NSCAssert(miso,@"Miso is installed in the bundled collection");
+    BuddiePose neutral={0}; neutral.squash=1; neutral.feet[0].x=-5; neutral.feet[1].x=5;
+    for(int direction=0;direction<5;direction++) {
+        NSBitmapImageRep *base=PuppetImage(miso,neutral,direction/4.,NO); NSMutableSet *faces=[NSMutableSet new];
+        for(int face=0;face<=3;face++) {
+            BuddiePose pose=neutral; pose.face=face;
+            NSBitmapImageRep *a=PuppetImage(miso,pose,direction/4.,NO),*b=PuppetImage(miso,pose,direction/4.,YES);
+            NSData *data=[a representationUsingType:NSBitmapImageFileTypePNG properties:@{}]; [faces addObject:data];
+            NSCAssert([data isEqual:[b representationUsingType:NSBitmapImageFileTypePNG properties:@{}]],@"Miso keeps its current perspective when direction reverses");
+            for(int y=0;y<320;y++) for(int x=0;x<320;x++) {
+                NSUInteger p[4],q[4]; [base getPixel:p atX:x y:y]; [a getPixel:q atX:x y:y];
+                NSCAssert(p[3]==q[3],@"Miso expressions preserve actual silhouette, ears and collar");
+                if(memcmp(p,q,sizeof(p))) NSCAssert(x>=100 && x<240 && y>=140 && y<156,@"Only Miso's rendered eyes change");
+            }
+        }
+        NSCAssert(faces.count==4,@"Idle, travel, press and release remain distinct across Miso's five directions");
+    }
+    NSMutableSet *tails=[NSMutableSet new]; NSBitmapImageRep *tailBase=PuppetImage(miso,neutral,0,NO);
+    for(NSNumber *time in @[@0,@1.1,@1.55]) {
+        NSBitmapImageRep *rep=PuppetImageAtTime(miso,neutral,0,NO,time.doubleValue,NO);
+        [tails addObject:[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}]];
+        for(int y=0;y<320;y++) for(int x=0;x<320;x++) {
+            NSUInteger p[4],q[4]; [tailBase getPixel:p atX:x y:y]; [rep getPixel:q atX:x y:y];
+            if(memcmp(p,q,sizeof(p))) NSCAssert(x>=60 && x<120 && y>=180 && y<236,@"Tail motion leaves head, body and foot contact unchanged");
+        }
+    }
+    NSCAssert(tails.count==3,@"Miso's tail has three visibly distinct positions");
+    NSData *stillA=[PuppetImageAtTime(miso,neutral,0,NO,0,YES) representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+    NSData *stillB=[PuppetImageAtTime(miso,neutral,0,NO,2.2,YES) representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+    NSCAssert([stillA isEqual:stillB],@"Reduced Motion holds Miso's tail and eyes still");
+    puts("PASS: Miso collection entry; 20 directional Cocoa faces preserve all non-eye pixels; tail moves locally; Reduced Motion stays still");
 }
 
 static void TestCollection(void) {
     Delegate *studio=[Delegate new]; studio.collection=[NSMutableArray new];
+    studio.window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,960,700) styleMask:0 backing:NSBackingStoreBuffered defer:NO];
+    studio.materialControls=[NSMutableArray new]; studio.materialFields=[NSMutableDictionary new]; studio.materialWells=[NSMutableDictionary new];
     studio.picker=[[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
     BuddieCharacter *first=ArticulatedNamed(@"bit"); [studio addCharacterToCollection:first];
     BuddieCharacter *reload=[first copy]; reload.torsoWidth=1.22; [studio addCharacterToCollection:reload];
@@ -603,6 +653,18 @@ static void TestCollection(void) {
     [studio addCharacterToCollection:reload];
     NSCAssert(studio.picker.indexOfSelectedItem==0 && [studio.picker.titleOfSelectedItem isEqual:reload.name],@"Repeated imports select the matching identity");
     puts("PASS: repeated imports and duplicate display names preserve collection/menu identity");
+    NSTextField *oldField=studio.materialFields[@"shell"]; NSColorWell *oldWell=studio.materialWells[@"shell"];
+    oldField.stringValue=@"#EB504D";
+    NSNotification *change=[NSNotification notificationWithName:NSControlTextDidChangeNotification object:oldField];
+    [studio controlTextDidChange:change]; NSCAssert([ColorHex(studio.character.materialColors[@"shell"]) isEqual:@"#EB504D"],@"Current field edits its own buddy");
+    [studio.window makeFirstResponder:oldField];
+    [studio addCharacterToCollection:ArticulatedNamed(@"miso")];
+    [studio controlTextDidChange:change];
+    [studio controlTextDidEndEditing:[NSNotification notificationWithName:NSControlTextDidEndEditingNotification object:oldField]];
+    oldWell.color=NSColor.redColor; [studio paint:oldWell];
+    NSCAssert([ColorHex(studio.character.materialColors[@"shell"]) isEqual:@"#FCEFD5"],@"Old color callbacks cannot repaint the newly selected buddy");
+    NSCAssert([studio.materialFields[@"shell"].stringValue isEqual:@"#FCEFD5"],@"Field, swatch and new character agree after an edited selection");
+    puts("PASS: switching buddies commits the old edit without copying its color; obsolete fields and wells cannot repaint the new selection");
 }
 
 static int SelfTest(void) {
@@ -670,9 +732,9 @@ int main(int argc,const char **argv) {
         if(argc>2 && strcmp(argv[1],"--export-frames")==0) return ExportFrames([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:nil);
         if(argc>2 && strcmp(argv[1],"--export-palettes")==0) return ExportPalettes([NSString stringWithUTF8String:argv[2]]);
         if(argc>2 && strcmp(argv[1],"--export-puppet")==0) return ExportPuppet([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"pip-articulated");
-        if(argc>2 && strcmp(argv[1],"--export-turn")==0) return ExportTurn([NSString stringWithUTF8String:argv[2]]);
-        if(argc>2 && strcmp(argv[1],"--export-gait")==0) return ExportGait([NSString stringWithUTF8String:argv[2]]);
-        if(argc>2 && strcmp(argv[1],"--export-faces")==0) return ExportFaces([NSString stringWithUTF8String:argv[2]]);
+        if(argc>2 && strcmp(argv[1],"--export-turn")==0) return ExportTurn([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"bit");
+        if(argc>2 && strcmp(argv[1],"--export-gait")==0) return ExportGait([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"bit");
+        if(argc>2 && strcmp(argv[1],"--export-faces")==0) return ExportFaces([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"bit");
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         InstallMenus();
         Delegate *delegate=[Delegate new]; NSApp.delegate=delegate; [NSApp run];

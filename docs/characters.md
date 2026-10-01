@@ -75,6 +75,13 @@ Review the [Cocoa turn](media/bit-studio-turn.gif) and [five poses](media/bit-st
 Reimporting a saved identity reloads its collection entry. Different identities
 can share a display name without losing menu entries or selection. Imported
 packs remain session-local; keep the exported folder to reopen it later.
+Changing selection commits the previous hex edit before replacing the model;
+obsolete controls cannot repaint the new buddy even when material ids match.
+
+Miso uses the same format with 58 frames, a three-pose curled tail, five authored
+head/torso perspectives, and separate `shell`, `suit` and `face` materials.
+Its [source art and reproduction steps](../artwork/miso/README.md) show how to
+add another generated character without changing the motion core.
 
 Set `pixelArt: true` in `puppet` (or version 2's `sprites`) for nearest-neighbor
 sampling. Pixel parts snap their local attachments to canvas pixels, avoid

@@ -1,0 +1,310 @@
+{
+  "sources": {
+    "artwork/miso/concept-source.png": "06a8ee169e6f8620d2cab3c912c00c3ef7db8b7751e8bb63d62b99a637517843",
+    "artwork/miso/turn-source.png": "e46b337f73d60856ed3e9926f6c01b497bc59165553b63d13a9bfee4b5bd3392",
+    "artwork/miso/body-turn-source.png": "44f94b4aaa269d032f5965f5be68e600612e96414c1d451c4ce9edea43672af6"
+  },
+  "requested_model": "GPT Image 2.5 if available",
+  "verified_model": null,
+  "builder": "scripts/build-miso.py",
+  "source_bounds": [
+    213,
+    104,
+    1039,
+    1196
+  ],
+  "parts": {
+    "head": [
+      [
+        0,
+        0,
+        64,
+        42
+      ],
+      [
+        34,
+        41
+      ],
+      [
+        34,
+        41
+      ]
+    ],
+    "body": [
+      [
+        26,
+        41,
+        43,
+        54
+      ],
+      [
+        34,
+        53
+      ],
+      [
+        34,
+        53
+      ]
+    ],
+    "pawNear": [
+      [
+        19,
+        43,
+        27,
+        53
+      ],
+      [
+        25,
+        44
+      ],
+      [
+        25,
+        44
+      ]
+    ],
+    "pawFar": [
+      [
+        42,
+        44,
+        47,
+        53
+      ],
+      [
+        43,
+        45
+      ],
+      [
+        43,
+        45
+      ]
+    ],
+    "tail": [
+      [
+        11,
+        38,
+        22,
+        50
+      ],
+      [
+        20,
+        49
+      ],
+      [
+        20,
+        49
+      ]
+    ],
+    "legNear": [
+      [
+        25,
+        53,
+        31,
+        55
+      ],
+      [
+        28,
+        53
+      ],
+      [
+        29,
+        52
+      ]
+    ],
+    "legFar": [
+      [
+        35,
+        53,
+        41,
+        55
+      ],
+      [
+        38,
+        53
+      ],
+      [
+        39,
+        52
+      ]
+    ],
+    "bootNear": [
+      [
+        23,
+        54,
+        32,
+        60
+      ],
+      [
+        28,
+        59
+      ],
+      [
+        34,
+        59
+      ]
+    ],
+    "bootFar": [
+      [
+        33,
+        54,
+        43,
+        60
+      ],
+      [
+        38,
+        59
+      ],
+      [
+        34,
+        59
+      ]
+    ]
+  },
+  "head_geometry": {
+    "source_boxes": [
+      [
+        31,
+        179,
+        417,
+        551
+      ],
+      [
+        448,
+        178,
+        843,
+        551
+      ],
+      [
+        881,
+        191,
+        1291,
+        551
+      ],
+      [
+        1329,
+        179,
+        1724,
+        551
+      ],
+      [
+        1756,
+        178,
+        2141,
+        551
+      ]
+    ],
+    "shared_scale": 0.10187667560321716,
+    "bottom": 42,
+    "height": 38
+  },
+  "body_geometry": {
+    "source_boxes": [
+      [
+        65,
+        241,
+        395,
+        521
+      ],
+      [
+        490,
+        246,
+        833,
+        521
+      ],
+      [
+        902,
+        243,
+        1271,
+        521
+      ],
+      [
+        1340,
+        244,
+        1682,
+        521
+      ],
+      [
+        1777,
+        243,
+        2107,
+        521
+      ]
+    ],
+    "shared_scale": 0.04642857142857143,
+    "bottom": 54,
+    "height": 13
+  },
+  "eye_boxes": {
+    "0": [
+      [
+        35,
+        27,
+        41,
+        31
+      ],
+      [
+        45,
+        27,
+        50,
+        31
+      ]
+    ],
+    "1": [
+      [
+        31,
+        27,
+        38,
+        31
+      ],
+      [
+        43,
+        27,
+        49,
+        31
+      ]
+    ],
+    "2": [
+      [
+        24,
+        27,
+        31,
+        31
+      ],
+      [
+        37,
+        27,
+        44,
+        31
+      ]
+    ],
+    "3": [
+      [
+        19,
+        27,
+        25,
+        31
+      ],
+      [
+        30,
+        27,
+        37,
+        31
+      ]
+    ],
+    "4": [
+      [
+        19,
+        27,
+        24,
+        31
+      ],
+      [
+        28,
+        27,
+        34,
+        31
+      ]
+    ]
+  },
+  "processing": "Nearest-neighbor common-scale registration; 16-color palette; separate reviewed limbs; localized eye variants; one-pixel tail flex; material masks.",
+  "status": "Selectable original cat-bot rig; actual Cocoa motion/customization reviewed; no user design approval or native cursor integration claimed."
+}

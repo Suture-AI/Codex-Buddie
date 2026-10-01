@@ -19,8 +19,8 @@ glow showing. See the [next implementation brief](docs/next-steps.md).
 The **Character Studio** now opens with **Bit · Pixel bot**, an original compact
 retro robot inspired by the user's Codex pet reference. Generated artwork is
 registered on a small pixel canvas with a restrained palette and crisp sampling.
-Independent feet, opposing paws, stable screen blinks and five authored head
-orientations animate in the actual Cocoa renderer. An interrupted head turn
+Independent feet, opposing paws, screen expressions and five coordinated head
+and torso directions animate in the actual Cocoa renderer. An interrupted turn
 retraces its current sequence. Body/head proportions, shell, screen-light and
 antenna colors can be edited and saved as a portable pack.
 
@@ -28,13 +28,20 @@ antenna colors can be edited and saved as a portable pack.
 
 [Walking review](docs/media/bit-studio-walk.gif) ·
 [Fast-travel review](docs/media/bit-studio-fast-travel.gif) ·
+[Facial reactions](docs/media/bit-face-reactions.gif) ·
 [Pack format](docs/characters.md) ·
-[Verification evidence](docs/evidence/bit-studio.json).
+[Verification evidence](docs/evidence/bit-faces.json).
 
-**Still a motion study.** The body still mirrors beneath the authored head turn;
-pixel joints and fast-travel landings need further polish. Production cursor
-sizing and the native service connection remain unresolved. These exports do
-not show a live Codex task, and user approval of this design is pending.
+**Miso · Cat bot** joins the collection with cream/coral generated artwork,
+separate limbs and a gently moving curled tail, five head/torso directions,
+click/travel expressions, and independently editable shell, suit and lights.
+See [Miso's customization](docs/media/miso-customization.png),
+[walking](docs/media/miso-walk.gif) and [source/review](artwork/miso/README.md).
+
+**Still a motion study.** Bit's visual direction was approved and his neck
+shortened; Miso is a new candidate. Broader anatomy controls, knee articulation,
+collection persistence, production cursor sizing and the native service
+connection remain unfinished. These exports do not show a live Codex task.
 
 Pip remains available as an articulated customization study and an earlier
 complete-pose pack. Sprout/Mochi/Orbit remain rejected art-direction fixtures.
@@ -67,7 +74,9 @@ cd Codex-Buddie
 Choose a character, then use **Take a walk**, the three stops, and **Try a click**.
 Changing stops during a walk preserves position and velocity. Bit offers size,
 body width/height, head size, stride, step height, **Shell**, **Screen lights**
-and **Antenna** controls. Click a color well to choose a color. Pip has equivalent
+and **Antenna** controls. Miso has the same shape controls and separate cream
+shell, coral suit and screen-light colors. Click a color well or enter an exact
+`#RRGGBB` value. Pip has equivalent
 proportion controls and separate raincoat/boot colors.
 **Save a copy…** exports a portable buddy folder; **Import buddy…** opens it again.
 **Native size** compares the small software-cursor layout with the enlarged

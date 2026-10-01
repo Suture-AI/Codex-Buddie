@@ -12,6 +12,43 @@ static void Reject(NSURL *root,id object) {
 static NSMutableDictionary *MutableJSON(NSDictionary *json) {
     return [NSJSONSerialization JSONObjectWithData:[NSJSONSerialization dataWithJSONObject:json options:0 error:nil] options:NSJSONReadingMutableContainers error:nil];
 }
+static void MisoPack(NSURL *root) {
+    NSError *error=nil;
+    BuddieCharacter *miso=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/miso"] error:&error];
+    NSCAssert(miso && !error && miso.puppetParts.count==18 && miso.materials.count==3,@"Miso loads as a complete editable character: %@",error);
+    NSUInteger total=0,weights[3]={0};
+    for(NSString *role in miso.clips) {
+        BuddieSpriteClip *clip=miso.clips[role]; total+=clip.frames.count;
+        for(NSImage *mask in clip.masks) {
+            NSBitmapImageRep *rep=[NSBitmapImageRep imageRepWithData:mask.TIFFRepresentation];
+            for(int y=0;y<64;y++) for(int x=0;x<64;x++) {
+                NSUInteger p[4]; [rep getPixel:p atX:x y:y];
+                for(int k=0;k<3;k++) if(p[k]) weights[k]++;
+                NSCAssert((p[0]>0)+(p[1]>0)+(p[2]>0)<=1,@"Miso materials never overlap");
+            }
+        }
+    }
+    NSCAssert(total==58 && weights[0]>0 && weights[1]>0 && weights[2]>0,@"58 frames within the shared budget; all three paint channels present");
+    for(NSString *role in @[@"headFocus",@"headPress",@"headRelease",@"headHalf",@"headClosed"]) for(int i=0;i<5;i++) {
+        NSBitmapImageRep *a=[NSBitmapImageRep imageRepWithData:miso.clips[@"headTurn"].frames[i].TIFFRepresentation];
+        NSBitmapImageRep *b=[NSBitmapImageRep imageRepWithData:miso.clips[role].frames[i].TIFFRepresentation]; NSUInteger changed=0;
+        for(int y=0;y<64;y++) for(int x=0;x<64;x++) {
+            NSUInteger p[4],q[4]; [a getPixel:p atX:x y:y]; [b getPixel:q atX:x y:y];
+            NSCAssert(p[3]==q[3],@"Miso eye changes preserve its silhouette");
+            if(memcmp(p,q,sizeof(p))) { NSCAssert(x>=19 && x<50 && y>=27 && y<31,@"Only Miso's reviewed eye area changes"); changed++; }
+        }
+        NSCAssert(changed>=4 && changed<=80,@"Miso has visibly different expressions");
+    }
+    BuddieCharacter *custom=[miso copy]; custom.torsoWidth=1.12; custom.torsoHeight=.92; custom.headScale=1.08;
+    custom.materialColors=@{@"shell":[NSColor colorWithSRGBRed:128/255. green:149/255. blue:242/255. alpha:1],@"suit":[NSColor colorWithSRGBRed:111/255. green:153/255. blue:98/255. alpha:1],@"face":[NSColor colorWithSRGBRed:1 green:200/255. blue:99/255. alpha:1]};
+    [custom prepareAppearance]; NSURL *saved=[root URLByAppendingPathComponent:@"miso.buddie"];
+    NSCAssert([custom savePack:saved error:&error],@"Miso exports its art, colors and geometry: %@",error);
+    BuddieCharacter *restored=[BuddieCharacter loadPack:saved error:&error];
+    NSCAssert(restored && restored.torsoWidth==1.12 && restored.torsoHeight==.92 && restored.headScale==1.08,@"Miso proportions survive import");
+    for(NSString *role in custom.clips) for(NSUInteger i=0;i<custom.clips[role].frames.count;i++)
+        NSCAssert([[restored imageForClip:role frame:i].TIFFRepresentation isEqual:[custom imageForClip:role frame:i].TIFFRepresentation],@"Every recolored Miso frame survives round-trip");
+    puts("PASS: Miso 58-frame pack; separate shell/suit/face masks; 25 localized expression textures; every custom frame and proportion survives export/import");
+}
 static void ArticulatedPack(NSURL *root) {
     NSError *error=nil;
     BuddieCharacter *pip=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/pip-articulated"] error:&error];
@@ -110,6 +147,7 @@ int main(void) {
         NSCAssert([fm createDirectoryAtURL:root withIntermediateDirectories:YES attributes:nil error:nil],@"Fixture directory");
         @try {
             ArticulatedPack(root);
+            MisoPack(root);
             BuddieCharacter *source=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/mochi"] error:nil];
             source.eyeSpacing=18; source.stride=20;
             NSURL *saved=[root URLByAppendingPathComponent:@"saved.buddie"];

@@ -55,20 +55,29 @@ collar, alpha, body and feet in actual Cocoa output. Timing and interrupted
 clicks pass at 30/60/120 Hz. See [the animation](media/bit-face-reactions.gif)
 and [source-pinned evidence](evidence/bit-faces.json).
 
-Native CUA observation recovered. The current build is open with Bit selected,
-shell `#EB504D`, default proportions, the saved Bit Ember entry restored, and
-the walk paused. Travel/release faces were observed live; this is still the
-Studio, not the modified Codex helper.
+Native CUA observation is working again. Bit's travel/release faces and Miso's
+customization were observed in the live Studio; this is still separate from
+the modified Codex helper.
 
-[Miso](../artwork/miso/README.md) is a new original cream/coral pixel cat-bot
-concept generated in ChatGPT through Brave. Its source PNG, exact prompt and
-provenance are retained. It needs a full rig, authored directions, material
-masks and movement review before collection integration; user approval is
-not claimed.
+[Miso](../artwork/miso/README.md) is now bundled in the collection: 18 parts,
+58 frames, three independent material masks, authored head/torso turns,
+localized expressions and a small tail flex. The first head strip was rejected
+for mirrored lighting, then corrected in ChatGPT. Sources, exact prompts and
+provenance are retained. Review [customization](media/miso-customization.png),
+[movement](media/miso-gait.gif), [faces](media/miso-faces.gif) and
+[evidence](evidence/miso-studio.json). User design approval is not claimed.
 
-Next rig Miso, refine knee articulation, and persist the installed
-collection/settings across launches. Native integration and production cursor
-size remain separate unresolved gates.
+Live import exposed color leakage: ending an old buddy's hex edit during a
+selection change could repaint the new buddy's same-named material. The Studio
+now commits the old edit before switching and ignores callbacks from obsolete
+controls. Both the regression and the original live Bit-red-to-Miso sequence
+pass; Miso keeps `#FCEFD5`. Suit `#7C9A80`, body width `1.12` and head size `0.93`
+were also exercised live, then reset to the original design.
+
+Next persist per-buddy customization and the installed collection across
+selection changes and launches, refine knee/tail articulation, and extend
+anatomy controls. Native integration and production cursor size remain
+separate unresolved gates.
 
 The root Studio also includes **Pip · Articulated**, a version-3 pack with nine
 independent generated parts, stable blink textures, live torso width/height and
