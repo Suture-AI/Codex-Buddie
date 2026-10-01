@@ -13,6 +13,24 @@ struct CoreTests {
         func sample(_ id: UInt32, _ x: Double, alpha: Double = 1) -> CursorSample {
             CursorSample(id: id, bounds: CGRect(x: x, y: 100, width: 126, height: 126), alpha: alpha)
         }
+        var setup = SetupProgress()
+        setup.begin()
+        check(setup.step == .permission && !setup.canFinish, "new user cannot finish without screen access")
+        setup.observeCursor()
+        check(!setup.cursorDetected, "cursor observation cannot certify denied access")
+        setup.updatePermission(false)
+        check(setup.step == .permission, "denial keeps recovery instructions available")
+        setup.updatePermission(true)
+        check(setup.step == .verify && setup.canFinish && !setup.cursorDetected, "permission does not imply live tracking")
+        setup.observeCursor()
+        check(setup.cursorDetected, "native cursor confirms live tracking")
+        setup.updatePermission(false)
+        check(setup.step == .permission && !setup.canFinish && !setup.cursorDetected, "revocation invalidates readiness and cursor confirmation")
+        setup.updatePermission(true)
+        check(!setup.cursorDetected, "new grant requires fresh cursor evidence")
+        check(SetupProgress.shouldShow(completed: true, permissionGranted: false), "revoked permission reopens setup on launch")
+        check(!SetupProgress.shouldShow(completed: true, permissionGranted: true), "completed setup stays dismissed")
+        check(SetupProgress.shouldShow(completed: false, permissionGranted: true), "existing permission does not skip welcome for new users")
         var tracker = CursorTracker()
         check(tracker.update([], now: 0) == nil, "no cursor means hidden")
         check(tracker.update([sample(1, 20)], now: 1)?.id == 1, "acquire visible cursor")
@@ -67,6 +85,6 @@ struct CoreTests {
         try JSONSerialization.data(withJSONObject: escaped).write(to: manifestURL)
         do { _ = try SpritePack.load(from: manifestURL); preconditionFailure("Accepted symlink escape") }
         catch { count += 1 }
-        print("Passed \(count) checks: cursor lifecycle, multi-display math, sprite validation, PNG decoding and frame cropping.")
+        print("Passed \(count) checks: onboarding permission lifecycle, cursor lifecycle, multi-display math, sprite validation, PNG decoding and frame cropping.")
     }
 }
