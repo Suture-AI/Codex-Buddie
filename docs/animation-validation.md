@@ -92,3 +92,40 @@ AppKit export harness. Brave's browser connection verified the generated sheets.
 Leg contact, turn/settle transitions and lighting consistency remain unapproved.
 The separate [development-signing probe](development-signing.md) did not establish
 a live native connection.
+# Outfit customization follow-up
+
+The complete-pose renderer now supports up to three masked color materials.
+Pip exposes raincoat and boots independently. Reviewed Cobalt, Rose, Moss and
+Lilac against all 14 poses, including lifted boots, face blinks and 64 px light
+and dark background composites. Boot-mask refinement removed fur spill and
+unrecolored highlight rims found in the first visual review.
+
+- `bash scripts/test-animation.sh`: motion and pack checks pass. Added checks
+  for untouched default art, cached recoloring, alpha preservation, protection
+  outside the selected material, independent character copies, exact colored
+  save/import round-trip, reset, invalid material definitions and unsafe masks.
+- Appearance preparation measured about 67–75 ms for all 14 poses on this Mac
+  after removing per-pixel color-object conversion. This is a local measurement,
+  not a hardware-independent performance guarantee. Animation uses cached frames.
+- Warning-free app build; Cocoa replacement/rendering self-test passes.
+- Native CUA app observation still returns `cgWindowNotFound`. The new color-well
+  interactions have not been exercised through live desktop automation. Visual
+  evidence is from the same color-rendering API used by `BuddieView`, exported
+  through the built Cocoa app. It does not certify native CUA replacement.
+
+Reproduce the visual review (Pillow required for the contact/GIF composition):
+
+```bash
+bash scripts/build.sh
+'.build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab' --export-palettes .build/palette-study
+uv run --with pillow python scripts/palette-review.py .build/palette-study docs/media
+```
+
+Kept artifacts: [color study](media/pip-outfit-colors.png) and
+[walk palette check](media/pip-outfit-walk.gif), plus the
+[all-pose contact sheet](media/pip-outfit-contact.png). Temporary exported poses are
+reproducible and are not required inputs for the app.
+
+This improves appearance customization only. Leg ownership, authored turns and
+settles, native input events, production cursor sizing, and live service
+integration remain open. Body/face geometry is still baked into these PNGs.

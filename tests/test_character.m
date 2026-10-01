@@ -32,6 +32,36 @@ int main(void) {
             BuddieCharacter *pip=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/pip"] error:nil];
             NSCAssert(pip.clips[@"idle"].frames.count==6 && !pip.bodyImage,@"Complete character pack loads its own face and feet");
             NSCAssert(pip.clips[@"walkRight"].frames.count==8 && pip.directionalIdle,@"Pip has the refined gait and matching directional idle");
+            NSCAssert(pip.materials.count==2 && pip.clips[@"idle"].masks.count==6,@"Pip exposes both outfit materials in every pose");
+            NSImage *original=[pip imageForClip:@"idle" frame:0];
+            NSCAssert(original==pip.clips[@"idle"].frames[0],@"Default palette must return the untouched original art");
+            BuddieCharacter *custom=[pip copy];
+            NSMutableDictionary *palette=[custom.materialColors mutableCopy];
+            palette[@"coat"]=[NSColor colorWithSRGBRed:.8 green:.35 blue:.58 alpha:1]; custom.materialColors=palette;
+            double began=NSProcessInfo.processInfo.systemUptime; [custom prepareAppearance];
+            printf("Appearance preparation: %.1f ms for 14 poses\n",(NSProcessInfo.processInfo.systemUptime-began)*1000);
+            NSImage *painted=[custom imageForClip:@"idle" frame:0];
+            NSCAssert(painted!=original && painted==[custom imageForClip:@"idle" frame:0],@"Recolored artwork is cached, never regenerated on animation ticks");
+            NSCAssert([pip imageForClip:@"idle" frame:0]==original,@"Changing a copy must not repaint its preset");
+            NSBitmapImageRep *before=[NSBitmapImageRep imageRepWithData:original.TIFFRepresentation];
+            NSBitmapImageRep *after=[NSBitmapImageRep imageRepWithData:painted.TIFFRepresentation];
+            NSBitmapImageRep *mask=[NSBitmapImageRep imageRepWithData:custom.clips[@"idle"].masks[0].TIFFRepresentation];
+            NSUInteger changed=0,protected=0;
+            for(NSInteger y=0;y<before.pixelsHigh;y++) for(NSInteger x=0;x<before.pixelsWide;x++) {
+                NSUInteger a[4],b[4],m[4]; [before getPixel:a atX:x y:y]; [after getPixel:b atX:x y:y]; [mask getPixel:m atX:x y:y];
+                NSCAssert(a[3]==b[3],@"Color edits preserve every alpha sample, including soft edges");
+                if(a[3]>0 && m[0]==0) {
+                    for(int k=0;k<3;k++) NSCAssert(labs((long)a[k]-(long)b[k])<=1,@"Pixels outside the edited coat stay unchanged");
+                    protected++;
+                } else if(a[3]>0 && labs((long)a[0]-(long)b[0])>20) changed++;
+            }
+            NSCAssert(changed>1000 && protected>1000,@"Recoloring changes the coat while protecting the face, boots and fur");
+            NSURL *paintCopy=[root URLByAppendingPathComponent:@"paint.buddie"];
+            NSCAssert([custom savePack:paintCopy error:nil],@"Save original pixels, masks and selected colors");
+            BuddieCharacter *restored=[BuddieCharacter loadPack:paintCopy error:nil];
+            NSCAssert([[restored imageForClip:@"idle" frame:0].TIFFRepresentation isEqual:painted.TIFFRepresentation],@"Save/import produces exactly the same recolored frame");
+            custom.materialColors=pip.materialColors;
+            NSCAssert([custom imageForClip:@"idle" frame:0]==original,@"Reset invalidates the cache and restores original pixels");
             BuddieSpriteClip *blink=pip.clips[@"idle"];
             NSCAssert([blink frameIndexAtTime:2.39 loop:YES]==0 && [blink frameIndexAtTime:2.426 loop:YES]==1,@"Blink uses per-frame durations, not uniform FPS");
             NSCAssert([blink frameIndexAtTime:blink.duration+.02 loop:YES]==0,@"Idle wraps at the clip duration");
@@ -43,9 +73,23 @@ int main(void) {
             NSCAssert(pipCopy.directionalIdle==pip.directionalIdle && pipCopy.mirrorWalk==pip.mirrorWalk,@"Facing contract round-trips with its art");
             NSData *spriteData=[NSData dataWithContentsOfURL:[spriteCopy URLByAppendingPathComponent:@"buddy.json"]];
             NSDictionary *spriteJSON=[NSJSONSerialization JSONObjectWithData:spriteData options:0 error:nil];
-            for(NSString *key in @[@"canvas",@"hotspot",@"height",@"mirrorWalk",@"directionalIdle",@"clips"]) {
+            NSMutableDictionary *legacy=[spriteJSON mutableCopy],*legacySprites=[spriteJSON[@"sprites"] mutableCopy];
+            [legacySprites removeObjectForKey:@"materials"];
+            legacySprites[@"clips"]=@{@"idle":@[@{@"image":@"idle-00.png",@"duration":@1}]}; legacy[@"sprites"]=legacySprites;
+            Write(spriteCopy,legacy);
+            BuddieCharacter *legacyPack=[BuddieCharacter loadPack:spriteCopy error:nil];
+            NSCAssert(legacyPack && !legacyPack.materials.count && [legacyPack imageForClip:@"idle" frame:0]==legacyPack.clips[@"idle"].frames[0],@"Existing version-2 packs need no materials or masks");
+            for(NSString *key in @[@"canvas",@"hotspot",@"height",@"mirrorWalk",@"directionalIdle",@"clips",@"materials"]) {
                 NSMutableDictionary *bad=[spriteJSON mutableCopy], *sprites=[spriteJSON[@"sprites"] mutableCopy];
                 sprites[key]=NSNull.null; bad[@"sprites"]=sprites; Reject(spriteCopy,bad);
+            }
+            for(id materials in @[@[@{}],@[@{@"id":@"coat",@"name":@"Coat",@"channel":@YES,@"base":@"#123456"}],@[@{@"id":@"coat",@"name":@"Coat",@"channel":@3,@"base":@"#123456"}],@[pip.materials[0],pip.materials[0]]]) {
+                NSMutableDictionary *bad=[spriteJSON mutableCopy], *s=[spriteJSON[@"sprites"] mutableCopy];
+                s[@"materials"]=materials; bad[@"sprites"]=s; Reject(spriteCopy,bad);
+            }
+            for(id maskName in @[@"../outside.png",@"missing-mask.png",NSNull.null,@"idle-00.png"]) {
+                NSMutableDictionary *bad=[spriteJSON mutableCopy], *s=[spriteJSON[@"sprites"] mutableCopy];
+                s[@"clips"]=@{@"idle":@[@{@"image":@"idle-00.png",@"duration":@1,@"mask":maskName}]}; bad[@"sprites"]=s; Reject(spriteCopy,bad);
             }
             for(id frames in @[@[],@[@{@"image":@"idle-00.png",@"duration":@0}],@[@{@"image":@"../outside.png",@"duration":@.1}],@[@{@"image":@"idle-00.png",@"duration":@YES}]]) {
                 NSMutableDictionary *bad=[spriteJSON mutableCopy], *sprites=[spriteJSON[@"sprites"] mutableCopy];
@@ -65,7 +109,7 @@ int main(void) {
             [fm createSymbolicLinkAtURL:[root URLByAppendingPathComponent:@"escape.png"] withDestinationURL:[NSURL fileURLWithPath:[fm.currentDirectoryPath stringByAppendingPathComponent:@"Characters/sprout/body.png"]] error:nil];
             NSMutableDictionary *p=[valid mutableCopy]; p[@"art"]=@{@"body":@"escape.png"}; Reject(root,p);
             p=[valid mutableCopy]; p[@"colors"]=@{@"body":@"#FF0000garbage"}; Reject(root,p);
-            puts("PASS: generated and sprite packs; timing boundaries; save/import round-trip; independent copies; procedural fallback; schema/range/dimension validation; path traversal; remote path; symlink escape; missing artwork; invalid colors");
+            puts("PASS: generated and sprite packs; timing boundaries; editable material save/import; cached recoloring; alpha and protected pixels; reset; independent copies; legacy packs; schema/range/dimension validation; unsafe artwork/masks; invalid colors");
         } @finally { [fm removeItemAtURL:root error:nil]; }
     }
 }

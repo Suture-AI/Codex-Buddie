@@ -22,7 +22,11 @@ expressive complete poses and coherent facial/limb design; create original art.
 The root Character Studio now opens with **Pip · Motion study**, a complete-pose
 version 2 pack: six matching side-facing blink frames, eight walk poses, size/stride controls,
 mirrored left travel, fixed hood hotspot and import/export of all frames. The
-renderer adds no tether, generic face or feet over its artwork. See
+renderer adds no tether, generic face or feet over its artwork. The studio now
+also edits raincoat and boot colors independently, retaining shading and the
+original alpha. All 14 poses have material masks; save/import preserves editable
+source artwork and colors. See the [palette review](media/pip-outfit-colors.png),
+the [material schema](characters.md#outfit-colors), and
 [`docs/media/pip-refined-motion.gif`](media/pip-refined-motion.gif),
 [the asset review](../artwork/pip/walk-refinement/review.json) and the implemented
 [version 2 pack format](characters.md).

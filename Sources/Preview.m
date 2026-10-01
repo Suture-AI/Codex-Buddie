@@ -53,6 +53,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 @property NSMutableDictionary<NSString *,NSTextField *> *settingLabels;
 @property NSTextField *settingsHeading;
 @property NSTextField *artNote;
+@property NSMutableArray<NSView *> *materialControls;
 @property BuddieCharacter *character;
 @property BOOL playing;
 @property BOOL software;
@@ -64,6 +65,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     self.collection=[BuddieCollection() mutableCopy]; self.character=[self.collection.firstObject copy];
     self.sliders=[NSMutableDictionary new];
     self.settingLabels=[NSMutableDictionary new];
+    self.materialControls=[NSMutableArray new];
     self.window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,960,700) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable backing:NSBackingStoreBuffered defer:NO];
     self.window.title=@"Codex Buddie — Character Studio"; self.window.delegate=self;
     self.window.appearance=[NSAppearance appearanceNamed:NSAppearanceNameAqua];
@@ -112,9 +114,25 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 }
 - (void)syncSliders {
     BOOL sprite=self.character.clips.count>0;
-    self.settingsHeading.stringValue=sprite ? @"SIZE & MOVEMENT":@"SHAPE & EXPRESSION";
+    self.settingsHeading.stringValue=sprite ? @"MAKE IT YOURS":@"SHAPE & EXPRESSION";
     self.artNote.hidden=!sprite;
-    self.artNote.stringValue=@"The face and outfit belong together. Import another buddy to try a different look.";
+    self.artNote.stringValue=self.character.materials.count ? @"Your colors, with all the original shading. Save a copy to keep this look.":@"The face and outfit belong together. Import another buddy to try a different look.";
+    self.artNote.frame=NSMakeRect(700,self.character.materials.count ? 202:315,218,65);
+    for(NSView *control in self.materialControls) {
+        if([control isKindOfClass:NSColorWell.class]) [(NSColorWell *)control deactivate];
+        [control removeFromSuperview];
+    }
+    [self.materialControls removeAllObjects];
+    NSUInteger row=0;
+    for(NSDictionary *material in self.character.materials) {
+        CGFloat y=369-42*row++;
+        NSTextField *label=Label(material[@"name"],12,Ink(),NSMakeRect(700,y+6,130,20));
+        NSColorWell *well=[[NSColorWell alloc] initWithFrame:NSMakeRect(858,y,66,30)];
+        well.identifier=material[@"id"]; well.accessibilityLabel=material[@"name"];
+        well.color=self.character.materialColors[material[@"id"]]; well.target=self; well.action=@selector(paint:); well.continuous=NO;
+        [self.materialControls addObjectsFromArray:@[label,well]];
+        [self.window.contentView addSubview:label]; [self.window.contentView addSubview:well];
+    }
     for(NSString *key in self.sliders) {
         self.sliders[key].doubleValue=[key isEqual:@"width"] ? self.character.bodySize.width : [key isEqual:@"height"] ? self.character.bodySize.height : [[self.character valueForKey:key] doubleValue];
         BOOL supported=sprite ? [@[@"stride",@"spriteHeight"] containsObject:key]:![key isEqual:@"spriteHeight"];
@@ -124,6 +142,13 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
         [self.settingLabels[key] setFrameOrigin:NSMakePoint(700,y+6)];
     }
     self.status.stringValue=self.character.clips.count ? @"Complete character poses • motion study • live Codex replacement is still under development":@"Character preview • live Codex replacement is still under development";
+}
+- (void)paint:(NSColorWell *)sender {
+    NSColor *color=[[sender.color colorUsingColorSpace:NSColorSpace.sRGBColorSpace] colorWithAlphaComponent:1];
+    NSMutableDictionary *colors=[self.character.materialColors mutableCopy]; colors[sender.identifier]=color;
+    self.character.materialColors=colors;
+    // Warm every pose before resuming animation, avoiding work at frame changes.
+    [self.character prepareAppearance]; self.buddy.needsDisplay=YES;
 }
 - (void)createCursor {
     if(self.cursor) { [self.window removeChildWindow:self.cursor]; [self.cursor orderOut:nil]; self.cursor.contentView=nil; }
@@ -250,6 +275,28 @@ static int ExportFrames(NSString *path, NSString *identifier) {
     printf("Exported %d deterministic frames at 60 Hz to %s\n",frame,path.UTF8String); return 0;
 }
 
+static int ExportPalettes(NSString *path) {
+    NSError *error=nil;
+    if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&error]) return 1;
+    NSArray *names=@[@"Cobalt",@"Rose",@"Moss",@"Lilac"];
+    // Curated examples; the studio's color wells accept any opaque color.
+    unsigned int coats[]={0x0850EF,0xD65378,0x668D4E,0x967AD3};
+    unsigned int boots[]={0xFF8000,0x4A6394,0xF1AF46,0xEAD38E};
+    NSColor *(^color)(unsigned int)=^NSColor *(unsigned int n) {
+        return [NSColor colorWithSRGBRed:((n>>16)&255)/255. green:((n>>8)&255)/255. blue:(n&255)/255. alpha:1];
+    };
+    for(NSUInteger variant=0;variant<names.count;variant++) {
+        BuddieCharacter *c=[BuddieCollection().firstObject copy];
+        c.materialColors=@{@"coat":color(coats[variant]),@"boots":color(boots[variant])}; [c prepareAppearance];
+        for(NSString *clip in @[@"idle",@"walkRight"]) for(NSUInteger i=0;i<c.clips[clip].frames.count;i++) {
+            NSBitmapImageRep *rep=[NSBitmapImageRep imageRepWithData:[c imageForClip:clip frame:i].TIFFRepresentation];
+            NSString *file=[path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@-%@-%02lu.png",names[variant],clip,(unsigned long)i]];
+            if(![[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:file options:NSDataWritingAtomic error:&error]) return 1;
+        }
+    }
+    printf("Exported four palettes, each with all 14 poses, to %s\n",path.UTF8String); return 0;
+}
+
 static int SelfTest(void) {
     NSRect r=NSMakeRect(0,0,20,23);
     NSWindow *plain=[[NSWindow alloc] initWithContentRect:r styleMask:0 backing:NSBackingStoreBuffered defer:NO];
@@ -311,6 +358,7 @@ int main(int argc,const char **argv) {
         if(!dlopen(path.fileSystemRepresentation,RTLD_NOW)) { fprintf(stderr,"%s\n",dlerror()); return 1; }
         if(argc>1 && strcmp(argv[1],"--self-test")==0) return SelfTest();
         if(argc>2 && strcmp(argv[1],"--export-frames")==0) return ExportFrames([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:nil);
+        if(argc>2 && strcmp(argv[1],"--export-palettes")==0) return ExportPalettes([NSString stringWithUTF8String:argv[2]]);
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         Delegate *delegate=[Delegate new]; NSApp.delegate=delegate; [NSApp run];
     }

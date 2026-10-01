@@ -1,0 +1,253 @@
+{
+  "status": "Appearance customization study; original poses unchanged; gait and native integration remain unfinished",
+  "materials": [
+    "Raincoat",
+    "Boots"
+  ],
+  "processing": "scripts/pip-materials.py creates RGB masks from original registered Pip poses. High-confidence boot seeds, filled highlights, bounded edge recovery. This script is character-specific. No new image generation or geometry edits.",
+  "rendering": "Sources/BuddieCharacter.m shifts selected material colors, preserves source alpha and caches all rendered poses before animation. Default colors reuse exact original image objects.",
+  "visual_review": [
+    "Cobalt, Rose, Moss, Lilac in docs/media/pip-outfit-colors.png at full and 64px sizes on light/dark backgrounds",
+    "All six Rose idle poses and all eight Rose walking poses inspected; refined lifted-boot highlight/heel masks after initial review",
+    "Palette walking sequence in docs/media/pip-outfit-walk.gif uses Cocoa-exported color frames, not live CUA"
+  ],
+  "limitations": [
+    "Whole-body gait and mirror turns unchanged",
+    "New native color-well UI built but not exercised via CUA because desktop observation returns cgWindowNotFound",
+    "No user art-direction approval inferred",
+    "Body and face geometry remain baked into frames"
+  ],
+  "inputs": [
+    {
+      "file": "idle-00.png",
+      "sha256": "1ca32a293ba921016c3d6ad753e6270541e9f21fc7a2a2d86efde1a00d5ec685",
+      "bounds": [
+        22,
+        29,
+        234,
+        294
+      ],
+      "hotspot_alpha": 253,
+      "edge_clipped": false
+    },
+    {
+      "file": "idle-01.png",
+      "sha256": "2609045ee2bda6ce0bb66f59da28f6d2cf8227c1249d790f24237b02a7468a7c",
+      "bounds": [
+        21,
+        29,
+        232,
+        294
+      ],
+      "hotspot_alpha": 253,
+      "edge_clipped": false
+    },
+    {
+      "file": "idle-02.png",
+      "sha256": "9fc0f19902c0ac0930e6b1ae4edf1f1cacf38896ceb4f4835dd47f4504603856",
+      "bounds": [
+        21,
+        29,
+        233,
+        294
+      ],
+      "hotspot_alpha": 253,
+      "edge_clipped": false
+    },
+    {
+      "file": "idle-03.png",
+      "sha256": "62eb850a33fec5a6984305fcd11faa76d7aaad6b8c22405c032b1c79f0dc4c2c",
+      "bounds": [
+        21,
+        30,
+        233,
+        295
+      ],
+      "hotspot_alpha": 253,
+      "edge_clipped": false
+    },
+    {
+      "file": "idle-04.png",
+      "sha256": "7bb4bc2bc267733a646e7a459d745eb0c4dfea1b7e8451d3d794a934c94c277d",
+      "bounds": [
+        22,
+        30,
+        233,
+        295
+      ],
+      "hotspot_alpha": 253,
+      "edge_clipped": false
+    },
+    {
+      "file": "idle-05.png",
+      "sha256": "363c0fae96bfa0c794202a6a1164c64af20a9fb57c8640fe43878419018131af",
+      "bounds": [
+        21,
+        30,
+        233,
+        295
+      ],
+      "hotspot_alpha": 253,
+      "edge_clipped": false
+    },
+    {
+      "file": "walk-00.png",
+      "sha256": "48398a2625c742630596a8ebdc47b37634d4af7c7215bc6d098fa2e6d74ce2b0",
+      "bounds": [
+        8,
+        32,
+        218,
+        296
+      ],
+      "hotspot_alpha": 254,
+      "edge_clipped": false
+    },
+    {
+      "file": "walk-01.png",
+      "sha256": "df35892d60970008ff5122d79a2fe2ed6384b57c145d4981bb444258edf37994",
+      "bounds": [
+        7,
+        39,
+        208,
+        297
+      ],
+      "hotspot_alpha": 247,
+      "edge_clipped": false
+    },
+    {
+      "file": "walk-02.png",
+      "sha256": "c9ee5bc6e68136e28960a419a89bb92468f6679a26e5941918ccfebb554718a0",
+      "bounds": [
+        6,
+        36,
+        204,
+        296
+      ],
+      "hotspot_alpha": 253,
+      "edge_clipped": false
+    },
+    {
+      "file": "walk-03.png",
+      "sha256": "aafc3e6b90c6edb879a60ade6bad803e51f4d9b255a67ec2efc8d1906b96f365",
+      "bounds": [
+        19,
+        33,
+        230,
+        295
+      ],
+      "hotspot_alpha": 253,
+      "edge_clipped": false
+    },
+    {
+      "file": "walk-04.png",
+      "sha256": "4b6e5fc1aeed9f7f631b4e3927d74730794420c70c27b3b2313c94cf4e02b206",
+      "bounds": [
+        8,
+        32,
+        232,
+        295
+      ],
+      "hotspot_alpha": 253,
+      "edge_clipped": false
+    },
+    {
+      "file": "walk-05.png",
+      "sha256": "94a152d915fc9e2d02c798d91f1bbc37809000a5a33d9b74de4e4afa9a8c83c2",
+      "bounds": [
+        15,
+        40,
+        216,
+        295
+      ],
+      "hotspot_alpha": 252,
+      "edge_clipped": false
+    },
+    {
+      "file": "walk-06.png",
+      "sha256": "618fe27e33d5830d5851489811ca15871dfb6dc21ca46a5f1ee5e1edb0aa3af7",
+      "bounds": [
+        8,
+        36,
+        220,
+        297
+      ],
+      "hotspot_alpha": 252,
+      "edge_clipped": false
+    },
+    {
+      "file": "walk-07.png",
+      "sha256": "f5d2adb7c5079f976a34cff1792ed47c5dd492af973cb781496511501e292834",
+      "bounds": [
+        24,
+        32,
+        246,
+        295
+      ],
+      "hotspot_alpha": 253,
+      "edge_clipped": false
+    }
+  ],
+  "masks": [
+    {
+      "file": "Characters/pip/idle-00-mask.png",
+      "sha256": "687a58f7daac9399133045c14e97eb627eccffb9179746172eb13ed9d6fcd57d"
+    },
+    {
+      "file": "Characters/pip/idle-01-mask.png",
+      "sha256": "aaf363384295d61559017cbb21a0bda9756a263338c84cdb811710d52aff9cda"
+    },
+    {
+      "file": "Characters/pip/idle-02-mask.png",
+      "sha256": "0f1d37d6e46c0e3f66a77f4ea0fb8322e4cf152d50f31ceb9753b63657d0e579"
+    },
+    {
+      "file": "Characters/pip/idle-03-mask.png",
+      "sha256": "5b081697a2b5e72fda7972bfa7335475363954d7b24b021e7e18c77367d128b2"
+    },
+    {
+      "file": "Characters/pip/idle-04-mask.png",
+      "sha256": "aee4beafaa2659b4084521e423768fcf8b990c88b772b661f847a4163a910e5e"
+    },
+    {
+      "file": "Characters/pip/idle-05-mask.png",
+      "sha256": "0d7f4ce310272688c09a6d908801df459d43af261f44898f90a09edc154dbbf7"
+    },
+    {
+      "file": "Characters/pip/walk-00-mask.png",
+      "sha256": "2766f12f349f7b8d3bdb28ec44bb3992e3d944d469c6a48c0a5bcb110709fdd9"
+    },
+    {
+      "file": "Characters/pip/walk-01-mask.png",
+      "sha256": "43c947962655b155d315d89d6fe7a432e770f386695549739615a17a46fba2ec"
+    },
+    {
+      "file": "Characters/pip/walk-02-mask.png",
+      "sha256": "266aa2c3dd90e673d6c8f585389db3279d23f42b60d205b9055d9274ea7f3e83"
+    },
+    {
+      "file": "Characters/pip/walk-03-mask.png",
+      "sha256": "ef2a0512c922c235c190d5f54ea289c3784c9b45a7dd091da9995f8efe16b458"
+    },
+    {
+      "file": "Characters/pip/walk-04-mask.png",
+      "sha256": "290d5d536a784c914006b9958ec5b74a6ed48ed8d7f1d0439907c5104b232eae"
+    },
+    {
+      "file": "Characters/pip/walk-05-mask.png",
+      "sha256": "422e81ab9780d940944b16ecd9fcd5dd32533ea86f1b3f14404d015d2f10467b"
+    },
+    {
+      "file": "Characters/pip/walk-06-mask.png",
+      "sha256": "033fa17316f757310e078edb2deeb0adbc16b2fbeeda8648ed674923725795df"
+    },
+    {
+      "file": "Characters/pip/walk-07-mask.png",
+      "sha256": "80c3073677e026cc1f435ac80a53f83586249c8fdb2d9ac0407397fde67b548b"
+    }
+  ],
+  "artifacts": [
+    "docs/media/pip-outfit-colors.png",
+    "docs/media/pip-outfit-walk.gif",
+    "docs/media/pip-outfit-contact.png"
+  ]
+}

@@ -22,8 +22,11 @@ The **Character Studio** now opens with **Pip**, a soft otter in a cobalt rain
 hood and orange boots, generated in ChatGPT through Brave. Its full character
 poses preserve the designed face, paws and footwear. It has a matching side-facing six-frame blink
 and an eight-pose walking study, with no tether or procedural face drawn over
-the art. Size and stride are editable; complete animation packs can be imported
-and saved. This is the studio's controlled renderer, not live Codex integration.
+the art. Size, stride, raincoat color and boot color are editable; complete
+animation packs can be imported and saved. Colors retain the artwork's shading
+and highlights. This is the studio's controlled renderer, not live Codex integration.
+
+![Pip outfit colors at full and cursor sizes](docs/media/pip-outfit-colors.png)
 
 **Still a motion study.** Pip's direction is awaiting user feedback. Standing now preserves the travel direction. The gait still
 needs stronger leg separation and authored turn/settle poses. Left
@@ -57,8 +60,9 @@ cd Codex-Buddie
 ```
 
 Choose a character, then use **Take a walk**, the three stops, and **Try a click**.
-Changing stops during a walk preserves position and velocity. Pip offers size
-and stride controls; the older layered presets also offer body and face controls.
+Changing stops during a walk preserves position and velocity. Pip offers size,
+stride, **Raincoat** and **Boots** controls; click either color well to choose a
+color. The older layered presets also offer body and face controls.
 **Save a copy…** exports a portable buddy folder; **Import buddy…** opens it again.
 **Native size** compares the small software-cursor layout with the enlarged
 studio view. **Reduced motion** removes autonomous animation and jumps directly

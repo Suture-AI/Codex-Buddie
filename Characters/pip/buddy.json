@@ -25,64 +25,92 @@
       "idle": [
         {
           "image": "idle-00.png",
-          "duration": 2.4
+          "duration": 2.4,
+          "mask": "idle-00-mask.png"
         },
         {
           "image": "idle-01.png",
-          "duration": 0.05
+          "duration": 0.05,
+          "mask": "idle-01-mask.png"
         },
         {
           "image": "idle-02.png",
-          "duration": 0.05
+          "duration": 0.05,
+          "mask": "idle-02-mask.png"
         },
         {
           "image": "idle-03.png",
-          "duration": 0.08
+          "duration": 0.08,
+          "mask": "idle-03-mask.png"
         },
         {
           "image": "idle-04.png",
-          "duration": 0.06
+          "duration": 0.06,
+          "mask": "idle-04-mask.png"
         },
         {
           "image": "idle-05.png",
-          "duration": 0.8
+          "duration": 0.8,
+          "mask": "idle-05-mask.png"
         }
       ],
       "walkRight": [
         {
           "image": "walk-00.png",
-          "duration": 0.0625
+          "duration": 0.0625,
+          "mask": "walk-00-mask.png"
         },
         {
           "image": "walk-01.png",
-          "duration": 0.0625
+          "duration": 0.0625,
+          "mask": "walk-01-mask.png"
         },
         {
           "image": "walk-02.png",
-          "duration": 0.0625
+          "duration": 0.0625,
+          "mask": "walk-02-mask.png"
         },
         {
           "image": "walk-03.png",
-          "duration": 0.0625
+          "duration": 0.0625,
+          "mask": "walk-03-mask.png"
         },
         {
           "image": "walk-04.png",
-          "duration": 0.0625
+          "duration": 0.0625,
+          "mask": "walk-04-mask.png"
         },
         {
           "image": "walk-05.png",
-          "duration": 0.0625
+          "duration": 0.0625,
+          "mask": "walk-05-mask.png"
         },
         {
           "image": "walk-06.png",
-          "duration": 0.0625
+          "duration": 0.0625,
+          "mask": "walk-06-mask.png"
         },
         {
           "image": "walk-07.png",
-          "duration": 0.0625
+          "duration": 0.0625,
+          "mask": "walk-07-mask.png"
         }
       ]
     },
-    "directionalIdle": true
+    "directionalIdle": true,
+    "materials": [
+      {
+        "id": "coat",
+        "name": "Raincoat",
+        "channel": 0,
+        "base": "#0850EF"
+      },
+      {
+        "id": "boots",
+        "name": "Boots",
+        "channel": 1,
+        "base": "#FF8000"
+      }
+    ]
   }
 }

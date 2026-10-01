@@ -27,6 +27,7 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 - (void)dealloc { [_animationTimer invalidate]; }
 - (void)setCharacter:(BuddieCharacter *)character {
     _character=character ?: [BuddieCharacter new]; BuddieMotionInit(&_motion);
+    [_character prepareAppearance];
     _spriteFacingLeft=NO; _spriteReleasing=NO; _spriteEpoch=NAN;
     self.spriteClipName=@"idle"; self.spriteFrame=0; self.needsDisplay=YES;
 }
@@ -99,7 +100,8 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
     double press=c.clips[@"press"] ? 1:.75+.25*MIN(1,_motion.pose.squash);
     [t scaleXBy:(mirror ? -unit:unit)*press yBy:unit*press]; [t concat];
     NSRect rect=NSMakeRect(-c.spriteHotspot.x,-c.spriteHotspot.y,c.spriteCanvas.width,c.spriteCanvas.height);
-    [clip.frames[MIN(self.spriteFrame,clip.frames.count-1)] drawInRect:rect fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1 respectFlipped:YES hints:nil];
+    NSString *name=c.clips[self.spriteClipName] ? self.spriteClipName:@"idle";
+    [[c imageForClip:name frame:MIN(self.spriteFrame,clip.frames.count-1)] drawInRect:rect fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1 respectFlipped:YES hints:nil];
     [NSGraphicsContext restoreGraphicsState];
 }
 - (void)drawRect:(NSRect)dirty {

@@ -4,6 +4,8 @@
 @interface BuddieSpriteClip : NSObject
 @property(copy) NSArray<NSImage *> *frames;
 @property(copy) NSArray<NSNumber *> *durations;
+// Optional RGB material masks, one per frame. Black preserves the original art.
+@property(copy) NSArray<NSImage *> *masks;
 @property(readonly) NSTimeInterval duration;
 - (NSUInteger)frameIndexAtTime:(double)time loop:(BOOL)loop;
 @end
@@ -32,6 +34,10 @@
 @property CGFloat spriteHeight;
 @property BOOL mirrorWalk;
 @property BOOL directionalIdle;
+@property(nonatomic,copy) NSArray<NSDictionary *> *materials;
+@property(nonatomic,copy) NSDictionary<NSString *,NSColor *> *materialColors;
+- (void)prepareAppearance;
+- (NSImage *)imageForClip:(NSString *)name frame:(NSUInteger)index;
 + (NSArray<BuddieCharacter *> *)presets;
 + (instancetype)bundledDefault;
 + (instancetype)loadPack:(NSURL *)folder error:(NSError **)error;

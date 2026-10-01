@@ -7,6 +7,88 @@ static NSColor *Color(NSString *hex) {
     if (![s scanHexInt:&n] || !s.isAtEnd) return nil;
     return [NSColor colorWithSRGBRed:((n>>16)&255)/255. green:((n>>8)&255)/255. blue:(n&255)/255. alpha:1];
 }
+static NSString *Hex(NSColor *color) {
+    NSColor *c=[color colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
+    return [NSString stringWithFormat:@"#%02X%02X%02X",(int)round(c.redComponent*255),(int)round(c.greenComponent*255),(int)round(c.blueComponent*255)];
+}
+// Decode once per appearance change, never per animation tick. Masks are raw
+// channel weights: do not color-manage them or apply the artwork's alpha twice.
+static NSBitmapImageRep *Bitmap(NSImage *image) {
+    for(NSImageRep *rep in image.representations) if([rep isKindOfClass:NSBitmapImageRep.class]) return (NSBitmapImageRep *)rep;
+    return [NSBitmapImageRep imageRepWithData:image.TIFFRepresentation];
+}
+static void RGBToHSV(double r,double g,double b,double *h,double *s,double *v) {
+    double hi=MAX(r,MAX(g,b)),lo=MIN(r,MIN(g,b)),delta=hi-lo;
+    *v=hi; *s=hi>0 ? delta/hi:0; *h=0;
+    if(delta>0) {
+        *h=(hi==r ? (g-b)/delta : hi==g ? 2+(b-r)/delta : 4+(r-g)/delta)/6;
+        if(*h<0) *h+=1;
+    }
+}
+static void HSVToRGB(double h,double s,double v,double *rgb) {
+    h-=floor(h); double k=h*6; int sector=(int)floor(k); double f=k-sector;
+    double p=v*(1-s),q=v*(1-s*f),t=v*(1-s*(1-f));
+    double values[6][3]={{v,t,p},{q,v,p},{p,v,t},{p,q,v},{t,p,v},{v,p,q}};
+    memcpy(rgb,values[sector%6],3*sizeof(double));
+}
+static NSImage *Paint(NSImage *image,NSImage *mask,NSArray<NSDictionary *> *materials,NSDictionary<NSString *,NSColor *> *colors) {
+    BOOL changed=NO;
+    double source[3][3]={{0}},target[3][3]={{0}}; BOOL active[3]={NO};
+    for(NSDictionary *m in materials) {
+        NSColor *base=Color(m[@"base"]),*color=colors[m[@"id"]] ?: base;
+        if([Hex(base) isEqual:Hex(color)]) continue;
+        NSUInteger channel=[m[@"channel"] unsignedIntegerValue];
+        base=[base colorUsingColorSpace:NSColorSpace.sRGBColorSpace]; color=[color colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
+        RGBToHSV(base.redComponent,base.greenComponent,base.blueComponent,&source[channel][0],&source[channel][1],&source[channel][2]);
+        RGBToHSV(color.redComponent,color.greenComponent,color.blueComponent,&target[channel][0],&target[channel][1],&target[channel][2]);
+        active[channel]=YES; changed=YES;
+    }
+    if(!changed || !mask) return image;
+    NSBitmapImageRep *input=Bitmap(image),*weights=Bitmap(mask);
+    NSInteger w=input.pixelsWide,h=input.pixelsHigh;
+    NSBitmapImageRep *out=[[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL pixelsWide:w pixelsHigh:h bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace bitmapFormat:NSBitmapFormatAlphaNonpremultiplied bytesPerRow:w*4 bitsPerPixel:32];
+    double maximum=ldexp(1,input.bitsPerSample)-1;
+    BOOL alphaFirst=(input.bitmapFormat&NSBitmapFormatAlphaFirst)!=0;
+    NSUInteger alphaIndex=alphaFirst ? 0:input.samplesPerPixel-1, start=alphaFirst ? 1:0;
+    BOOL gray=input.samplesPerPixel==2, premultiplied=!(input.bitmapFormat&NSBitmapFormatAlphaNonpremultiplied);
+    BOOL direct=input.bitsPerSample==8 && input.samplesPerPixel==4 && !input.isPlanar && input.bitmapFormat==NSBitmapFormatAlphaNonpremultiplied;
+    BOOL directMask=weights.bitsPerSample==8 && weights.samplesPerPixel==4 && !weights.isPlanar && weights.bitmapFormat==NSBitmapFormatAlphaNonpremultiplied;
+    unsigned char *inputBytes=input.bitmapData,*maskBytes=weights.bitmapData,*outputBytes=out.bitmapData;
+    NSInteger inputRow=input.bytesPerRow,maskRow=weights.bytesPerRow,outputRow=out.bytesPerRow;
+    for(NSInteger y=0;y<h;y++) for(NSInteger x=0;x<w;x++) {
+        NSUInteger samples[5]={0};
+        if(direct) { unsigned char *p=inputBytes+y*inputRow+x*4; for(int k=0;k<4;k++) samples[k]=p[k]; }
+        else [input getPixel:samples atX:x y:y];
+        double alpha=samples[alphaIndex]/maximum;
+        double original[3]={samples[start]/maximum,samples[start+(gray ? 0:1)]/maximum,samples[start+(gray ? 0:2)]/maximum};
+        if(premultiplied && alpha>0)
+            for(int k=0;k<3;k++) original[k]=MIN(1,original[k]/alpha);
+        double result[3]={original[0],original[1],original[2]};
+        NSUInteger channels[4]={0};
+        if(directMask) { unsigned char *p=maskBytes+y*maskRow+x*4; for(int k=0;k<3;k++) channels[k]=p[k]; }
+        else [weights getPixel:channels atX:x y:y];
+        double hue,sat,val; RGBToHSV(original[0],original[1],original[2],&hue,&sat,&val);
+        // Normalize overlapping masks so malformed blends cannot amplify light.
+        double sum=0; for(int j=0;j<3;j++) sum+=channels[j];
+        double denominator=MAX(255.,sum);
+        for(int j=0;j<3;j++) if(active[j] && channels[j]) {
+            double rgb[3];
+            double s=source[j][1]>0 ? sat*target[j][1]/source[j][1] : target[j][1];
+            // Specular highlights are low-saturation pixels: retain their light
+            // instead of turning a glossy orange boot into flat blue paint.
+            double ratio=source[j][2]>0 ? target[j][2]/source[j][2] : target[j][2];
+            double v=val*((1-sat)+sat*ratio);
+            HSVToRGB(hue+target[j][0]-source[j][0],MIN(1,s),MIN(1,v),rgb);
+            for(int k=0;k<3;k++) result[k]+=(rgb[k]-original[k])*channels[j]/denominator;
+        }
+        unsigned char *pixel=outputBytes+y*outputRow+x*4;
+        for(int k=0;k<3;k++) pixel[k]=(unsigned char)lround(MAX(0,MIN(1,result[k]))*255);
+        pixel[3]=(unsigned char)lround(alpha*255);
+    }
+    NSImage *painted=[[NSImage alloc] initWithSize:image.size];
+    NSColorSpace *space=input.colorSpace.colorSpaceModel==NSColorSpaceModelRGB ? input.colorSpace:NSColorSpace.sRGBColorSpace;
+    [painted addRepresentation:[out bitmapImageRepByRetaggingWithColorSpace:space]]; return painted;
+}
 static id Fail(NSError **error, NSString *message) {
     if(error) *error=[NSError errorWithDomain:@"BuddiePack" code:1 userInfo:@{NSLocalizedDescriptionKey:message}];
     return nil;
@@ -65,7 +147,31 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
 }
 @end
 
+@interface BuddieCharacter ()
+@property NSMutableDictionary<NSString *,NSImage *> *paintedFrames;
+@end
 @implementation BuddieCharacter
+- (void)setMaterialColors:(NSDictionary<NSString *,NSColor *> *)colors {
+    NSMutableDictionary *canonical=[NSMutableDictionary new];
+    for(NSString *key in colors) canonical[key]=Color(Hex(colors[key]));
+    _materialColors=[canonical copy]; self.paintedFrames=[NSMutableDictionary new];
+}
+- (void)setMaterials:(NSArray<NSDictionary *> *)materials {
+    _materials=[materials copy]; self.paintedFrames=[NSMutableDictionary new];
+}
+- (NSImage *)imageForClip:(NSString *)name frame:(NSUInteger)index {
+    BuddieSpriteClip *clip=self.clips[name];
+    if(index>=clip.frames.count) return nil;
+    if(!self.materials.count || !clip.masks.count) return clip.frames[index];
+    NSString *key=[NSString stringWithFormat:@"%@:%lu",name,(unsigned long)index];
+    NSImage *image=self.paintedFrames[key];
+    if(!image) { image=Paint(clip.frames[index],clip.masks[index],self.materials,self.materialColors); self.paintedFrames[key]=image; }
+    return image;
+}
+- (void)prepareAppearance {
+    for(NSString *name in self.clips) for(NSUInteger i=0;i<self.clips[name].frames.count;i++)
+        @autoreleasepool { [self imageForClip:name frame:i]; }
+}
 + (instancetype)bundledDefault {
     static BuddieCharacter *preset;
     static dispatch_once_t once;
@@ -108,13 +214,29 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
                 for(NSUInteger i=0;i<clip.frames.count;i++) {
                     NSString *filename=[NSString stringWithFormat:@"%@-%02lu.png",name,(unsigned long)i];
                     if(!WritePNG(clip.frames[i],[stage URLByAppendingPathComponent:filename],error)) return NO;
-                    [frames addObject:@{@"image":filename,@"duration":clip.durations[i]}];
+                    NSMutableDictionary *frame=[@{@"image":filename,@"duration":clip.durations[i]} mutableCopy];
+                    if(clip.masks.count) {
+                        NSString *mask=[NSString stringWithFormat:@"%@-%02lu-mask.png",name,(unsigned long)i];
+                        if(!WritePNG(clip.masks[i],[stage URLByAppendingPathComponent:mask],error)) return NO;
+                        frame[@"mask"]=mask;
+                    }
+                    [frames addObject:frame];
                 }
                 clips[name]=frames;
             }
-            json[@"sprites"]=@{@"canvas":@[@(self.spriteCanvas.width),@(self.spriteCanvas.height)],
+            NSMutableDictionary *sprites=[@{@"canvas":@[@(self.spriteCanvas.width),@(self.spriteCanvas.height)],
                 @"hotspot":@[@(self.spriteHotspot.x),@(self.spriteHotspot.y)],@"height":@(self.spriteHeight),
-                @"mirrorWalk":@(self.mirrorWalk),@"directionalIdle":@(self.directionalIdle),@"clips":clips};
+                @"mirrorWalk":@(self.mirrorWalk),@"directionalIdle":@(self.directionalIdle),@"clips":clips} mutableCopy];
+            if(self.materials.count) {
+                NSMutableArray *materials=[NSMutableArray new];
+                for(NSDictionary *m in self.materials) {
+                    NSMutableDictionary *definition=[m mutableCopy];
+                    definition[@"color"]=Hex(self.materialColors[m[@"id"]] ?: Color(m[@"base"]));
+                    [materials addObject:definition];
+                }
+                sprites[@"materials"]=materials;
+            }
+            json[@"sprites"]=sprites;
         }
         NSData *data=[NSJSONSerialization dataWithJSONObject:json options:NSJSONWritingPrettyPrinted|NSJSONWritingSortedKeys error:error];
         if(!data || ![data writeToURL:[stage URLByAppendingPathComponent:@"buddy.json"] options:NSDataWritingAtomic error:error]) return NO;
@@ -129,12 +251,12 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
         _bodyColor=Color(@"#C2EB89"); _inkColor=Color(@"#283C31"); _accentColor=Color(@"#F2A899");
         _bodySize=NSMakeSize(34,32); _cornerRadius=13; _eyeSpacing=13; _eyeSize=5;
         _faceY=0; _footSpacing=10; _footSize=8; _stride=28; _footLift=5;
-        _clips=@{}; _spriteHeight=64;
+        _clips=@{}; _spriteHeight=64; _materials=@[]; _materialColors=@{}; _paintedFrames=[NSMutableDictionary new];
     } return self;
 }
 - (id)copyWithZone:(NSZone *)zone {
     BuddieCharacter *c=[[[self class] allocWithZone:zone] init];
-    for(NSString *key in @[@"identifier",@"name",@"bodyColor",@"inkColor",@"accentColor",@"bodySize",@"cornerRadius",@"eyeSpacing",@"eyeSize",@"faceY",@"footSpacing",@"footSize",@"stride",@"footLift",@"bodyImage",@"footImage",@"clips",@"spriteCanvas",@"spriteHotspot",@"spriteHeight",@"mirrorWalk",@"directionalIdle"])
+    for(NSString *key in @[@"identifier",@"name",@"bodyColor",@"inkColor",@"accentColor",@"bodySize",@"cornerRadius",@"eyeSpacing",@"eyeSize",@"faceY",@"footSpacing",@"footSize",@"stride",@"footLift",@"bodyImage",@"footImage",@"clips",@"spriteCanvas",@"spriteHotspot",@"spriteHeight",@"mirrorWalk",@"directionalIdle",@"materials",@"materialColors"])
         [c setValue:[self valueForKey:key] forKey:key];
     return c;
 }
@@ -195,6 +317,18 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
             if(value && (![value isKindOfClass:NSNumber.class] || CFGetTypeID((__bridge CFTypeRef)value)!=CFBooleanGetTypeID())) return Fail(error,[flag stringByAppendingString:@" must be true or false."]);
             [c setValue:@([value boolValue]) forKey:flag];
         }
+        NSArray *materials=sprites[@"materials"] ?: @[];
+        if(![materials isKindOfClass:NSArray.class] || materials.count>3) return Fail(error,@"A sprite pack supports up to three materials.");
+        NSMutableSet *ids=[NSMutableSet new],*channels=[NSMutableSet new]; NSMutableDictionary *materialColors=[NSMutableDictionary new];
+        for(id m in materials) {
+            if(![m isKindOfClass:NSDictionary.class] || ![m[@"id"] isKindOfClass:NSString.class] || ![m[@"id"] length] || [m[@"id"] length]>40 ||
+               ![m[@"name"] isKindOfClass:NSString.class] || ![m[@"name"] length] || [m[@"name"] length]>40 ||
+               !NumberInRange(m[@"channel"],0,2) || floor([m[@"channel"] doubleValue])!=[m[@"channel"] doubleValue] ||
+               !Color(m[@"base"]) || (m[@"color"] && !Color(m[@"color"]))) return Fail(error,@"Materials need an id, name, RGB channel (0–2), base color and optional color in #RRGGBB.");
+            if([ids containsObject:m[@"id"]] || [channels containsObject:m[@"channel"]]) return Fail(error,@"Material ids and channels must be unique.");
+            [ids addObject:m[@"id"]]; [channels addObject:m[@"channel"]]; materialColors[m[@"id"]]=Color(m[@"color"] ?: m[@"base"]);
+        }
+        c.materials=materials; c.materialColors=materialColors;
         NSDictionary *definitions=sprites[@"clips"];
         if(![definitions isKindOfClass:NSDictionary.class] || !definitions[@"idle"]) return Fail(error,@"Sprite packs need an idle clip.");
         NSMutableDictionary *clips=[NSMutableDictionary new], *cache=[NSMutableDictionary new];
@@ -203,15 +337,28 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
             if(![@[@"idle",@"idleLeft",@"walkRight",@"walkLeft",@"press",@"release"] containsObject:name]) return Fail(error,@"Unknown sprite clip.");
             NSArray *frames=definitions[name];
             if(![frames isKindOfClass:NSArray.class] || !frames.count || frames.count>64 || total+frames.count>64) return Fail(error,@"Sprite packs support 1–64 frames in total.");
-            total+=frames.count; NSMutableArray *images=[NSMutableArray new], *durations=[NSMutableArray new];
+            total+=frames.count; NSMutableArray *images=[NSMutableArray new], *durations=[NSMutableArray new],*masks=[NSMutableArray new];
             for(id frame in frames) {
                 if(![frame isKindOfClass:NSDictionary.class] || ![frame[@"image"] isKindOfClass:NSString.class] || !NumberInRange(frame[@"duration"],1./120,30)) return Fail(error,@"Each sprite frame needs a PNG filename and a duration between 1/120 and 30 seconds.");
                 NSImage *image=cache[frame[@"image"]];
                 if(!image) { image=LoadImage(folder,frame[@"image"],&budget,error); if(!image) return nil; cache[frame[@"image"]]=image; }
                 if(!NSEqualSizes(image.size,c.spriteCanvas)) return Fail(error,@"Every frame must match the shared sprite canvas.");
                 [images addObject:image]; [durations addObject:frame[@"duration"]];
+                if(materials.count) {
+                    if(![frame[@"mask"] isKindOfClass:NSString.class]) return Fail(error,@"Each frame in a customizable sprite pack needs a material mask.");
+                    NSImage *mask=cache[frame[@"mask"]];
+                    if(!mask) { mask=LoadImage(folder,frame[@"mask"],&budget,error); if(!mask) return nil; cache[frame[@"mask"]]=mask; }
+                    if(!NSEqualSizes(mask.size,c.spriteCanvas)) return Fail(error,@"Material masks must match the sprite canvas.");
+                    NSBitmapImageRep *rep=(NSBitmapImageRep *)mask.representations.firstObject;
+                    if(rep.bitsPerSample!=8 || rep.samplesPerPixel!=4 || rep.isPlanar || rep.bitmapFormat!=NSBitmapFormatAlphaNonpremultiplied) return Fail(error,@"Material masks must be 8-bit RGBA PNGs.");
+                    for(NSInteger y=0;y<rep.pixelsHigh;y++) for(NSInteger x=0;x<rep.pixelsWide;x++) {
+                        NSUInteger p[4]; [rep getPixel:p atX:x y:y];
+                        if(p[3]!=255) return Fail(error,@"Material masks use opaque RGB channel weights; their alpha must be 255.");
+                    }
+                    [masks addObject:mask];
+                } else if(frame[@"mask"]) return Fail(error,@"Define materials before adding frame masks.");
             }
-            BuddieSpriteClip *clip=[BuddieSpriteClip new]; clip.frames=images; clip.durations=durations; clips[name]=clip;
+            BuddieSpriteClip *clip=[BuddieSpriteClip new]; clip.frames=images; clip.durations=durations; clip.masks=masks; clips[name]=clip;
         }
         c.clips=clips;
     } else if(json[@"sprites"]) return Fail(error,@"Complete sprite poses require version 2.");
