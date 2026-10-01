@@ -1,0 +1,130 @@
+{
+  "source_sha256": "0fe8471547355ae98a8b582f3470dbfe9de76e7f79a30c4a3a15e954e098f580",
+  "frames": [
+    {
+      "frame": 0,
+      "size": [
+        256,
+        320
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "bounds": [
+        33,
+        25,
+        223,
+        296
+      ],
+      "touches_edge": false,
+      "lower_body_mean_pixel_difference": 0.0
+    },
+    {
+      "frame": 1,
+      "size": [
+        256,
+        320
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "bounds": [
+        33,
+        24,
+        223,
+        296
+      ],
+      "touches_edge": false,
+      "lower_body_mean_pixel_difference": 2.8187360491071427
+    },
+    {
+      "frame": 2,
+      "size": [
+        256,
+        320
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "bounds": [
+        32,
+        25,
+        223,
+        296
+      ],
+      "touches_edge": false,
+      "lower_body_mean_pixel_difference": 2.0405133928571426
+    },
+    {
+      "frame": 3,
+      "size": [
+        256,
+        320
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "bounds": [
+        32,
+        25,
+        223,
+        296
+      ],
+      "touches_edge": false,
+      "lower_body_mean_pixel_difference": 4.455252511160714
+    },
+    {
+      "frame": 4,
+      "size": [
+        256,
+        320
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "bounds": [
+        32,
+        25,
+        223,
+        296
+      ],
+      "touches_edge": false,
+      "lower_body_mean_pixel_difference": 5.192933872767857
+    },
+    {
+      "frame": 5,
+      "size": [
+        256,
+        320
+      ],
+      "alpha_range": [
+        0,
+        255
+      ],
+      "bounds": [
+        32,
+        25,
+        224,
+        296
+      ],
+      "touches_edge": false,
+      "lower_body_mean_pixel_difference": 4.000299944196429
+    }
+  ],
+  "visual_observations": [
+    "Six complete otter poses; no cropped extremities or visible background.",
+    "Same hood, cape button, orange boots, tail, muzzle and eye construction.",
+    "Sequence visibly progresses from open through half-lidded to fully closed, then reopens.",
+    "Shared size and foot registration; source height spread is 0.4 percent and width spread 1.14 percent."
+  ],
+  "limits": [
+    "Generated pose study only; not integrated with cursor motion.",
+    "No user approval of Pip art direction yet.",
+    "Real-time playback and walking identity remain unverified."
+  ]
+}

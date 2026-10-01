@@ -1,0 +1,56 @@
+{
+  "source": "artwork/pip/blink-study/source.png",
+  "source_size": [
+    1536,
+    1024
+  ],
+  "expected_count": 6,
+  "detected_count": 6,
+  "boxes": [
+    [
+      133,
+      13,
+      484,
+      513
+    ],
+    [
+      601,
+      11,
+      952,
+      513
+    ],
+    [
+      1060,
+      13,
+      1412,
+      513
+    ],
+    [
+      133,
+      515,
+      485,
+      1016
+    ],
+    [
+      601,
+      515,
+      953,
+      1016
+    ],
+    [
+      1060,
+      515,
+      1415,
+      1016
+    ]
+  ],
+  "shared_scale": 0.5418326693227091,
+  "canvas": [
+    256,
+    320
+  ],
+  "registration": "Centered by detected complete bounds; shared foot baseline. Review for drift; not suitable for jump poses.",
+  "height_ratio": 1.004,
+  "width_ratio": 1.0113960113960114,
+  "visual_review": "pending"
+}
