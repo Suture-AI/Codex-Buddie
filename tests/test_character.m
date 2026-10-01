@@ -31,6 +31,7 @@ int main(void) {
             NSCAssert(![source savePack:saved error:nil],@"Existing packs must not be overwritten");
             BuddieCharacter *pip=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/pip"] error:nil];
             NSCAssert(pip.clips[@"idle"].frames.count==6 && !pip.bodyImage,@"Complete character pack loads its own face and feet");
+            NSCAssert(pip.clips[@"walkRight"].frames.count==8 && pip.directionalIdle,@"Pip has the refined gait and matching directional idle");
             BuddieSpriteClip *blink=pip.clips[@"idle"];
             NSCAssert([blink frameIndexAtTime:2.39 loop:YES]==0 && [blink frameIndexAtTime:2.426 loop:YES]==1,@"Blink uses per-frame durations, not uniform FPS");
             NSCAssert([blink frameIndexAtTime:blink.duration+.02 loop:YES]==0,@"Idle wraps at the clip duration");
@@ -39,9 +40,10 @@ int main(void) {
             NSCAssert([pip savePack:spriteCopy error:nil],@"Save sprite pack with every frame");
             BuddieCharacter *pipCopy=[BuddieCharacter loadPack:spriteCopy error:nil];
             NSCAssert(pipCopy.clips.count==pip.clips.count && pipCopy.clips[@"idle"].duration==blink.duration && NSEqualPoints(pipCopy.spriteHotspot,pip.spriteHotspot),@"Sprite timings and hotspot round-trip");
+            NSCAssert(pipCopy.directionalIdle==pip.directionalIdle && pipCopy.mirrorWalk==pip.mirrorWalk,@"Facing contract round-trips with its art");
             NSData *spriteData=[NSData dataWithContentsOfURL:[spriteCopy URLByAppendingPathComponent:@"buddy.json"]];
             NSDictionary *spriteJSON=[NSJSONSerialization JSONObjectWithData:spriteData options:0 error:nil];
-            for(NSString *key in @[@"canvas",@"hotspot",@"height",@"mirrorWalk",@"clips"]) {
+            for(NSString *key in @[@"canvas",@"hotspot",@"height",@"mirrorWalk",@"directionalIdle",@"clips"]) {
                 NSMutableDictionary *bad=[spriteJSON mutableCopy], *sprites=[spriteJSON[@"sprites"] mutableCopy];
                 sprites[key]=NSNull.null; bad[@"sprites"]=sprites; Reject(spriteCopy,bad);
             }

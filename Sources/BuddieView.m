@@ -17,7 +17,7 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 @implementation BuddieView
 - (instancetype)initWithFrame:(NSRect)frame {
     if((self=[super initWithFrame:frame])) {
-        _character=[BuddieCharacter new]; _characterScale=1;
+        self.character=[BuddieCharacter bundledDefault]; _characterScale=1;
         BuddieMotionInit(&_motion);
     } return self;
 }
@@ -66,14 +66,15 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
     if(c.clips.count && isfinite(time)) {
         if(!isfinite(_spriteEpoch) || time<_spriteEpoch) _spriteEpoch=time;
         if(_motion.moving && fabs(_motion.velocity.x)>3) _spriteFacingLeft=_motion.velocity.x<0;
-        NSString *name=@"idle"; double elapsed=time-_spriteEpoch; BOOL loop=YES;
+        NSString *idle=c.directionalIdle && _spriteFacingLeft && c.clips[@"idleLeft"] ? @"idleLeft":@"idle";
+        NSString *name=idle; double elapsed=time-_spriteEpoch; BOOL loop=YES;
         if(_motion.pressed && c.clips[@"press"]) { name=@"press"; elapsed=time-_spriteEventAt; loop=NO; }
         else if(_spriteReleasing && c.clips[@"release"] && time-_spriteEventAt<c.clips[@"release"].duration) { name=@"release"; elapsed=time-_spriteEventAt; loop=NO; }
         else if(!reduced && _motion.pose.walkWeight>.1) {
             NSString *walk=_spriteFacingLeft && c.clips[@"walkLeft"] ? @"walkLeft":@"walkRight";
             if(c.clips[walk]) { name=walk; elapsed=_motion.pose.phase*c.clips[walk].duration; }
         }
-        if(![name isEqual:self.spriteClipName] && [name isEqual:@"idle"]) { _spriteEpoch=time; elapsed=0; }
+        if(![name isEqual:self.spriteClipName] && [name isEqual:idle]) { _spriteEpoch=time; elapsed=0; }
         self.spriteClipName=name;
         self.spriteFrame=reduced ? 0:[c.clips[name] frameIndexAtTime:elapsed loop:loop];
     }
@@ -87,7 +88,8 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
     BuddieCharacter *c=self.character;
     BuddieSpriteClip *clip=c.clips[self.spriteClipName] ?: c.clips[@"idle"];
     if(!clip.frames.count) return;
-    BOOL mirror=_spriteFacingLeft && [self.spriteClipName isEqual:@"walkRight"] && c.mirrorWalk;
+    BOOL directional=[self.spriteClipName isEqual:@"walkRight"] || (c.directionalIdle && [self.spriteClipName isEqual:@"idle"]);
+    BOOL mirror=_spriteFacingLeft && directional && c.mirrorWalk;
     double unit=scale*c.spriteHeight/c.spriteCanvas.height;
     [NSGraphicsContext saveGraphicsState];
     NSGraphicsContext.currentContext.imageInterpolation=NSImageInterpolationHigh;

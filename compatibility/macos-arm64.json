@@ -9,5 +9,13 @@
       4
     ],
     "fogHotspot": "view centre"
+  },
+  "d4b1775138342c0df8e9451df3c23dda3fdef44c4ade50a2de382c188cf61b54": {
+    "version": "26.924.1001281",
+    "build": "1001281",
+    "status": "inspected-not-live-certified",
+    "cursorClass": "ComputerUse.ComputerUseCursor.Window",
+    "inspection": "Original deep/strict signature verified. Known cursor markers present. Injection changes 53 bytes ending at offset 9997, before text offset 10176, without moving executable code.",
+    "geometry": "Not verified on this build; the lab retains the earlier prototype hotspot assumptions."
   }
 }

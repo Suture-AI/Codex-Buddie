@@ -31,7 +31,9 @@
 @property NSPoint spriteHotspot;
 @property CGFloat spriteHeight;
 @property BOOL mirrorWalk;
+@property BOOL directionalIdle;
 + (NSArray<BuddieCharacter *> *)presets;
++ (instancetype)bundledDefault;
 + (instancetype)loadPack:(NSURL *)folder error:(NSError **)error;
 - (BOOL)savePack:(NSURL *)folder error:(NSError **)error;
 @end

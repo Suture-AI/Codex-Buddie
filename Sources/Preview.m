@@ -258,6 +258,7 @@ static int SelfTest(void) {
     NSWindow *cursor=[[cursorClass alloc] initWithContentRect:r styleMask:0 backing:NSBackingStoreBuffered defer:NO];
     NSImageView *image=[[NSImageView alloc] initWithFrame:r]; cursor.contentView=image;
     NSCAssert([NSStringFromClass(cursor.contentView.class) isEqual:@"BuddieView"],@"Native image must be replaced");
+    NSCAssert([((BuddieView *)cursor.contentView).character.identifier isEqual:@"pip"],@"Replacement factory loads the bundled character before studio overrides");
     NSCAssert(NSEqualSizes(cursor.contentView.frame.size,r.size),@"Native dimensions must stay intact");
     NSCAssert(image.superview==nil,@"Original artwork must be detached");
     NSImageView *refresh=[[NSImageView alloc] initWithFrame:r]; cursor.contentView=refresh;
@@ -284,8 +285,21 @@ static int SelfTest(void) {
     [sprite animateAtTime:104 anchor:(BuddiePoint){100,20}]; NSCAssert([still isEqual:snapshot()],@"Reduced Motion renders the same complete pose while moving");
     [sprite press:YES atTime:104]; [sprite animateAtTime:104.1 anchor:(BuddiePoint){100,20}];
     NSCAssert(NSEqualPoints(sprite.hotspot,hotspot),@"Sprite press keeps the native click coordinate");
+    if(!NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion) {
+        sprite.character=[BuddieCollection().firstObject copy]; sprite.reduceMotion=NO;
+        [sprite animateAtTime:200 anchor:(BuddiePoint){0,0}]; NSData *rightIdle=snapshot();
+        for(int i=1;i<=90;i++) [sprite animateAtTime:200+i/60. anchor:(BuddiePoint){-MIN(i,30),0}];
+        NSData *leftIdle=snapshot();
+        NSCAssert(![leftIdle isEqual:rightIdle],@"After left travel, directional idle must keep facing left");
+        sprite.reduceMotion=YES;
+        [sprite animateAtTime:201.6 anchor:(BuddiePoint){-30,0}];
+        NSCAssert([leftIdle isEqual:snapshot()],@"Reduced Motion preserves the stopped facing and first pose");
+        sprite.character.directionalIdle=NO;
+        [sprite animateAtTime:201.7 anchor:(BuddiePoint){-30,0}];
+        NSCAssert([rightIdle isEqual:snapshot()],@"Nondirectional packs keep their authored idle orientation");
+    }
     puts("PASS: software + fog replacement, unchanged geometry, detached artwork, repeated assignment, unrelated windows, unknown renderer fallback");
-    puts("PASS: complete sprite drawing, timed blink, Reduced Motion stability, unchanged sprite hotspot");
+    puts("PASS: complete sprite drawing, timed blink, Reduced Motion stability, stopped facing, unchanged sprite hotspot");
     return 0;
 }
 int main(int argc,const char **argv) {

@@ -1,0 +1,109 @@
+{
+  "source": "artwork/pip/walk-refinement/source.png",
+  "source_size": [
+    1774,
+    887
+  ],
+  "expected_count": 8,
+  "detected_count": 8,
+  "boxes": [
+    [
+      69,
+      33,
+      383,
+      428
+    ],
+    [
+      499,
+      45,
+      797,
+      430
+    ],
+    [
+      930,
+      40,
+      1227,
+      430
+    ],
+    [
+      1379,
+      36,
+      1696,
+      428
+    ],
+    [
+      69,
+      454,
+      404,
+      847
+    ],
+    [
+      511,
+      466,
+      809,
+      847
+    ],
+    [
+      932,
+      459,
+      1249,
+      849
+    ],
+    [
+      1388,
+      454,
+      1720,
+      847
+    ]
+  ],
+  "shared_scale": 0.68,
+  "canvas": [
+    256,
+    320
+  ],
+  "registration": {
+    "scale": 0.68,
+    "origins": [
+      [
+        248,
+        426
+      ],
+      [
+        680,
+        426
+      ],
+      [
+        1112,
+        426
+      ],
+      [
+        1544,
+        426
+      ],
+      [
+        248,
+        845
+      ],
+      [
+        680,
+        845
+      ],
+      [
+        1112,
+        845
+      ],
+      [
+        1544,
+        845
+      ]
+    ],
+    "target": [
+      128,
+      296
+    ],
+    "method": "Reviewed common row ground lines and horizontal body origins. Shared scale retains the lowered body and lifted boots."
+  },
+  "height_ratio": 1.036745406824147,
+  "width_ratio": 1.127946127946128,
+  "visual_review": "pending"
+}

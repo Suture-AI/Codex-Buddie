@@ -16,7 +16,7 @@ from macho import inject
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def prepare(service, destination):
+def prepare(service, destination, signing_identity="-"):
     if platform.system() != "Darwin" or platform.machine() != "arm64":
         raise ValueError("The native experiment currently requires an Apple Silicon Mac")
     service = service.expanduser().resolve(strict=True)
@@ -50,13 +50,23 @@ def prepare(service, destination):
     frameworks = destination / "Contents/Frameworks"
     frameworks.mkdir(exist_ok=True)
     shutil.copy2(library, frameworks / "libBuddie.dylib")
-    # The local copy has a new ad-hoc signature, not OpenAI's identity or grants.
-    subprocess.run(["codesign", "--force", "--sign", "-", "--options", "0", "--timestamp=none", str(destination)], check=True)
+    # Keep our complete-pose artwork with the shim in the isolated copy.
+    characters=ROOT / "Characters"
+    if characters.is_dir():
+        shutil.copytree(characters, destination / "Contents/Resources/BuddieCharacters")
+    # The isolated copy never claims OpenAI's identity, app groups or grants.
+    # A development signature allows testing the existing same-team IPC rule
+    # with an equally signed local client; it does not remove that rule.
+    options="0" if signing_identity=="-" else "runtime"
+    if signing_identity!="-":
+        subprocess.run(["codesign", "--force", "--sign", signing_identity, "--options", options, "--timestamp=none", str(frameworks / "libBuddie.dylib")], check=True)
+    subprocess.run(["codesign", "--force", "--sign", signing_identity, "--options", options, "--timestamp=none", str(destination)], check=True)
     subprocess.run(["codesign", "--verify", "--deep", "--strict", str(destination)], check=True)
     if hashlib.sha256(executable.read_bytes()).hexdigest() != digest:
         raise RuntimeError("Source changed during preparation; investigate before proceeding")
     report = {"source": str(service), "source_sha256": digest, "copy": str(destination),
-              "status": "prepared-not-live-verified", "compatibility": supported[digest]}
+              "status": "prepared-not-live-verified", "signing": "ad-hoc" if signing_identity=="-" else "development",
+              "compatibility": supported[digest]}
     (destination.parent / "preparation.json").write_text(json.dumps(report, indent=2) + "\n")
     print(f"Prepared: {destination}\nOriginal app verified unchanged. Native operation still needs testing.")
 
@@ -115,13 +125,14 @@ if __name__ == "__main__":
     p = sub.add_parser("prepare")
     p.add_argument("--service", required=True, type=Path)
     p.add_argument("--destination", type=Path, default=ROOT / ".build/native/Codex Buddie Runtime.app")
+    p.add_argument("--signing-identity", default="-", help="Optional local development identity; requires a client signed by the same team. Default: ad-hoc.")
     p = sub.add_parser("launcher")
     p.add_argument("--runtime", required=True, type=Path)
     p.add_argument("--service", type=Path, default=ROOT / ".build/native/Codex Buddie Runtime.app")
     p.add_argument("--output", type=Path, default=ROOT / ".build/codex-buddie-cua")
     args = parser.parse_args()
     try:
-        if args.command == "prepare": prepare(args.service, args.destination)
+        if args.command == "prepare": prepare(args.service, args.destination, args.signing_identity)
         else: launcher(args.runtime, args.service, args.output)
     except (ValueError, OSError, subprocess.CalledProcessError) as exc:
         print(f"Buddie: {exc}", file=sys.stderr)

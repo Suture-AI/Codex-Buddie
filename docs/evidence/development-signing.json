@@ -1,0 +1,31 @@
+{
+  "service_version": "26.924.1001281",
+  "source_sha256": "d4b1775138342c0df8e9451df3c23dda3fdef44c4ade50a2de382c188cf61b54",
+  "source_app_unchanged": true,
+  "runtime_originals_unchanged": true,
+  "same_nonempty_signing_team_verified": true,
+  "signature_type": "Existing Apple Development identity, hardened runtime on copied service/library/client",
+  "signed_runtime_file_count": 7,
+  "permission_changes": false,
+  "authentication_code_changes": false,
+  "probe": {
+    "status": "blocked",
+    "observed_at_utc": "2026-10-01T02:16:16Z",
+    "scope": "Official CUA initialization and read-only native app inventory; no UI actions or permission approvals.",
+    "startup_grace_seconds": 8.0,
+    "tool_error": false,
+    "nativeAppCount": 0,
+    "errors": [
+      "Error: Sky Computer Use native pipe startup failed"
+    ],
+    "team_not_found_in_log": false,
+    "renderer_loaded": true
+  },
+  "renderer_sha256": "881c4a36d10aeb5d39383c8077f92c4431cef172a309d27daa57583bb221349b",
+  "limits": [
+    "Same-team metadata and disappearance of a stderr string do not prove authentication succeeded.",
+    "No native app inventory or cursor replacement was reached.",
+    "Detailed IPC rejection reason remains unavailable.",
+    "This isolated probe used the pre-refinement renderer from the start of this turn; its purpose was IPC validation."
+  ]
+}

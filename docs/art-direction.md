@@ -35,10 +35,10 @@ Remove the dangling tether from the final design; calibrate a fixed local
 hotspot for the actual renderer integration instead.
 
 Pip is now exposed as an explicitly labeled **Motion study** in the review
-studio, with complete blink and four walk key poses. This is for evaluating the
+studio, with matching side-facing blink and eight walk poses. This is for evaluating the
 candidate direction, not approval into a finalized character collection. See
-[the recording](media/pip-motion-study.gif) and
-[remaining quality gaps](../artwork/pip/walk-study/review.json).
+[the recording](media/pip-refined-motion.gif) and
+[remaining quality gaps](../artwork/pip/walk-refinement/review.json).
 
 ## Review at useful sizes
 

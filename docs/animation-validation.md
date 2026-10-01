@@ -39,7 +39,7 @@ movement/press/drag/visibility signals, browser and picture-in-picture surfaces,
 multi-display accuracy, lifecycle/performance profiling, durable collection
 management, and signed distribution. The native IPC signing blocker still
 applies. No claim of seamless replacement in stock Codex is made by this update.
-# Complete-pose Pip follow-up
+# Complete-pose Pip follow-up — initial four-pose checkpoint
 
 The studio now loads version 2 packs with shared canvases/hotspots, per-frame
 timings, distance-driven gait selection, optional leftward mirroring and explicit
@@ -66,3 +66,29 @@ gaps are recorded in [the review](../artwork/pip/walk-study/review.json). The
 four-pose gait still needs in-betweens, clearer leg separation and an authored
 idle/turn transition. Mirrored lighting and small native software-cursor bounds
 also remain limitations. These facts prevent claiming finished animation quality.
+
+## Eight-pose / directional-idle refinement
+
+Current Pip has eight walk poses and six new idle/blink poses matching the side
+view. The runtime holds that facing direction at rest and in Reduced Motion.
+Native rendering tests compare right-facing idle, a completed leftward journey,
+the stopped pose, and the still pose under Reduced Motion. They also prove that
+front-facing packs retain their authored orientation when `directionalIdle` is
+false. Save/import tests cover both facing flags.
+
+The replacement factory now loads the bundled Pip pack before studio overrides.
+The preparer includes character assets in the isolated native bundle. Two new
+preparation tests verify that signing and artwork writes target only the copy,
+the source remains unchanged, existing destinations are refused, and development
+signatures keep hardened runtime enabled. All nine Python tests, motion/pack
+checks, build and native harness passed locally.
+
+See [the refined recording](media/pip-refined-motion.gif),
+[rendered poses](media/pip-refined-contact.png),
+[ChatGPT generation screenshot](media/pip-chatgpt-refinement.jpg), and
+[asset checks](../artwork/pip/walk-refinement/review.json). Native desktop windows
+were unavailable through CUA this turn; visual runtime evidence is the actual
+AppKit export harness. Brave's browser connection verified the generated sheets.
+Leg contact, turn/settle transitions and lighting consistency remain unapproved.
+The separate [development-signing probe](development-signing.md) did not establish
+a live native connection.

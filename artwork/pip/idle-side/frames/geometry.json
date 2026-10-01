@@ -1,0 +1,56 @@
+{
+  "source": "artwork/pip/idle-side/source.png",
+  "source_size": [
+    1536,
+    1024
+  ],
+  "expected_count": 6,
+  "detected_count": 6,
+  "boxes": [
+    [
+      102,
+      31,
+      488,
+      518
+    ],
+    [
+      582,
+      31,
+      971,
+      518
+    ],
+    [
+      1050,
+      31,
+      1439,
+      518
+    ],
+    [
+      102,
+      524,
+      491,
+      1008
+    ],
+    [
+      582,
+      524,
+      970,
+      1008
+    ],
+    [
+      1050,
+      524,
+      1441,
+      1008
+    ]
+  ],
+  "shared_scale": 0.5524296675191815,
+  "canvas": [
+    256,
+    320
+  ],
+  "registration": "Centered by detected complete bounds; shared foot baseline. Review for drift; not suitable for jump poses.",
+  "height_ratio": 1.006198347107438,
+  "width_ratio": 1.0129533678756477,
+  "visual_review": "pending"
+}

@@ -3,7 +3,7 @@
 Version 2 packs now play complete generated poses, preserving the face, hands
 and footwear established in canonical art. Version 1 still supports the earlier
 layered rig. See [the implemented schema](characters.md). Pip is a working
-blink/four-key-pose motion study, not a final animation-quality reference.
+blink/eight-pose motion study, not a final animation-quality reference.
 
 ## Minimum useful clips
 
@@ -47,9 +47,9 @@ separate unresolved product gates. Sprite work must not imply those are solved.
 
 ## Current gaps against this contract
 
-Pip still cuts between its three-quarter idle and more side-facing walk view;
-there are no authored turn/settle clips. Its four walk poses need in-betweens and
-stronger leg separation. Left travel mirrors lighting. The runtime retains the
+Pip now has side-facing idle art matching its walk camera and retains the travel
+direction when it stops. There are still no authored turn/settle clips. Its eight
+walk poses need closer leg/contact review. Left travel mirrors lighting. The runtime retains the
 last distance phase while decelerating, then changes to idle; this does not yet
 guarantee a planted final contact. Press/release use a restrained whole-image
 response until authored poses are supplied. These are visible quality gaps,

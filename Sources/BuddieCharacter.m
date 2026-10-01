@@ -66,6 +66,19 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
 @end
 
 @implementation BuddieCharacter
++ (instancetype)bundledDefault {
+    static BuddieCharacter *preset;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        NSURL *resources=NSBundle.mainBundle.resourceURL;
+        for(NSString *folder in @[@"BuddieCharacters",@"Characters"]) {
+            NSURL *pack=[[resources URLByAppendingPathComponent:folder] URLByAppendingPathComponent:@"pip"];
+            preset=[self loadPack:pack error:nil]; if(preset) break;
+        }
+        if(!preset) preset=[self new];
+    });
+    return [preset copy];
+}
 - (BOOL)savePack:(NSURL *)folder error:(NSError **)error {
     NSFileManager *fm=NSFileManager.defaultManager;
     if([fm fileExistsAtPath:folder.path]) { Fail(error,@"A buddy already exists at that location. Choose a new name."); return NO; }
@@ -101,7 +114,7 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
             }
             json[@"sprites"]=@{@"canvas":@[@(self.spriteCanvas.width),@(self.spriteCanvas.height)],
                 @"hotspot":@[@(self.spriteHotspot.x),@(self.spriteHotspot.y)],@"height":@(self.spriteHeight),
-                @"mirrorWalk":@(self.mirrorWalk),@"clips":clips};
+                @"mirrorWalk":@(self.mirrorWalk),@"directionalIdle":@(self.directionalIdle),@"clips":clips};
         }
         NSData *data=[NSJSONSerialization dataWithJSONObject:json options:NSJSONWritingPrettyPrinted|NSJSONWritingSortedKeys error:error];
         if(!data || ![data writeToURL:[stage URLByAppendingPathComponent:@"buddy.json"] options:NSDataWritingAtomic error:error]) return NO;
@@ -121,7 +134,7 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
 }
 - (id)copyWithZone:(NSZone *)zone {
     BuddieCharacter *c=[[[self class] allocWithZone:zone] init];
-    for(NSString *key in @[@"identifier",@"name",@"bodyColor",@"inkColor",@"accentColor",@"bodySize",@"cornerRadius",@"eyeSpacing",@"eyeSize",@"faceY",@"footSpacing",@"footSize",@"stride",@"footLift",@"bodyImage",@"footImage",@"clips",@"spriteCanvas",@"spriteHotspot",@"spriteHeight",@"mirrorWalk"])
+    for(NSString *key in @[@"identifier",@"name",@"bodyColor",@"inkColor",@"accentColor",@"bodySize",@"cornerRadius",@"eyeSpacing",@"eyeSize",@"faceY",@"footSpacing",@"footSize",@"stride",@"footLift",@"bodyImage",@"footImage",@"clips",@"spriteCanvas",@"spriteHotspot",@"spriteHeight",@"mirrorWalk",@"directionalIdle"])
         [c setValue:[self valueForKey:key] forKey:key];
     return c;
 }
@@ -177,15 +190,17 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
         c.spriteHotspot=NSMakePoint([sprites[@"hotspot"][0] doubleValue],[sprites[@"hotspot"][1] doubleValue]);
         if(!NumberInRange(sprites[@"height"],32,96)) return Fail(error,@"Sprite display height must be between 32 and 96 points.");
         c.spriteHeight=[sprites[@"height"] doubleValue];
-        id mirror=sprites[@"mirrorWalk"];
-        if(mirror && (![mirror isKindOfClass:NSNumber.class] || CFGetTypeID((__bridge CFTypeRef)mirror)!=CFBooleanGetTypeID())) return Fail(error,@"mirrorWalk must be true or false.");
-        c.mirrorWalk=[mirror boolValue];
+        for(NSString *flag in @[@"mirrorWalk",@"directionalIdle"]) {
+            id value=sprites[flag];
+            if(value && (![value isKindOfClass:NSNumber.class] || CFGetTypeID((__bridge CFTypeRef)value)!=CFBooleanGetTypeID())) return Fail(error,[flag stringByAppendingString:@" must be true or false."]);
+            [c setValue:@([value boolValue]) forKey:flag];
+        }
         NSDictionary *definitions=sprites[@"clips"];
         if(![definitions isKindOfClass:NSDictionary.class] || !definitions[@"idle"]) return Fail(error,@"Sprite packs need an idle clip.");
         NSMutableDictionary *clips=[NSMutableDictionary new], *cache=[NSMutableDictionary new];
         NSUInteger total=0,budget=64*1024*1024;
         for(NSString *name in definitions) {
-            if(![@[@"idle",@"walkRight",@"walkLeft",@"press",@"release"] containsObject:name]) return Fail(error,@"Unknown sprite clip.");
+            if(![@[@"idle",@"idleLeft",@"walkRight",@"walkLeft",@"press",@"release"] containsObject:name]) return Fail(error,@"Unknown sprite clip.");
             NSArray *frames=definitions[name];
             if(![frames isKindOfClass:NSArray.class] || !frames.count || frames.count>64 || total+frames.count>64) return Fail(error,@"Sprite packs support 1–64 frames in total.");
             total+=frames.count; NSMutableArray *images=[NSMutableArray new], *durations=[NSMutableArray new];

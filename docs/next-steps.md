@@ -20,17 +20,17 @@ are not the current direction. Study the built-in pets' clear silhouettes,
 expressive complete poses and coherent facial/limb design; create original art.
 
 The root Character Studio now opens with **Pip · Motion study**, a complete-pose
-version 2 pack: six blink frames, four walk key poses, size/stride controls,
+version 2 pack: six matching side-facing blink frames, eight walk poses, size/stride controls,
 mirrored left travel, fixed hood hotspot and import/export of all frames. The
 renderer adds no tether, generic face or feet over its artwork. See
-[`docs/media/pip-motion-study.gif`](media/pip-motion-study.gif),
-[the asset review](../artwork/pip/walk-study/review.json) and the implemented
+[`docs/media/pip-refined-motion.gif`](media/pip-refined-motion.gif),
+[the asset review](../artwork/pip/walk-refinement/review.json) and the implemented
 [version 2 pack format](characters.md).
 
 Next art work: obtain feedback on Pip, add gait in-betweens and clearer leg
-separation, and author idle/turn/settle and leftward poses. Current whole-pose
+separation, and author idle/turn/settle and leftward poses. Direction now survives stopping and Reduced Motion. Whole-pose
 transitions and mirrored lighting are explicit limitations. Do not mark the
-four-keyframe study as smooth final animation.
+eight-frame study as smooth final animation.
 
 The studio also retains three earlier ChatGPT-generated body packs, independent
 animated faces/feet, distance-driven planted gait, continuous curved retargeting,
@@ -40,7 +40,7 @@ Run `bash scripts/test-animation.sh`. Review `docs/media/buddies-walking.gif` an
 [the pack specification](characters.md). These components are independent of the
 blocked live service connection and can be reused by a supported integration.
 
-The repository root contains the native renderer experiment already pushed by a collaborator: it substitutes the cursor content view in a lab and stages an isolated service copy. Its documented live blocker is `SkyIPCRequirement.Error.teamNotFound` during native IPC signing validation. Preserve the original service and its authentication requirements.
+The repository root contains the native renderer experiment already pushed by a collaborator: it substitutes the cursor content view in a lab and stages an isolated service copy. Its documented live blocker is `SkyIPCRequirement.Error.teamNotFound` during native IPC signing validation. A matching-team Apple development signature was also tested; native inventory still fails. See [the probe evidence](development-signing.md). Preserve the original service and its authentication requirements.
 
 The independent passive experiment under `experiments/passive-overlay/` adds:
 

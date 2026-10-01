@@ -1,0 +1,42 @@
+{
+  "scale": 0.68,
+  "origins": [
+    [
+      248,
+      426
+    ],
+    [
+      680,
+      426
+    ],
+    [
+      1112,
+      426
+    ],
+    [
+      1544,
+      426
+    ],
+    [
+      248,
+      845
+    ],
+    [
+      680,
+      845
+    ],
+    [
+      1112,
+      845
+    ],
+    [
+      1544,
+      845
+    ]
+  ],
+  "target": [
+    128,
+    296
+  ],
+  "method": "Reviewed common row ground lines and horizontal body origins. Shared scale retains the lowered body and lifted boots."
+}

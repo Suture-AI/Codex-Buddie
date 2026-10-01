@@ -7,29 +7,30 @@ coordinate; your own mouse stays independent.
 
 **Experimental macOS prototype.** The renderer works in the included lab. A
 modified copy of the native service boots with the renderer library loaded.
-**Live integration is currently blocked by native IPC signing validation**
-(`SkyIPCRequirement.Error.teamNotFound`). This is a renderer prototype and
+**Live integration is currently blocked by native IPC startup.** The ad-hoc
+experiment reported `SkyIPCRequirement.Error.teamNotFound`; a matching-team
+Apple development signing experiment also failed to connect. This is a renderer prototype and
 research experiment, not a working Codex cursor skin or an official plugin.
 
 The intended experience is a buddy that **walks along the agent's curved cursor
 path**, stops at the exact hotspot, and animates the click, with no gray arrow or
 glow showing. See the [next implementation brief](docs/next-steps.md).
 
-![Pip motion study rendered by the native Character Studio](docs/media/pip-motion-study.gif)
+![Pip motion study rendered by the native Character Studio](docs/media/pip-refined-motion.gif)
 
 The **Character Studio** now opens with **Pip**, a soft otter in a cobalt rain
 hood and orange boots, generated in ChatGPT through Brave. Its full character
-poses preserve the designed face, paws and footwear. It has a six-frame blink
-and a four-key-pose walking study, with no tether or procedural face drawn over
+poses preserve the designed face, paws and footwear. It has a matching side-facing six-frame blink
+and an eight-pose walking study, with no tether or procedural face drawn over
 the art. Size and stride are editable; complete animation packs can be imported
 and saved. This is the studio's controlled renderer, not live Codex integration.
 
-**Still a motion study.** Pip's direction is awaiting user feedback. The gait
-needs in-betweens, stronger leg separation and authored turn/settle poses. Left
+**Still a motion study.** Pip's direction is awaiting user feedback. Standing now preserves the travel direction. The gait still
+needs stronger leg separation and authored turn/settle poses. Left
 travel currently mirrors the right-facing artwork and its lighting. Sprout,
 Mochi and Orbit are retained as rejected art-direction fixtures, alongside the
 procedural presets. See the [art direction](docs/art-direction.md) and
-[review evidence](artwork/pip/walk-study/review.json).
+[review evidence](artwork/pip/walk-refinement/review.json).
 
 ## Additional runtime research
 
@@ -92,9 +93,11 @@ connections.** The service starts and the library loads, but the read-only
 `cua.getApp(...)` health check fails with `Sky Computer Use native pipe startup
 failed`; service logs report `SkyIPCRequirement.Error.teamNotFound`.
 Normal app permission grants alone have not been shown to resolve this.
+The [development-signing follow-up](docs/development-signing.md) records the
+matching-team attempt and its failed native inventory probe.
 
-**Apple Silicon only.** Currently gated to service version `26.913.1001067`,
-build `1001067`, with an exact executable SHA-256 in
+**Apple Silicon only.** Gated to the inspected service builds `26.913.1001067`
+and `26.924.1001281`, with exact executable SHA-256 entries in
 [`compatibility/macos-arm64.json`](compatibility/macos-arm64.json). That entry
 means inspected, not live-certified. Other binaries are rejected.
 
@@ -154,7 +157,7 @@ all generated copies are under `.build/`.
 | Stage and verify signed copy; original stays unchanged | Passed |
 | Load library inside copied native service; private socket starts | Passed |
 | Initialise official REPL through generated launcher | Passed |
-| Native app observation through the modified service | **Blocked: IPC signing validation** |
+| Native app observation through the modified service | **Blocked: native IPC startup** |
 | Character replaces cursor during real native CUA actions | **Not reached** |
 | Native hotspot accuracy, drag, multiple monitors, cancellation | **Not verified** |
 

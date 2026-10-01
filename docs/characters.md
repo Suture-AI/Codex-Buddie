@@ -22,6 +22,7 @@ the artwork. The renderer adds no generic eyes, legs or tether. See
     "hotspot": [128, 48],
     "height": 64,
     "mirrorWalk": false,
+    "directionalIdle": true,
     "clips": {
       "idle": [{ "image": "idle-00.png", "duration": 2.4 }],
       "walkRight": [{ "image": "walk-00.png", "duration": 0.125 }]
@@ -36,7 +37,7 @@ subject to the native view's available space. The hotspot lies inside the
 canvas. Pip's `(128,48)` lies within its hood in every supplied frame; it maps
 exactly to the native view's click coordinate. Mirroring uses this same pivot.
 
-`idle` is required. Optional clips are `walkRight`, `walkLeft`, `press` and
+`idle` is required. Optional clips are `idleLeft`, `walkRight`, `walkLeft`, `press` and
 `release`. Each clip is an array of PNG filenames and frame durations in seconds
 (1/120–30). At most 64 frames and 64 MB of decoded pixel artwork are accepted.
 Duplicate filenames share the loaded image. Files remain local and data-only.
@@ -47,11 +48,18 @@ the idle artwork visible. `mirrorWalk: true` explicitly allows the rightward
 clip to serve left travel when no `walkLeft` exists. Mirroring also reverses
 lighting and asymmetric details; Pip currently uses it only as a motion study.
 
+`directionalIdle: true` declares that idle faces the same direction as
+`walkRight`. After left travel, the renderer keeps that direction using
+`idleLeft` if supplied, otherwise a mirrored idle if `mirrorWalk` is enabled.
+It does not suddenly switch to a front-facing idle. The default is false for
+older/front-facing packs. This flag and the authored frames survive save/import.
+
 Press/release clips are explicit event-driven one-shots. Without them, the
 studio applies a small whole-character press response around the fixed hotspot.
 Reduced Motion holds the first pose. No interpolation or ghosted crossfade is
 applied between unrelated character images. Smoothness therefore depends on
-authored pose density and transitions; four keyframes are not a finished gait.
+authored pose density and transitions; a higher frame count alone does not prove
+correct alternating foot contacts or seamless turns.
 
 **Save a copy…** preserves every frame, its timing, size, stride and hotspot.
 The studio hides face/body sliders for complete art because those features are

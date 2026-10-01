@@ -15,8 +15,8 @@ proportions, curious expression, coherent soft toon shading, clear color groups,
 and smooth precise edges. Complete face, paws and footwear were generated
 together. Requested transparent background, no tether, text, scenery or shadow.
 
-Grounded blink and four-key-pose walk studies are now connected to the native
+Grounded side-facing blink and eight-pose walk studies are now connected to the native
 Character Studio through [Pip's version 2 pack](../../Characters/pip/). The
 renderer draws complete poses without generic eyes, oval feet or a tether.
-[See the rendered motion study](../../docs/media/pip-motion-study.gif).
+[See the rendered motion study](../../docs/media/pip-refined-motion.gif).
 Further gait/turn work and live Codex integration remain outstanding.
