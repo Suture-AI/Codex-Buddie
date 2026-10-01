@@ -1,0 +1,78 @@
+{
+  "source": "source.png",
+  "source_sha256": "1e21b3c2144b9b305af5ea6f62f5dd38b92f9eb9cb41f3d06f1d27fc9c209a31",
+  "parts": {
+    "head": {
+      "image": "parts/head.png",
+      "source_rect": [
+        40,
+        70,
+        600,
+        540
+      ]
+    },
+    "body": {
+      "image": "parts/body.png",
+      "source_rect": [
+        615,
+        180,
+        1050,
+        535
+      ]
+    },
+    "tail": {
+      "image": "parts/tail.png",
+      "source_rect": [
+        1098,
+        276,
+        1490,
+        500
+      ]
+    },
+    "paw": {
+      "image": "parts/paw.png",
+      "source_rect": [
+        195,
+        600,
+        389,
+        896
+      ]
+    },
+    "nearLeg": {
+      "image": "parts/nearLeg.png",
+      "source_rect": [
+        666,
+        582,
+        844,
+        746
+      ]
+    },
+    "farLeg": {
+      "image": "parts/farLeg.png",
+      "source_rect": [
+        1150,
+        596,
+        1325,
+        750
+      ]
+    },
+    "nearBoot": {
+      "image": "parts/nearBoot.png",
+      "source_rect": [
+        610,
+        698,
+        958,
+        949
+      ]
+    },
+    "farBoot": {
+      "image": "parts/farBoot.png",
+      "source_rect": [
+        1105,
+        704,
+        1425,
+        944
+      ]
+    }
+  }
+}

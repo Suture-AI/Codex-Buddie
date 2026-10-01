@@ -31,10 +31,16 @@ the [material schema](characters.md#outfit-colors), and
 [the asset review](../artwork/pip/walk-refinement/review.json) and the implemented
 [version 2 pack format](characters.md).
 
-Next art work: obtain feedback on Pip, add gait in-betweens and clearer leg
-separation, and author idle/turn/settle and leftward poses. Direction now survives stopping and Reduced Motion. Whole-pose
-transitions and mirrored lighting are explicit limitations. Do not mark the
-eight-frame study as smooth final animation.
+The [articulated follow-up](../artwork/pip/rig-study/README.md) now separates
+generated head, torso, tail, paws, upper legs and boots. It demonstrates
+continuous foot motion, stable blink textures and independent body/head
+proportions using the native motion core. It also exposed and fixed sliding on
+stop and airborne-foot jumps on reversal in that core. This is an offline art
+study, not yet a selectable Studio pack. Prioritize joint review and Cocoa/
+pack/UI integration of this route before generating more whole-pose in-betweens:
+the existing sheet repeats leading-foot relationships. Authored turns, leftward
+lighting and real interaction events remain open. Do not mark either study as
+smooth final animation or infer user approval of Pip.
 
 The studio also retains three earlier ChatGPT-generated body packs, independent
 animated faces/feet, distance-driven planted gait, continuous curved retargeting,

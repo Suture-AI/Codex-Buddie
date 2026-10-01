@@ -6,6 +6,7 @@ static const double pi = 3.14159265358979323846;
 static double clamp(double value, double low, double high) { return fmax(low, fmin(high, value)); }
 static double mix(double a, double b, double t) { return a + (b-a)*t; }
 static double ease(double t) { return t*t*(3-2*t); }
+static double settleEase(double t) { return t*t*t*(10+t*(-15+6*t)); }
 static BuddiePoint add(BuddiePoint a, BuddiePoint b) { return (BuddiePoint){a.x+b.x,a.y+b.y}; }
 static BuddiePoint sub(BuddiePoint a, BuddiePoint b) { return (BuddiePoint){a.x-b.x,a.y-b.y}; }
 static BuddiePoint mul(BuddiePoint a, double s) { return (BuddiePoint){a.x*s,a.y*s}; }
@@ -38,6 +39,7 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
         for (int i=0;i<2;i++) {
             s->foot[i]=(BuddiePoint){(i?1:-1)*rig.footSpacing,0};
             s->planted[i]=add(anchor,s->foot[i]); s->swingStart[i]=s->planted[i]; s->stance[i]=true;
+            s->settling[i]=false; s->swinging[i]=false; s->pose.footLift[i]=0; s->swingDistance[i]=0;
         }
         delta=(BuddiePoint){0,0}; distance=0; dt=1./60.;
         s->velocity=(BuddiePoint){0,0};
@@ -46,7 +48,8 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
     BuddiePoint raw=mul(delta,1/fmax(dt,.0001));
     s->velocity=lerp(s->velocity,raw,rate);
     s->speed=mix(s->speed,length(raw),rate);
-    bool traveling=distance>.015;
+    // A velocity threshold has the same meaning at 30, 60 and 120 Hz.
+    bool traveling=length(raw)>.9;
     if (traveling) {
         s->lastMotion=time;
         s->direction=mul(delta,1/distance);
@@ -54,27 +57,74 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
     }
     bool walking=traveling || (s->moving && time-s->lastMotion<.08);
     s->walkWeight=mix(s->walkWeight,walking?1:0,1-exp(-dt/(walking?.06:.14)));
+    if(!walking && !reduced) {
+        if(s->moving) for(int i=0;i<2;i++) { s->planted[i]=add(s->point,s->foot[i]); s->swinging[i]=false; }
+        if(!s->settling[0] && !s->settling[1]) {
+            int next=-1; double priority=0;
+            for(int i=0;i<2;i++) {
+                BuddiePoint base={(i?1:-1)*rig.footSpacing,0};
+                double distanceToRest=length(sub(base,s->foot[i]));
+                // Land an already lifted foot first; otherwise move the most
+                // displaced foot. The other contact stays fixed in world space.
+                double score=distanceToRest+(s->pose.footLift[i]>.05 ? 1000:0);
+                if((distanceToRest>.05 || s->pose.footLift[i]>.05) && score>priority) { next=i; priority=score; }
+            }
+            if(next>=0) {
+                s->settling[next]=true; s->settleAt[next]=time;
+                s->settleFrom[next]=add(anchor,s->foot[next]);
+                s->settleTo[next]=add(anchor,(BuddiePoint){(next?1:-1)*rig.footSpacing,0});
+                s->settleLift[next]=s->pose.footLift[next];
+                s->settleDuration[next]=.16+.12*clamp(length(sub(s->settleTo[next],s->settleFrom[next]))/rig.stride,0,1);
+            }
+        }
+    }
     for (int i=0;i<2;i++) {
         BuddiePoint base={(i?1:-1)*rig.footSpacing,0};
         double phase=fmod(s->phase+i*.5,1);
         bool stance=phase<.62;
-        if (walking && !reduced) {
-            if (!s->moving || (stance && !s->stance[i])) s->planted[i]=add(anchor,s->foot[i]);
-            if (!stance && s->stance[i]) s->swingStart[i]=add(anchor,s->foot[i]);
-            if (stance) {
+        if(reduced) {
+            s->settling[i]=false; s->swinging[i]=false; s->foot[i]=base; s->pose.footLift[i]=0;
+            s->planted[i]=add(anchor,base); stance=true;
+        } else if(s->settling[i]) {
+            // Finish this short landing even when travel resumes. A new stride
+            // then starts from the actual landing, not a stale swing origin.
+            double u=clamp((time-s->settleAt[i])/s->settleDuration[i],0,1);
+            s->foot[i]=sub(lerp(s->settleFrom[i],s->settleTo[i],settleEase(u)),anchor);
+            double lift=fmax(0,rig.footLift*.7-s->settleLift[i]);
+            s->pose.footLift[i]=s->settleLift[i]*(1-settleEase(u))+lift*pow(sin(pi*u),2);
+            stance=false;
+            if(u>=1) {
+                s->settling[i]=false; s->planted[i]=s->settleTo[i];
+                s->pose.footLift[i]=0; stance=true;
+            }
+        } else if (walking) {
+            if(!s->moving) s->stance[i]=true;
+            bool beginSwing=!s->swinging[i] && !stance && s->stance[i] && !s->swinging[1-i] && !s->settling[1-i];
+            if(beginSwing) {
+                s->swinging[i]=true; s->swingDistance[i]=0; s->swingStart[i]=s->planted[i];
+                // Commit this step's landing in world space. Reversing the
+                // cursor must not teleport an airborne foot to the other side.
+                BuddiePoint target=add(add(anchor,base),mul(s->direction,rig.stride*.69));
+                BuddiePoint reach=sub(target,s->swingStart[i]); double span=length(reach);
+                s->swingTarget[i]=add(s->swingStart[i],mul(reach,span>0 ? fmin(1,rig.stride*1.25/span):0));
+            }
+            if (!s->swinging[i]) {
                 // World-space contact remains fixed while the body advances.
                 s->foot[i]=sub(s->planted[i],anchor);
-                s->pose.footLift[i]=0;
+                s->pose.footLift[i]=0; stance=true;
             } else {
-                double u=(phase-.62)/.38;
-                BuddiePoint landing=add(add(anchor,base),mul(s->direction,rig.stride*.31));
-                s->foot[i]=sub(lerp(s->swingStart[i],landing,ease(u)),anchor);
-                s->pose.footLift[i]=sin(pi*u)*rig.footLift;
+                if(!beginSwing) s->swingDistance[i]+=distance;
+                // A restarted stride still gets its whole swing interval,
+                // instead of being squeezed into a tiny remaining phase.
+                double u=clamp(s->swingDistance[i]/(rig.stride*.38),0,1);
+                s->foot[i]=sub(lerp(s->swingStart[i],s->swingTarget[i],ease(u)),anchor);
+                s->pose.footLift[i]=pow(sin(pi*u),2)*rig.footLift;
+                stance=false;
+                if(u>=1) { s->swinging[i]=false; s->planted[i]=s->swingTarget[i]; s->pose.footLift[i]=0; stance=true; }
             }
         } else {
-            s->foot[i]=lerp(s->foot[i],base,reduced?1:1-exp(-dt/.1));
-            s->pose.footLift[i]=mix(s->pose.footLift[i],0,reduced?1:1-exp(-dt/.065));
-            s->planted[i]=add(anchor,s->foot[i]);
+            s->foot[i]=sub(s->planted[i],anchor);
+            s->pose.footLift[i]=0; stance=true;
         }
         s->stance[i]=stance;
         s->pose.feet[i]=s->foot[i];

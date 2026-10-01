@@ -1,0 +1,91 @@
+{
+  "status": "Articulated motion/customization study; Studio cutout integration and live CUA remain incomplete",
+  "source_inputs": [
+    {
+      "file": "Sources/BuddieMotion.c",
+      "sha256": "2dbe4b3d076fb581928537f8e772db8a453f7d7a1ad286b875505b2db34f5efd"
+    },
+    {
+      "file": "Sources/BuddieMotion.h",
+      "sha256": "b13f991b234366e24537bb35a57875101482e56a4248f4a5c8a039c4164fbb9b"
+    },
+    {
+      "file": "scripts/export-puppet-motion.c",
+      "sha256": "1ecd0ceeca4f0b73d58f8c5cc38e8d3d37940c80c4efe27333a3c0a043e7c4ec"
+    },
+    {
+      "file": "scripts/prepare-puppet-art.py",
+      "sha256": "a5269916d4f7a96fc1a56122b7e43caafe13ea361019a289e484737bdc1952e9"
+    },
+    {
+      "file": "scripts/puppet-study.py",
+      "sha256": "547fa4509e6330c32f7cdb27ff400141987ded4631fcc22fdcbec3bad4b1d616"
+    },
+    {
+      "file": "artwork/pip/rig-study/motion-trace.json",
+      "sha256": "39e46bdbb2410e22698e9a14c10aceb3611916c62cc9856dfb3bae8bd18c572c"
+    }
+  ],
+  "trace": {
+    "samples": 420,
+    "sample_rate_hz": 60,
+    "duration_seconds": 7,
+    "rig": {
+      "stride": 16,
+      "footSpacing": 6,
+      "footLift": 3
+    },
+    "path": "Controlled straight travel, hard stop, reversal, rest; not native CUA"
+  },
+  "checks": {
+    "motion_stop_resume_scenarios": 120,
+    "sample_rates_hz": [
+      30,
+      60,
+      120
+    ],
+    "rigs": [
+      [
+        26,
+        14,
+        6
+      ],
+      [
+        16,
+        6,
+        3
+      ]
+    ],
+    "grounded_contact_drift_tolerance": 1e-07,
+    "final_rest_tolerance_logical_units": 0.05,
+    "slow_travel_speed": 1.2,
+    "blink_alpha_unchanged": true,
+    "blink_pixels_outside_eye_mask_unchanged": true,
+    "build": "passed, warning-free",
+    "cocoa_self_test": "passed"
+  },
+  "boot_sole_pivots": {
+    "nearBoot": [
+      209,
+      238
+    ],
+    "farBoot": [
+      193,
+      218
+    ]
+  },
+  "artifacts": [
+    "docs/media/pip-articulated-study.gif",
+    "docs/media/pip-articulated-contact.png",
+    "docs/media/pip-articulated-proportions.png",
+    "artwork/pip/rig-study/chatgpt-blink.jpg"
+  ],
+  "limitations": [
+    "Offline Pillow renderer uses the native C motion trace; no new selectable pack yet",
+    "Instant mirror turn and reflected lighting remain",
+    "Shoulder overlap and leg deformation need further art review",
+    "No curved/high-speed/running visual certification",
+    "Native CUA integration and production cursor size unresolved",
+    "No user art-direction approval inferred"
+  ]
+}

@@ -15,6 +15,9 @@ typedef struct {
     bool initialized, pressed, moving, stance[2];
     double lastTime, lastMotion, phase, speed, walkWeight, releasedAt;
     BuddiePoint point, velocity, direction, planted[2], swingStart[2], foot[2];
+    bool settling[2], swinging[2];
+    double settleAt[2], settleDuration[2], settleLift[2], swingDistance[2];
+    BuddiePoint settleFrom[2], settleTo[2], swingTarget[2];
     BuddiePose pose;
 } BuddieMotion;
 

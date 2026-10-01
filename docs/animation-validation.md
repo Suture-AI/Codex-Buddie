@@ -129,3 +129,33 @@ reproducible and are not required inputs for the app.
 This improves appearance customization only. Leg ownership, authored turns and
 settles, native input events, production cursor sizing, and live service
 integration remain open. Body/face geometry is still baked into these PNGs.
+# Articulated movement follow-up
+
+The new cutout study combines ChatGPT-generated parts with actual
+`BuddieMotion.c` output. Its [README](../artwork/pip/rig-study/README.md) records
+reproduction commands, provenance, rendering scope and remaining quality gates.
+
+The core now keeps ground contacts fixed while sequentially lifting feet back
+to rest. Swing targets are committed in world space rather than jumping across
+the body on reversal. An interrupted/restarted swing gets its whole travel
+interval. Movement detection uses speed instead of a frame-dependent distance
+threshold. None of these operations changes the caller's cursor coordinate.
+
+Validation:
+
+- 120 stop/resume scenarios: 20 phases × 30/60/120 Hz × two rigs (including the
+  cutout study's actual settings). Grounded feet remain fixed; only one settles
+  at a time; the phase does not run while stopped; rest errors stay within 0.05
+  logical units; interrupted reversals have bounded foot displacement.
+- Slow 1.2 unit/sec travel advances the same gait phase at all three rates.
+- Reduced Motion and discontinuities clear swing/settle state and lifted feet.
+- Generated blink textures preserve the exact canonical alpha and every pixel
+  outside the reviewed eye mask; three head textures are used.
+- Motion/pack checks, warning-free build and Cocoa rendering self-test pass.
+
+The GIF is a 30 Hz sample of a 60 Hz native-core trace, composited offline using
+Pillow. It does not prove Cocoa cutout performance, the Studio's new-rig UI,
+curved/high-speed movement, authored turning or native CUA replacement. The
+default version-2 Pip still uses the earlier full-frame renderer. The core
+changes immediately apply to the older layered rig and are ready for cutout
+integration. The full user goal remains incomplete.

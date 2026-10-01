@@ -1,0 +1,44 @@
+{
+  "source": "artwork/pip/rig-study/blink/source.png",
+  "source_size": [
+    2172,
+    724
+  ],
+  "expected_count": 4,
+  "detected_count": 4,
+  "boxes": [
+    [
+      26,
+      135,
+      551,
+      589
+    ],
+    [
+      569,
+      135,
+      1096,
+      589
+    ],
+    [
+      1112,
+      135,
+      1641,
+      589
+    ],
+    [
+      1653,
+      135,
+      2172,
+      589
+    ]
+  ],
+  "shared_scale": 0.40831758034026466,
+  "canvas": [
+    256,
+    320
+  ],
+  "registration": "Centered by detected complete bounds; shared foot baseline. Review for drift; not suitable for jump poses.",
+  "height_ratio": 1.0,
+  "width_ratio": 1.0192678227360308,
+  "visual_review": "Use frames 0\u20132 for local eye patches. Frame 3 has whiskers near the right source boundary and is unused."
+}

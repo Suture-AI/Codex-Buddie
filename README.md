@@ -35,6 +35,13 @@ Mochi and Orbit are retained as rejected art-direction fixtures, alongside the
 procedural presets. See the [art direction](docs/art-direction.md) and
 [review evidence](artwork/pip/walk-refinement/review.json).
 
+The newer [articulated Pip study](artwork/pip/rig-study/README.md) tests generated
+cutout parts, continuous feet, blink textures and separate head/body proportions.
+Its motion trace uses the native core, including lifted settling and committed
+landings during reversals. It is not yet a selectable Studio pack. See the
+[motion study](docs/media/pip-articulated-study.gif) and
+[proportion comparison](docs/media/pip-articulated-proportions.png).
+
 ## Additional runtime research
 
 An independently tested [passive macOS overlay](experiments/passive-overlay/README.md)
