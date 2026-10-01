@@ -19,8 +19,9 @@ final class BuddieApp: NSObject, NSApplicationDelegate {
     private var activeID: UInt32?
     private var helperPIDs: Set<Int32> = []
     private var lastStatus = ""
-    private var preview: NSWindow?
-    private var clickCount = 0
+    private var studio: StudioController?
+    private var onboarding: OnboardingController?
+    private var permissionGranted = false
     private let started = ProcessInfo.processInfo.systemUptime
     private let trace = CommandLine.arguments.contains("--trace")
 
@@ -41,8 +42,11 @@ final class BuddieApp: NSObject, NSApplicationDelegate {
         status = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         status.button?.title = "◉ Buddie"
         status.button?.toolTip = "Codex Buddie — experimental cursor companion"
+        permissionGranted = CGPreflightScreenCaptureAccess()
         rebuildMenu()
-        if CommandLine.arguments.contains("--preview") { showPreview() }
+        let needsSetup = SetupProgress.shouldShow(completed: UserDefaults.standard.bool(forKey: OnboardingController.completionKey), permissionGranted: permissionGranted)
+        if CommandLine.arguments.contains("--onboarding") || needsSetup { showSetup() }
+        else { showPreview() }
         timer = Timer(timeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in self?.update() }
         RunLoop.main.add(timer!, forMode: .common)
         if let i = CommandLine.arguments.firstIndex(of: "--quit-after"), i + 1 < CommandLine.arguments.count,
@@ -58,84 +62,100 @@ final class BuddieApp: NSObject, NSApplicationDelegate {
         return value
     }
 
+    private var needsSetup: Bool {
+        SetupProgress.shouldShow(completed: UserDefaults.standard.bool(forKey: OnboardingController.completionKey), permissionGranted: permissionGranted)
+    }
+
     private func rebuildMenu() {
         let menu = NSMenu()
         statusLine = NSMenuItem(title: "Waiting for computer use…", action: nil, keyEquivalent: "")
         menu.addItem(statusLine)
         menu.addItem(.separator())
+        if needsSetup {
+            statusLine.title = "Screen access required to continue"
+            menu.addItem(item("Continue setup…", #selector(showSetup)))
+            menu.addItem(item("Quit Codex Buddie", #selector(quit)))
+            status.menu = menu
+            lastStatus = ""
+            return
+        }
         for name in ["Mochi", "Sprout", "Orbit"] {
             menu.addItem(item(name, #selector(selectPreset(_:)), checked: buddy.pack == nil && buddy.preset == name))
         }
         if let pack = buddy.pack { menu.addItem(NSMenuItem(title: "Custom: \(pack.manifest.name)", action: nil, keyEquivalent: "")) }
         menu.addItem(item("Load sprite pack…", #selector(loadPack)))
-        menu.addItem(item("Preview characters", #selector(showPreview)))
+        menu.addItem(item("Open Buddie Studio", #selector(showPreview)))
         menu.addItem(.separator())
         menu.addItem(item("Follow agent cursor", #selector(agentMode), checked: !followHuman))
         menu.addItem(item("Demo: follow my mouse", #selector(demoMode), checked: followHuman))
         menu.addItem(item("Cover gray cursor (experimental)", #selector(toggleCover), checked: cover))
         menu.addItem(item(paused ? "Resume" : "Pause", #selector(togglePause)))
-        menu.addItem(item("Grant Screen Recording access…", #selector(requestAccess)))
+        menu.addItem(item("Setup & permissions…", #selector(showSetup)))
         menu.addItem(.separator())
         menu.addItem(item("Quit Codex Buddie", #selector(quit)))
         status.menu = menu
         lastStatus = ""
+        syncStudio()
     }
 
     @objc private func selectPreset(_ sender: NSMenuItem) { buddy.preset = sender.title; buddy.pack = nil; rebuildMenu() }
-    @objc private func agentMode() { followHuman = false; resetTracking(); rebuildMenu() }
-    @objc private func demoMode() { followHuman = true; resetTracking(); rebuildMenu() }
+    @objc private func agentMode() {
+        followHuman = false; resetTracking(); rebuildMenu()
+        if !CGPreflightScreenCaptureAccess() { showSetup() }
+    }
+    @objc private func demoMode() {
+        guard !needsSetup else { showSetup(); return }
+        followHuman = true; resetTracking(); rebuildMenu()
+    }
     @objc private func toggleCover() { cover.toggle(); rebuildMenu() }
     @objc private func togglePause() { paused.toggle(); rebuildMenu() }
     @objc private func quit() { NSApp.terminate(nil) }
     @objc private func showPreview() {
-        if let preview { preview.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true); return }
-        let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 660, height: 360), styleMask: [.titled, .closable], backing: .buffered, defer: false)
-        window.title = "Codex Buddie Preview"
-        window.isReleasedWhenClosed = false
-        let content = NSView(frame: CGRect(x: 0, y: 0, width: 660, height: 360))
-        let title = NSTextField(labelWithString: "A little buddy for the work.")
-        title.font = .systemFont(ofSize: 26, weight: .semibold)
-        title.alignment = .center
-        title.frame = CGRect(x: 20, y: 292, width: 620, height: 38)
-        content.addSubview(title)
-        for (index, name) in ["Mochi", "Sprout", "Orbit"].enumerated() {
-            let x = CGFloat(40 + index * 210)
-            let view = BuddieView(frame: CGRect(x: x + 45, y: 173, width: 80, height: 80))
-            view.preset = name; view.reducedMotion = true
-            content.addSubview(view)
-            let button = NSButton(title: name, target: self, action: #selector(choosePreviewPreset(_:)))
-            button.bezelStyle = .rounded
-            button.frame = CGRect(x: x + 20, y: 133, width: 130, height: 32)
-            content.addSubview(button)
+        guard !needsSetup else { showSetup(); return }
+        if studio == nil {
+            let controller = StudioController()
+            controller.onSelect = { [weak self] name in
+                self?.buddy.preset = name; self?.buddy.pack = nil; self?.rebuildMenu()
+            }
+            controller.onAgent = { [weak self] in self?.agentMode() }
+            controller.onDemo = { [weak self] in self?.demoMode() }
+            controller.onPause = { [weak self] in self?.togglePause() }
+            controller.onCover = { [weak self] in self?.toggleCover() }
+            controller.onSetup = { [weak self] in self?.showSetup() }
+            controller.onLoad = { [weak self] in self?.loadPack() }
+            studio = controller
         }
-        let subtitle = NSTextField(labelWithString: "Agent mode follows the computer-use cursor. Demo mode follows your mouse.")
-        subtitle.font = .systemFont(ofSize: 12)
-        subtitle.textColor = .secondaryLabelColor
-        subtitle.alignment = .center
-        subtitle.frame = CGRect(x: 20, y: 83, width: 620, height: 22)
-        content.addSubview(subtitle)
-        let test = NSButton(title: "Click test: 0", target: self, action: #selector(clickTest(_:)))
-        test.bezelStyle = .rounded
-        test.frame = CGRect(x: 240, y: 30, width: 180, height: 34)
-        content.addSubview(test)
-        window.contentView = content
-        window.center(); window.makeKeyAndOrderFront(nil)
-        preview = window
-        NSApp.activate(ignoringOtherApps: true)
+        syncStudio()
+        studio?.present()
     }
-    @objc private func choosePreviewPreset(_ sender: NSButton) {
-        buddy.preset = sender.title; buddy.pack = nil; rebuildMenu()
+    private func syncStudio() {
+        studio?.refresh(preset: buddy.preset, pack: buddy.pack, demo: followHuman, paused: paused,
+                        cover: cover, permission: permissionGranted, status: lastStatus)
     }
-    @objc private func clickTest(_ sender: NSButton) {
-        clickCount += 1; sender.title = "Click test: \(clickCount)"
-        if trace { print("Preview click received: \(clickCount)"); fflush(stdout) }
-    }
-    @objc private func requestAccess() {
-        if !CGRequestScreenCaptureAccess() {
-            NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")!)
+    @objc private func showSetup() {
+        if onboarding == nil {
+            let setup = OnboardingController()
+            setup.onPermissionChange = { [weak self] granted in
+                guard let self else { return }
+                let changed = self.permissionGranted != granted
+                self.permissionGranted = granted
+                if changed { self.rebuildMenu() }
+                self.syncStudio()
+            }
+            setup.onFinish = { [weak self] in self?.agentMode(); self?.showPreview() }
+            onboarding = setup
         }
+        onboarding?.present()
+    }
+    func applicationDidBecomeActive(_ notification: Notification) {
+        let granted = CGPreflightScreenCaptureAccess()
+        let changed = granted != permissionGranted
+        permissionGranted = granted
+        if changed { rebuildMenu() }
+        onboarding?.refreshPermission(); syncStudio()
     }
     @objc private func loadPack() {
+        guard !needsSetup else { showSetup(); return }
         let picker = NSOpenPanel()
         picker.allowedContentTypes = [.json]
         picker.message = "Choose a pack.json file. Its PNG stays in the same folder."
@@ -150,6 +170,7 @@ final class BuddieApp: NSObject, NSApplicationDelegate {
     private func setStatus(_ text: String) {
         guard text != lastStatus else { return }
         lastStatus = text; statusLine.title = text
+        syncStudio()
         if trace { print(text); fflush(stdout) }
     }
 
@@ -176,6 +197,21 @@ final class BuddieApp: NSObject, NSApplicationDelegate {
     private func update() {
         let now = ProcessInfo.processInfo.systemUptime
         defer { tick += 1 }
+        if tick % 30 == 0 {
+            let previousPermission = permissionGranted
+            permissionGranted = CGPreflightScreenCaptureAccess()
+            if previousPermission != permissionGranted { rebuildMenu() }
+            if onboarding?.window?.isVisible == true { onboarding?.refreshPermission() }
+            syncStudio()
+        }
+        if needsSetup {
+            panel.orderOut(nil)
+            if studio?.window?.isVisible == true { studio?.close() }
+            resetTracking()
+            setStatus("Screen access required — complete setup to continue")
+            if onboarding?.window?.isVisible != true { showSetup() }
+            return
+        }
         if paused { panel.orderOut(nil); setStatus("Paused"); return }
         let point: CGPoint
         if followHuman {
@@ -187,7 +223,7 @@ final class BuddieApp: NSObject, NSApplicationDelegate {
             if tick % 2 == 0 { source = tracker.update(samples(), now: now) }
             guard let sample = source else {
                 panel.orderOut(nil); lastPoint = nil
-                setStatus(CGPreflightScreenCaptureAccess() ? "Waiting for agent cursor…" : "Agent mode may need Screen Recording access")
+                setStatus(permissionGranted ? "Waiting for agent cursor…" : "Screen access needed — open Setup & permissions")
                 return
             }
             let primaryHeight = CGFloat(CGDisplayBounds(CGMainDisplayID()).height)
@@ -197,6 +233,7 @@ final class BuddieApp: NSObject, NSApplicationDelegate {
                 if trace { print("Tracking cursor window \(sample.id); bounds \(sample.bounds)"); fflush(stdout) }
             }
             setStatus("Following agent cursor")
+            onboarding?.observeCursor()
         }
         if let previous = lastPoint, hypot(point.x - previous.x, point.y - previous.y) > 0.5 {
             lastMotion = now

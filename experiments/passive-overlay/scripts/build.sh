@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 APP="build/Codex Buddie.app"
 mkdir -p "$APP/Contents/MacOS"
-xcrun swiftc -O -target "$(uname -m)-apple-macosx14.0" Sources/BuddieCore.swift Sources/BuddieView.swift Sources/main.swift \
+xcrun swiftc -O -target "$(uname -m)-apple-macosx14.0" Sources/BuddieCore.swift Sources/BuddieView.swift Sources/SetupProgress.swift Sources/Onboarding.swift Sources/Theme.swift Sources/Studio.swift Sources/main.swift \
   -o "$APP/Contents/MacOS/CodexBuddie" -framework AppKit -framework CoreGraphics -framework ImageIO
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>

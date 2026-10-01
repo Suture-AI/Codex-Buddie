@@ -30,10 +30,35 @@ Select **◉ Buddie** in the menu bar:
 - **Demo: follow my mouse:** preview the character using your physical pointer.
 - **Cover gray cursor (experimental):** center the character over the cursor window instead of beside it. Coverage is approximate and may lag.
 - **Load sprite pack…:** choose a `pack.json`; see [sprite packs](docs/sprite-packs.md).
-- **Preview characters:** open the character picker and a harmless click-test button.
+- **Open Buddie Studio:** open the character gallery, live preview, cursor controls, and click test.
 - **Pause / Quit:** hide or stop the companion immediately.
+- **Setup & permissions…:** reopen the permission walkthrough at any time.
 
-Agent mode may require Screen Recording permission to read cursor-window titles. The menu includes a permission action. Restart the app after granting access if tracking remains unavailable. The app reads window metadata; it does not record screen pixels, keyboard input, or conversations, and makes no network requests. It does not request Accessibility access or execute computer-use actions itself.
+### First-launch setup
+
+On first launch, Buddie explains why it needs screen access and walks you through
+enabling **Codex Buddie** in **System Settings → Privacy & Security → Screen &
+System Audio Recording** (called **Screen Recording** on older macOS versions).
+The macOS permission prompt appears only when you click **Allow screen access**.
+
+Use **Open System Settings** to reach that page, and **Check again** after changing
+access. The walkthrough also checks automatically while open and when you return
+to the app. If Buddie is missing from the list, request access first, or use the
+Settings **+** button; **Show app in Finder** locates the exact copy you launched.
+If macOS asks you to quit and reopen, follow that prompt, or use **Restart Buddie**.
+
+The last step separately shows whether permission is enabled and whether a real
+agent cursor has been detected. Start a native computer-use task in Codex to test
+tracking. You can finish setup while waiting for a cursor. Completed setup stays
+dismissed on future launches unless access is missing or revoked. Screen access
+is mandatory: Studio, mouse demo, and the overlay stay locked until access is
+granted and setup is finished. Revoking access hides the overlay and returns to setup.
+
+Launch with `--onboarding` to reopen setup for testing. `--demo` still starts the
+physical-mouse demo after required setup has been completed. Codex manages its own computer-use permissions;
+Buddie does not request Accessibility access for itself. The app reads window
+metadata; it does not record screen pixels or audio, read keyboard input or
+conversations, or make network requests.
 
 For a source installation into `~/Applications`, run `bash scripts/install.sh`. That script builds and opens the app and refuses to overwrite an existing installation. Quit the app and remove its `.app` bundle to uninstall. There is no background service or login item.
 
@@ -68,7 +93,9 @@ No npm packages, model subscription, or API key are required for the character a
 | --- | --- |
 | `Sources/BuddieCore.swift` | Cursor selection, coordinate conversion, sprite validation and decoding |
 | `Sources/BuddieView.swift` | Original character renderer |
-| `Sources/main.swift` | Menu bar, native overlay, cursor-window adapter and preview |
+| `Sources/main.swift` | Menu bar, native overlay, cursor-window adapter and setup gate |
+| `Sources/Studio.swift`, `Sources/Theme.swift` | Character studio, shared palette and controls |
+| `Sources/Onboarding.swift`, `Sources/SetupProgress.swift` | Required permission walkthrough and readiness state |
 | `Tests/CoreTests.swift` | Behavioral checks for tracking and sprite loading |
 | `tools/inspect-runtime.py` | Read-only, version-specific implementation fingerprint |
 | `docs/` | Research, evidence, sprite format and validation |

@@ -7,6 +7,7 @@ final class BuddiePanel: NSPanel {
 
 final class BuddieView: NSView {
     override var isOpaque: Bool { false }
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
     var preset = "Mochi"
     var pack: SpritePack?
     var moving = false
