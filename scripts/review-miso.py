@@ -83,7 +83,7 @@ def main():
                           "customization": {"suit": "#7C9A80", "torsoWidth": 1.12, "headScale": 0.93},
                           "observed": ["walking with travel eyes", "release sparkle", "live suit and proportion changes", "reset to original palette/proportions"],
                           "screenshot": "docs/media/miso-live.png", "screenshot_processing": "Full CUA app-window screenshot, downsampled to 960 px wide and saved as PNG"},
-              "limitations": ["Native helper IPC and true cursor replacement remain unfinished", "Live collection restart verification is pending; automated persistence checks pass", "Miso design approval is pending", "Arms retain screen-side artwork through the torso turn", "ChatGPT did not expose the image model identifier"],
+              "limitations": ["Native helper IPC and true cursor replacement remain unfinished", "Live collection restart verification is pending; automated persistence checks pass", "Miso design approval is pending", "Broader body types remain unfinished", "ChatGPT did not expose the image model identifier"],
               "sha256": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(files)}}
     (ROOT / "docs/evidence/miso-studio.json").write_text(json.dumps(report, indent=2) + "\n")
     print("Saved Miso's Cocoa customization, turn, gait and face reviews.")

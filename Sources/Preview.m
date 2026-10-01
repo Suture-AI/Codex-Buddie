@@ -632,7 +632,7 @@ static void AssertConnectedPixels(NSBitmapImageRep *rep) {
     for(NSUInteger y=0;y<h;y++) for(NSUInteger x=0;x<w;x++) {
         [rep getPixel:pixel atX:x y:y]; if(pixel[3]) { bits[y*w+x]=1; start=y*w+x; total++; }
     }
-    NSCAssert(total>0,@"Calf must render");
+    NSCAssert(total>0,@"Articulated part must render");
     NSMutableData *queue=[NSMutableData dataWithLength:w*h*sizeof(NSUInteger)]; NSUInteger *q=queue.mutableBytes,read=0,write=0;
     q[write++]=start; bits[start]=0;
     while(read<write) {
@@ -642,7 +642,7 @@ static void AssertConnectedPixels(NSBitmapImageRep *rep) {
             NSUInteger next=v+offsets[d]; if(bits[next]) { bits[next]=0; q[write++]=next; }
         }
     }
-    NSCAssert(total==write,@"Folded legs remain one four-connected pixel shape");
+    NSCAssert(total==write,@"The articulated part remains one four-connected pixel shape");
 }
 static void AssertViewFits(BuddieView *view) {
     // Render beyond the view's clipping rectangle so out-of-bounds pixels are
@@ -894,6 +894,55 @@ static void TestPuppet(BuddieView *view) {
     puts("PASS: Miso collection entry; 20 directional Cocoa faces preserve all non-eye pixels; tail moves locally; Reduced Motion stays still");
 }
 
+static void TestArms(void) {
+    NSUInteger samples=0;
+    for(NSString *identifier in @[@"bit",@"miso"]) {
+        BuddieCharacter *original=ArticulatedNamed(identifier);
+        BuddiePose neutral={0}; neutral.squash=1; neutral.feet[0].x=-5; neutral.feet[1].x=5;
+        NSBitmapImageRep *before=PuppetImage(original,neutral,.5-1e-6,NO),*after=PuppetImage(original,neutral,.5+1e-6,YES);
+        NSCAssert([[before representationUsingType:NSBitmapImageFileTypePNG properties:@{}] isEqual:[after representationUsingType:NSBitmapImageFileTypePNG properties:@{}]],@"Crossing the front view cannot pop arm depth or mirror the pose");
+        for(NSString *role in @[@"pawNear",@"pawFar"]) {
+            BuddieCharacter *only=[original copy]; NSMutableDictionary *clips=[NSMutableDictionary new];
+            for(NSString *name in original.clips) {
+                BuddieSpriteClip *source=original.clips[name];
+                if([name hasPrefix:role]) clips[name]=source;
+                else {
+                    BuddieSpriteClip *blank=[BuddieSpriteClip new]; blank.durations=source.durations;
+                    NSMutableArray *frames=[NSMutableArray new];
+                    for(NSImage *frame in source.frames) [frames addObject:[NSImage imageWithSize:frame.size flipped:YES drawingHandler:^BOOL(NSRect r) { return YES; }]];
+                    blank.frames=frames; clips[name]=blank;
+                }
+            }
+            only.clips=clips;
+            for(int variant=0;variant<3;variant++) {
+                only.armLength=(double[]){.7,1,1.3}[variant];
+                only.torsoWidth=(double[]){.85,1,1.22}[variant];
+                only.torsoHeight=(double[]){.85,1,1.18}[variant];
+                NSArray *anchor=only.puppetParts[role][@"anchor"],*origin=only.puppetParts[@"body"][@"anchor"];
+                int x=round([origin[0] doubleValue]+([anchor[0] doubleValue]-[origin[0] doubleValue])*only.torsoWidth);
+                int y=round([origin[1] doubleValue]+([anchor[1] doubleValue]-[origin[1] doubleValue])*only.torsoHeight);
+                for(int direction=0;direction<5;direction++) {
+                    NSMutableSet *swings=[NSMutableSet new];
+                    for(int step=0;step<4;step++) {
+                        BuddiePose pose=neutral; pose.walkWeight=1; pose.phase=step/4.;
+                        NSBitmapImageRep *rep=PuppetImage(only,pose,direction/4.,NO);
+                        NSUInteger pixel[4]; [rep getPixel:pixel atX:x*4+2 y:y*4+2];
+                        NSCAssert(pixel[3]>0,@"The shoulder stays attached at all arm lengths, torso proportions, directions and swing phases");
+                        AssertConnectedPixels(rep); samples++;
+                        NSData *pixels=[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}]; [swings addObject:pixels];
+                        NSCAssert([pixels isEqual:[PuppetImage(only,pose,direction/4.,YES) representationUsingType:NSBitmapImageFileTypePNG properties:@{}]],@"Reversing direction preserves the current arm perspective and swing");
+                    }
+                    if(variant==1 && (direction==0 || direction==4)) NSCAssert(swings.count==3,@"The hand visibly swings both ways around a fixed shoulder");
+                    if(direction==2) NSCAssert(swings.count==1,@"A front-facing forward/back swing does not wave sideways");
+                }
+            }
+        }
+        NSData *still=[PuppetImageAtTime(original,neutral,1,YES,0,YES) representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+        NSCAssert([still isEqual:[PuppetImageAtTime(original,neutral,1,YES,8,YES) representationUsingType:NSBitmapImageFileTypePNG properties:@{}]],@"Reduced Motion preserves the left-facing arms without ambient movement");
+    }
+    printf("PASS: %lu connected arm rasters with fixed shoulders across proportions, perspectives and swing; stable front depth, reversal and Reduced Motion\n",(unsigned long)samples);
+}
+
 static void TestCollection(void) {
     Delegate *studio=[Delegate new]; studio.collection=[NSMutableArray new];
     studio.window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,960,700) styleMask:0 backing:NSBackingStoreBuffered defer:NO];
@@ -1009,6 +1058,7 @@ static int SelfTest(void) {
     puts("PASS: software + fog replacement, unchanged geometry, detached artwork, repeated assignment, unrelated windows, unknown renderer fallback");
     puts("PASS: complete sprite drawing, timed blink, Reduced Motion stability, stopped facing, unchanged sprite hotspot");
     TestPuppet(sprite);
+    TestArms();
     TestCollection();
     TestStudioPersistence();
     TestAnatomy();

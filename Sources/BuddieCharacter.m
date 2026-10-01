@@ -353,9 +353,12 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
         if(![definitions isKindOfClass:NSDictionary.class]) return Fail(error,@"Expected a clips or parts object.");
         if(puppet) {
             NSSet *keys=[NSSet setWithArray:definitions.allKeys];
-            if(sprites[@"clips"] || ![[NSSet setWithArray:roles] isSubsetOfSet:keys] || ![keys isSubsetOfSet:[NSSet setWithArray:[roles arrayByAddingObjectsFromArray:@[@"headTurn",@"headLeft",@"bodyTurn",@"bodyLeft",@"tailTurn",@"tailLeft",@"headFocus",@"headPress",@"headRelease",@"headHalf",@"headClosed"]]]]) return Fail(error,@"Articulated packs need nine body parts, with optional head/body/tail directions and expression heads.");
+            if(sprites[@"clips"] || ![[NSSet setWithArray:roles] isSubsetOfSet:keys] || ![keys isSubsetOfSet:[NSSet setWithArray:[roles arrayByAddingObjectsFromArray:@[@"headTurn",@"headLeft",@"bodyTurn",@"bodyLeft",@"tailTurn",@"tailLeft",@"pawNearTurn",@"pawNearLeft",@"pawFarTurn",@"pawFarLeft",@"headFocus",@"headPress",@"headRelease",@"headHalf",@"headClosed"]]]]) return Fail(error,@"Articulated packs need nine body parts, with optional head/body/tail/arm directions and expression heads.");
             if((definitions[@"bodyTurn"]!=nil)!=(definitions[@"bodyLeft"]!=nil)) return Fail(error,@"Provide bodyTurn and bodyLeft together.");
             if((definitions[@"tailTurn"]!=nil)!=(definitions[@"tailLeft"]!=nil) || (definitions[@"tailTurn"] && !definitions[@"bodyTurn"])) return Fail(error,@"Provide tailTurn and tailLeft together with bodyTurn and bodyLeft.");
+            NSUInteger armDirections=0;
+            for(NSString *role in @[@"pawNearTurn",@"pawNearLeft",@"pawFarTurn",@"pawFarLeft"]) if(definitions[role]) armDirections++;
+            if(armDirections && (armDirections!=4 || !definitions[@"bodyTurn"])) return Fail(error,@"Provide all four arm direction tracks together with bodyTurn and bodyLeft.");
             if(!NumberInRange(sprites[@"motionScale"],.25,8)) return Fail(error,@"motionScale must be between 0.25 and 8 canvas pixels per motion unit.");
             c.puppetMotionScale=[sprites[@"motionScale"] doubleValue];
             NSDictionary *proportions=sprites[@"proportions"] ?: @{};
@@ -376,9 +379,10 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
                 if(![part isKindOfClass:NSDictionary.class] || !Pair(part[@"pivot"],0,1024) || !Pair(part[@"anchor"],0,1024) ||
                    [part[@"anchor"][0] doubleValue]>=c.spriteCanvas.width || [part[@"anchor"][1] doubleValue]>=c.spriteCanvas.height ||
                    !NumberInRange(part[@"scale"],.01,4)) return Fail(error,@"Each part needs a pivot, an anchor inside the canvas, and a scale between 0.01 and 4.");
-                BOOL leg=[name hasPrefix:@"leg"];
+                BOOL leg=[name hasPrefix:@"leg"],arm=[name hasPrefix:@"paw"];
                 if(leg && (!Pair(part[@"cuff"],-1024,1024) || !NumberInRange(part[@"span"],1,1024))) return Fail(error,@"Leg parts need a cuff offset and a positive neutral span.");
-                for(NSString *key in part) if(![@[@"pivot",@"anchor",@"scale",@"frames"] containsObject:key] && !(leg && [@[@"cuff",@"span"] containsObject:key])) return Fail(error,@"Unknown articulated part setting.");
+                if(arm && part[@"span"] && !NumberInRange(part[@"span"],1,1024)) return Fail(error,@"Arm spans must be between 1 and 1024 displayed pixels.");
+                for(NSString *key in part) if(![@[@"pivot",@"anchor",@"scale",@"frames"] containsObject:key] && !(leg && [@[@"cuff",@"span"] containsObject:key]) && !(arm && [key isEqual:@"span"])) return Fail(error,@"Unknown articulated part setting.");
                 NSMutableDictionary *metadata=[part mutableCopy]; [metadata removeObjectForKey:@"frames"]; parts[name]=metadata;
             }
             NSArray *frames=puppet ? part[@"frames"]:definitions[name];
@@ -391,6 +395,7 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
                 if(puppet) {
                     if(image.size.width>1024 || image.size.height>1024 || (images.count && !NSEqualSizes(image.size,((NSImage *)images[0]).size))) return Fail(error,@"Part frames must share dimensions no larger than 1024 pixels.");
                     if([part[@"pivot"][0] doubleValue]>=image.size.width || [part[@"pivot"][1] doubleValue]>=image.size.height) return Fail(error,@"Part pivots must lie inside their artwork.");
+                    if([name hasPrefix:@"paw"] && part[@"span"] && [part[@"pivot"][1] doubleValue]+[part[@"span"] doubleValue]/[part[@"scale"] doubleValue]>image.size.height) return Fail(error,@"The complete arm span must fit below its shoulder pivot inside the artwork.");
                 } else if(!NSEqualSizes(image.size,c.spriteCanvas)) return Fail(error,@"Every frame must match the shared sprite canvas.");
                 [images addObject:image]; [durations addObject:frame[@"duration"]];
                 if(materials.count) {
@@ -421,6 +426,14 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
                ![parts[@"tail"] isEqual:parts[@"tailTurn"]] || ![parts[@"tail"] isEqual:parts[@"tailLeft"]] ||
                !NSEqualSizes(tail.frames[0].size,turn.frames[0].size) || !NSEqualSizes(tail.frames[0].size,left.frames[0].size))
                 return Fail(error,@"Tail directions must share tail geometry and image size; tailTurn timings must match bodyTurn.");
+        }
+        if(clips[@"pawNearTurn"]) for(NSString *role in @[@"pawNear",@"pawFar"]) {
+            NSString *turnName=[role stringByAppendingString:@"Turn"],*leftName=[role stringByAppendingString:@"Left"];
+            BuddieSpriteClip *base=clips[role],*turn=clips[turnName],*left=clips[leftName];
+            if(!parts[role][@"span"] || ![turn.durations isEqual:((BuddieSpriteClip *)clips[@"bodyTurn"]).durations] ||
+               ![parts[role] isEqual:parts[turnName]] || ![parts[role] isEqual:parts[leftName]] ||
+               !NSEqualSizes(base.frames[0].size,turn.frames[0].size) || !NSEqualSizes(base.frames[0].size,left.frames[0].size))
+                return Fail(error,@"Arm directions need a span and shared shoulder geometry/image size; turn timings must match bodyTurn.");
         }
         c.clips=clips;
         c.puppetParts=parts;

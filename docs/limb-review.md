@@ -29,6 +29,7 @@ physical limbs and Miso's tail retain screen-side attachments during torso turns
 Those are remaining motion findings, not final-quality approvals.
 The subsequent [tail review](tail-review.md) resolves Miso's tail finding;
 these original anatomy media and their source-pinned evidence are retained.
+The later [arm review](arms-review.md) adds directional arms and fixed shoulders.
 
 Interruptibility and timing: stance changes are handled by the existing step
 planner. Tests cover 288 combinations of anatomy, size and 30/60/120 Hz, with

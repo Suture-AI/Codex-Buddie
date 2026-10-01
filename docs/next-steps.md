@@ -61,8 +61,8 @@ That evidence predates the library, limb-control and tail updates; subsequent
 Studio lookup again returned `cgWindowNotFound`. This is separate from
 the modified Codex helper.
 
-[Miso](../artwork/miso/README.md) is now bundled in the collection: 20 parts,
-68 frames, three independent material masks, authored head/torso/tail turns,
+[Miso](../artwork/miso/README.md) is now bundled in the collection: 24 parts,
+80 frames, three independent material masks, authored head/torso/tail/arm turns,
 localized expressions and a small tail flex. The first head strip was rejected
 for mirrored lighting, then corrected in ChatGPT. Sources, exact prompts and
 provenance are retained. Review [customization](media/miso-customization.png),
@@ -111,7 +111,18 @@ retaining the 64 MB decoded-art limit; version 2 still permits 64 frames.
 See [the turn](media/miso-tail-turn.gif), [gait](media/miso-tail-gait.gif),
 [review](tail-review.md) and [source-pinned checks](evidence/miso-tail.json).
 
-Next refine directional arm artwork and non-pixel knee articulation.
+Directional arms are now authored for Bit and Miso. Each has ten generated arm
+views registered to stable shoulders. Pixel rows swing about the shoulder,
+instead of shifting the entire arm; projection narrows through front, with
+draw depth changing around the torso. 240 raster checks cover both arms, all
+five directions, three proportions and four swing phases. Mid-front depth,
+interruptions, Reduced Motion and portable span/direction metadata pass.
+See [the review](arms-review.md), [turns](media/arms-turn-sequence.png) and
+[source-pinned evidence](evidence/directional-arms.json). Miso's generation
+follow-up retained mirrored sleeve glints; 14 color-only pixel retouches are
+recorded explicitly, preserving alpha and mittens.
+
+Next refine head/antenna perspective and non-pixel knee articulation.
 Live Studio interaction/restart, native integration and production cursor size
 remain unresolved gates. The broader anatomy goal still includes more than
 the current biped rig and scalar controls.

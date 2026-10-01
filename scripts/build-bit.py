@@ -11,6 +11,7 @@ from collections import Counter
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+from pixel_parts import arm_sheet, install_arms
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "artwork/bit"
@@ -163,6 +164,8 @@ def main():
     images["bodyLeft"] = images["body-turn-4"].copy()
     parts["bodyLeft"] = dict(parts["body"],frames=[frame("bodyLeft")])
     parts["bodyTurn"] = dict(parts["body"],frames=[frame(f"body-turn-{i}",.045) for i in range(5)])
+    arms, arm_geometry = arm_sheet(ART / "arm-turn-source.png", colors)
+    install_arms(images, parts, arms, [[34, 51], [50, 51]], .045)
     for name, image in images.items():
         image.save(PACK / (name+".png"))
         mask = Image.new("RGBA", image.size, (0, 0, 0, 255))
@@ -185,6 +188,7 @@ def main():
                   "turn_source": "artwork/bit/turn-source.png", "turn_source_sha256": hashlib.sha256((ART / "turn-source.png").read_bytes()).hexdigest(),
                   "turn_geometry": {"source_boxes":boxes,"shared_scale":scale,"source_baseline":baseline,"target_neck":[32,42],"source_collar_rows":collar_starts,"retained_collar_rows":1},
                   "body_turn": {"source":"artwork/bit/body-turn-source.png","sha256":hashlib.sha256((ART/"body-turn-source.png").read_bytes()).hexdigest(),"trimmed_boxes":body_boxes,"shared_scale":body_scale,"target_top":42,"height":11},
+                  "arm_turn": {"source": "artwork/bit/arm-turn-source.png", "sha256": hashlib.sha256((ART/"arm-turn-source.png").read_bytes()).hexdigest(), **arm_geometry},
                   "status": "User approved Bit's visual direction. Compact collar and coordinated head/torso turns; final animation polish remains pending."}
     (PACK / "provenance.json").write_text(json.dumps(provenance, indent=2)+"\n")
     print(json.dumps({"eyes":eye_boxes,"colors":len(set(base.getpixel((x,y))[:3] for y in range(64) for x in range(64) if base.getpixel((x,y))[3]))}))

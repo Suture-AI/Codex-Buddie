@@ -6,6 +6,14 @@
   "requested_model": "GPT Image 2.5 if available",
   "verified_model": null,
   "reference": "User supplied blue retro Codex pet screenshot. Browser upload was blocked by extension file-URL access; its visual direction was described in the prompt.",
-  "status": "Original concept source; current animated implementation is Characters/bit, with user approval pending.",
-  "processing": "See scripts/build-bit.py and Characters/bit/provenance.json for canonical pixels, cutouts, palette and turn processing."
+  "status": "User approved Bit visual direction and requested the completed short collar. The current 66-frame rig adds directional arms; full motion and native integration remain unfinished.",
+  "processing": "See scripts/build-bit.py and Characters/bit/provenance.json for canonical pixels, cutouts, palette and turn processing.",
+  "generated_sources": {
+    "arm-turn-source.png": "496bbff9cd1be87332316706fec598c66abb523c7f2081077593f1d590f2e3c7",
+    "arm-turn-alternative.png": "1af3825d5ea574bba238b2b81ebd1dfb68554308f081b49a7c454416d96c9c97"
+  },
+  "prompts": [
+    "artwork/bit/arm-prompts.md"
+  ],
+  "arm_alternatives": "One prompt returned two images; first selected for simpler mittens and consistent lighting. The second is retained but excluded."
 }

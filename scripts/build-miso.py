@@ -6,6 +6,7 @@ from collections import Counter
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+from pixel_parts import arm_sheet, install_arms
 
 ROOT = Path(__file__).resolve().parents[1]
 ART, PACK = ROOT / "artwork/miso", ROOT / "Characters/miso"
@@ -163,6 +164,28 @@ def main():
     parts["body"]["frames"] = [frame("body-turn-0")]
     parts["bodyLeft"] = dict(parts["body"], frames=[frame("body-turn-4")])
     parts["bodyTurn"] = dict(parts["body"], frames=[frame(f"body-turn-{i}", .055) for i in range(5)])
+    arms, arm_geometry = arm_sheet(ART / "arm-turn-source.png", COLORS)
+    # The lighting follow-up retained mirrored sleeve glints. Retouch only
+    # those tiny highlight clusters after quantization, preserving alpha and
+    # all cream mitten pixels. Record every changed pixel for provenance.
+    arm_edits = []
+    coral, glints = set(RGB[8:12] + [RGB[14]]), set([RGB[11], RGB[14]])
+    for index in (3, 4, 8, 9):
+        im = arms[index]
+        for y in range(44, 48):
+            xs = [x for x in range(64) if im.getpixel((x, y))[3] and im.getpixel((x, y))[:3] in coral]
+            highlights = [im.getpixel((x, y)) for x in xs if im.getpixel((x, y))[:3] in glints]
+            before = {x: im.getpixel((x, y)) for x in xs}
+            for x in xs:
+                if before[x][:3] in glints:
+                    im.putpixel((x, y), (*RGB[10], 255))
+            for x, color in zip(xs, highlights):
+                im.putpixel((x, y), color)
+            for x in xs:
+                if before[x] != im.getpixel((x, y)):
+                    arm_edits.append({"frame": index, "pixel": [x, y], "before": before[x], "after": im.getpixel((x, y))})
+    arm_geometry["highlight_edits"] = arm_edits
+    install_arms(images, parts, arms, [[33, 51], [51, 51]], .055)
     used = {f["image"][:-4] for p in parts.values() for f in p["frames"]}
     for name in sorted(used):
         im = images[name]; im.save(PACK / (name + ".png"))
@@ -180,10 +203,10 @@ def main():
                                          {"id": "suit", "name": "Coral suit", "channel": 1, "base": "#FF8068"},
                                          {"id": "face", "name": "Screen lights", "channel": 2, "base": "#B4F0B9"}], "parts": parts}}
     (PACK / "buddy.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    sources = [ART / name for name in ("concept-source.png", "turn-source.png", "body-turn-source.png", "tail-turn-source.png")]
+    sources = [ART / name for name in ("concept-source.png", "turn-source.png", "body-turn-source.png", "tail-turn-source.png", "arm-turn-source.png")]
     provenance = {"sources": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources},
                   "requested_model": "GPT Image 2.5 if available", "verified_model": None, "builder": "scripts/build-miso.py",
-                  "source_bounds": bounds, "concept_cutouts": definitions, "head_geometry": head_geometry, "body_geometry": body_geometry, "tail_geometry": tail_geometry, "eye_boxes": eye_boxes,
+                  "source_bounds": bounds, "concept_cutouts": definitions, "head_geometry": head_geometry, "body_geometry": body_geometry, "tail_geometry": tail_geometry, "arm_geometry": arm_geometry, "eye_boxes": eye_boxes,
                   "processing": "Nearest-neighbor common-scale registration; 16-color palette; separate reviewed limbs; localized eye variants; five root-registered tail perspectives with one-pixel endpoint flex; material masks.",
                   "status": "Selectable original cat-bot rig; actual Cocoa motion/customization reviewed; no user design approval or native cursor integration claimed."}
     (PACK / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")

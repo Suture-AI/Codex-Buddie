@@ -80,7 +80,7 @@ perspectives, not a time-based emotion cycle. The renderer selects the
 current turn progress, including during a mid-turn reversal. Neutral blinking
 continues through turns. Missing expression tracks preserve the older renderer.
 Reduced Motion retains static press feedback and omits the travel, release
-and blink embellishments. Bit includes 54 frames across 18 parts. See
+and blink embellishments. Bit includes 66 frames across 22 parts. See
 [the face animation](media/bit-face-reactions.gif),
 [poses](media/bit-face-sequence.png) and [live Studio evidence](evidence/bit-faces.json).
 
@@ -102,8 +102,25 @@ continuously before torso proportions, lean and bob are applied. Authored tail
 pixels preserve their lighting and remain behind the head, torso and limbs.
 Endpoint tail tracks may contain their own idle flex; Reduced Motion holds the
 appropriate endpoint still. See [Miso's turn](media/miso-tail-turn.gif) and
-[the review](tail-review.md). This is still a biped rig; arms retain screen-side
-artwork through torso turns.
+[the review](tail-review.md).
+
+Optional arm directions come as a complete set: `pawNearTurn`, `pawNearLeft`,
+`pawFarTurn`, `pawFarLeft`, with both body direction tracks. Near/far name the
+original right-facing arms; they keep their physical screen sides through the
+front-facing turn. Each trio shares its base arm's pivot, anchor, scale, `span`
+and image dimensions. Both turn tracks match the torso's frame count/timings.
+The renderer changes the nearer arm's draw depth as the torso turns; both arms
+sit behind the chest in the central front pose, avoiding a mid-turn depth pop.
+
+`span` is optional for legacy arms and required for directional arms. It covers
+the complete arm artwork below the shoulder, in displayed pixels (1–1024);
+`pivot.y + span / scale` must fit inside the source image. Keep pixels above the
+pivot transparent. Pixel arms with a span draw connected square rows from that
+fixed shoulder, so their hands swing without bobbing the attachment. Arm length
+scales the row spacing; torso width/height move the shoulder itself. Sideways
+swing narrows through the front view and reverses its projection smoothly.
+Non-pixel arms retain their rotation around the pivot. Older packs without these
+tracks retain their artwork. See [the arm review](arms-review.md).
 
 Reimporting a saved identity reloads its collection entry. Different identities
 can share a display name without losing menu entries or selection. Imported
@@ -123,8 +140,9 @@ Malformed settings are ignored. An unreadable manifest is left untouched, with
 a visible session-only warning; a missing pack's entry is retained for recovery.
 Failed installs roll back without replacing the previous library record.
 
-Miso uses the same format with 58 frames, a three-pose curled tail, five authored
-head/torso perspectives, and separate `shell`, `suit` and `face` materials.
+Miso uses the same format with 80 frames, a curled tail with endpoint flex,
+five authored head/torso/tail perspectives, ten arm views, and separate
+`shell`, `suit` and `face` materials.
 Its [source art and reproduction steps](../artwork/miso/README.md) show how to
 add another generated character without changing the motion core.
 

@@ -10,7 +10,7 @@ neck, closer to the original generated concept.
 
 ## Generated sources
 
-All five images were generated sequentially through ChatGPT in Brave in
+The first five images were generated sequentially through ChatGPT in Brave in
 [this art conversation](https://chatgpt.com/c/6abdd0db-1804-83e8-8ac9-505a7e27ca9b).
 The prompt requested GPT Image 2.5 if available; the UI did not expose the image
 model identifier. No exact model version is certified.
@@ -24,6 +24,9 @@ model identifier. No exact model version is certified.
 - [Torso turn source](body-turn-source.png), image 5: five chest directions.
   The builder removes the bottom hip peg, registers an 11 px torso at its
   existing attachment, and quantizes it into the shared palette.
+- [Arm sheet](arm-turn-source.png), image 6: ten connected sleeve/mitten views.
+  [Image 7](arm-turn-alternative.png) came from the same prompt and is excluded
+  for its mitten notches and mirrored highlights. [Exact prompt and selection](arm-prompts.md).
 
 The user's reference image was not added to the repository. Browser upload
 was blocked by extension file access, so its visual direction was described
@@ -40,7 +43,10 @@ A transparent tail fills the current biped schema's unused tail slot.
 
 The walking sheets are not used. Independent limbs follow the native motion
 core; attachment coordinates snap to logical pixels. Fast travel uses its
-bounded airborne gait. Paws move in opposing one-pixel steps. The renderer
+bounded airborne gait. The newer arm sheet replaces the original paw cutouts:
+connected rows swing the hands about fixed shoulder pivots. Ten authored views
+follow the torso's perspective and draw depth, retaining fixed light and body
+proportions. See [the current arms](../../docs/arms-review.md). The renderer
 preserves the input hotspot rather than moving the cursor to accommodate art.
 
 The calf cutouts exclude boot highlights and pixels from the inter-leg gap;
@@ -71,10 +77,11 @@ interrupted by a new press. See [the face sequence](../../docs/media/bit-face-se
 The torso now follows the head through five authored directions, while limbs
 keep their physical screen-side positions. See the [turn review](../../docs/media/bit-studio-turn.png).
 This remains a motion study: lighting/antenna perspective is imperfect, and
-knee articulation and additional body types remain unfinished. Official CUA
-observation recovered for this expression pass. The updated Studio was opened,
+non-pixel knee articulation and additional body types remain unfinished. Official CUA
+observation recovered for the earlier expression pass. That Studio was opened,
 the saved Bit Ember entry restored, and travel/release faces observed with the
-red shell palette. Live Codex cursor replacement remains unverified.
+red shell palette. That screenshot predates the newer arms; live Codex cursor
+replacement remains unverified.
 
 ## Reproduce
 

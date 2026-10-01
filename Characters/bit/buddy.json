@@ -104,37 +104,39 @@
       },
       "pawNear": {
         "pivot": [
-          26,
-          44
+          34,
+          43
         ],
         "anchor": [
           34,
-          52
+          51
         ],
         "scale": 1,
+        "span": 10,
         "frames": [
           {
             "image": "pawNear.png",
-            "duration": 1,
-            "mask": "pawNear-mask.png"
+            "mask": "pawNear-mask.png",
+            "duration": 1
           }
         ]
       },
       "pawFar": {
         "pivot": [
-          41,
-          45
+          34,
+          43
         ],
         "anchor": [
-          49,
-          53
+          50,
+          51
         ],
         "scale": 1,
+        "span": 10,
         "frames": [
           {
             "image": "pawFar.png",
-            "duration": 1,
-            "mask": "pawFar-mask.png"
+            "mask": "pawFar-mask.png",
+            "duration": 1
           }
         ]
       },
@@ -557,6 +559,122 @@
             "image": "body-turn-4.png",
             "duration": 0.045,
             "mask": "body-turn-4-mask.png"
+          }
+        ]
+      },
+      "pawNearTurn": {
+        "pivot": [
+          34,
+          43
+        ],
+        "anchor": [
+          34,
+          51
+        ],
+        "scale": 1,
+        "span": 10,
+        "frames": [
+          {
+            "image": "pawNear.png",
+            "mask": "pawNear-mask.png",
+            "duration": 0.045
+          },
+          {
+            "image": "pawNear-turn-1.png",
+            "mask": "pawNear-turn-1-mask.png",
+            "duration": 0.045
+          },
+          {
+            "image": "pawNear-turn-2.png",
+            "mask": "pawNear-turn-2-mask.png",
+            "duration": 0.045
+          },
+          {
+            "image": "pawNear-turn-3.png",
+            "mask": "pawNear-turn-3-mask.png",
+            "duration": 0.045
+          },
+          {
+            "image": "pawNear-turn-4.png",
+            "mask": "pawNear-turn-4-mask.png",
+            "duration": 0.045
+          }
+        ]
+      },
+      "pawNearLeft": {
+        "pivot": [
+          34,
+          43
+        ],
+        "anchor": [
+          34,
+          51
+        ],
+        "scale": 1,
+        "span": 10,
+        "frames": [
+          {
+            "image": "pawNear-turn-4.png",
+            "mask": "pawNear-turn-4-mask.png",
+            "duration": 1
+          }
+        ]
+      },
+      "pawFarTurn": {
+        "pivot": [
+          34,
+          43
+        ],
+        "anchor": [
+          50,
+          51
+        ],
+        "scale": 1,
+        "span": 10,
+        "frames": [
+          {
+            "image": "pawFar.png",
+            "mask": "pawFar-mask.png",
+            "duration": 0.045
+          },
+          {
+            "image": "pawFar-turn-1.png",
+            "mask": "pawFar-turn-1-mask.png",
+            "duration": 0.045
+          },
+          {
+            "image": "pawFar-turn-2.png",
+            "mask": "pawFar-turn-2-mask.png",
+            "duration": 0.045
+          },
+          {
+            "image": "pawFar-turn-3.png",
+            "mask": "pawFar-turn-3-mask.png",
+            "duration": 0.045
+          },
+          {
+            "image": "pawFar-turn-4.png",
+            "mask": "pawFar-turn-4-mask.png",
+            "duration": 0.045
+          }
+        ]
+      },
+      "pawFarLeft": {
+        "pivot": [
+          34,
+          43
+        ],
+        "anchor": [
+          50,
+          51
+        ],
+        "scale": 1,
+        "span": 10,
+        "frames": [
+          {
+            "image": "pawFar-turn-4.png",
+            "mask": "pawFar-turn-4-mask.png",
+            "duration": 1
           }
         ]
       }

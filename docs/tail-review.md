@@ -5,6 +5,8 @@ back of the hips. This improves the character rig; native Codex cursor
 replacement remains unfinished. [Five poses](media/miso-tail-sequence.png),
 [turn animation](media/miso-tail-turn.gif) and [walking/landing](media/miso-tail-gait.gif)
 come from the actual Cocoa renderer.
+The subsequent [arm review](arms-review.md) resolves the directional-arm
+finding below; this review and its media retain their original source pins.
 
 | Before | After | Why |
 | --- | --- | --- |

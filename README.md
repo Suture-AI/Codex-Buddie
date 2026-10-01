@@ -41,8 +41,13 @@ See [Miso's customization](docs/media/miso-customization.png),
 [walking](docs/media/miso-walk.gif), [tail turns](docs/media/miso-tail-turn.gif)
 and [source/review](artwork/miso/README.md).
 
+Bit and Miso now use ten authored arm perspectives each. Shoulders stay fixed
+while hands swing; arm length and torso proportions remain editable. See
+[the turns](docs/media/arms-turn-sequence.png), [Bit walking](docs/media/bit-arm-gait.gif),
+[Miso walking](docs/media/miso-arm-gait.gif) and [the checks](docs/evidence/directional-arms.json).
+
 **Still a motion study.** Bit's visual direction was approved and his neck
-shortened; Miso is a new candidate. Directional arm artwork, non-pixel knee articulation,
+shortened; Miso is a new candidate. Head/antenna perspective, non-pixel knee articulation,
 production cursor sizing and the native service
 connection remain unfinished. These exports do not show a live Codex task.
 

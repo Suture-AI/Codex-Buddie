@@ -48,6 +48,23 @@ static void PixelLeg(BuddieCharacter *c,NSString *role,NSPoint hip,NSPoint cuff,
     }
     }
 }
+static void Arm(BuddieCharacter *c,NSString *role,NSPoint shoulder,double angle,double elapsed,BOOL reduced) {
+    NSDictionary *part=c.puppetParts[role];
+    if(!c.pixelArt || !part[@"span"]) { Part(c,role,shoulder,angle,1,c.armLength,elapsed,reduced); return; }
+    BuddieSpriteClip *clip=c.clips[role];
+    NSImage *image=[c imageForClip:role frame:reduced ? 0:[clip frameIndexAtTime:elapsed loop:YES]];
+    NSPoint pivot=PartPoint(part[@"pivot"]); double scale=[part[@"scale"] doubleValue];
+    double sourceRows=[part[@"span"] doubleValue]/scale,unit=scale*c.armLength;
+    // Sample connected square rows from a fixed shoulder. The hand swings
+    // farther than the sleeve; the old whole-arm bob cannot detach this root.
+    for(int row=0;row<(int)ceil(sourceRows);row++) {
+        double offset=row*unit;
+        NSRect source=NSMakeRect(0,image.size.height-1-floor(pivot.y+row),image.size.width,1);
+        NSRect target=NSMakeRect(round(shoulder.x+sin(angle)*offset)-round(pivot.x*scale),
+                                round(shoulder.y+offset*cos(angle)),image.size.width*scale,MAX(1,ceil(unit)));
+        [image drawInRect:target fromRect:source operation:NSCompositingOperationSourceOver fraction:1 respectFlipped:YES hints:nil];
+    }
+}
 NSPoint BuddiePuppetSole(BuddieCharacter *c, BuddiePose p, NSUInteger foot) {
     NSPoint base=PartPoint(c.puppetParts[foot ? @"bootFar":@"bootNear"][@"anchor"]);
     return NSMakePoint(base.x+p.feet[foot].x*c.puppetMotionScale,base.y+(p.feet[foot].y-p.footLift[foot])*c.puppetMotionScale);
@@ -94,10 +111,23 @@ void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double 
         Part(c,boot,foot,0,c.bootWidth,1,elapsed,reduced);
     }
     double swing=sin(p.phase*2*M_PI)*.18*p.walkWeight;
-    Part(c,@"pawFar",attach(@"pawFar"),lean-swing,1,c.armLength,elapsed,reduced);
+    BOOL directionalArms=c.clips[@"pawNearTurn"] && c.clips[@"pawFarTurn"];
+    if(directionalArms) swing*=1-2*turnProgress;
+    void (^arm)(NSString *)=^(NSString *base) {
+        NSString *role=directionalArms ? (inTurn ? [base stringByAppendingString:@"Turn"]:turnProgress>=.5 ? [base stringByAppendingString:@"Left"]:base):base;
+        double time=directionalArms && inTurn ? MIN(1-1e-9,turnProgress)*c.clips[role].duration:elapsed;
+        Arm(c,role,attach(base),lean+([base isEqual:@"pawNear"] ? swing:-swing),time,directionalArms && inTurn ? NO:reduced);
+    };
+    // Near/far are the original right-facing labels. Physical arms keep their
+    // screen side, but authored perspective and draw depth change with yaw.
+    NSString *frontArm=directionalArms && turnProgress>.5 ? @"pawFar":@"pawNear";
+    NSString *backArm=[frontArm isEqual:@"pawNear"] ? @"pawFar":@"pawNear";
+    NSUInteger bodyFrame=[c.clips[@"bodyTurn"] frameIndexAtTime:MIN(1-1e-9,turnProgress)*c.clips[@"bodyTurn"].duration loop:NO];
+    BOOL frontal=directionalArms && bodyFrame==c.clips[@"bodyTurn"].frames.count/2;
+    arm(backArm); if(frontal) arm(frontArm);
     NSString *body=directionalBody ? (inTurn ? @"bodyTurn":turnProgress>=.5 ? @"bodyLeft":@"body"):@"body";
     Part(c,body,NSMakePoint(origin.x,origin.y+bob),lean,width,height,[body isEqual:@"bodyTurn"] ? turnProgress*c.clips[body].duration:elapsed,reduced);
-    Part(c,@"pawNear",attach(@"pawNear"),lean+swing,1,c.armLength,elapsed,reduced);
+    if(!frontal) arm(frontArm);
     BOOL turning=c.clips[@"headTurn"] && inTurn;
     BOOL leftHead=c.clips[@"headTurn"] ? turnProgress>=.5:facingLeft;
     NSString *head=turning ? @"headTurn":leftHead && c.clips[@"headLeft"] ? @"headLeft":@"head";

@@ -61,13 +61,14 @@ def main():
     assert len(connectivity) == 9
     sources = [ROOT / p for p in ["Sources/BuddieCharacter.m", "Sources/BuddiePuppet.m", "Sources/BuddieView.m", "Sources/Preview.m", "tests/test_character.m", "scripts/build-miso.py"]]
     sources += [Path(__file__), *ROOT.glob("Characters/miso/*"), *ROOT.glob("artwork/miso/tail*"), ROOT / "artwork/miso/provenance.json"]
+    parts = json.loads((ROOT / "Characters/miso/buddy.json").read_text())["puppet"]["parts"]
     report = {
         "status": "Miso tail rotates around the hips with authored perspective, behind the body; actual Cocoa review and regression checks passed.",
-        "pack": {"parts": 20, "logical_frames": 68, "tail_views": 5, "unique_tail_images": 9, "version_3_frame_limit": 96, "decoded_byte_limit": 67108864},
+        "pack": {"parts": len(parts), "logical_frames": sum(len(p["frames"]) for p in parts.values()), "tail_views": 5, "unique_tail_images": 9, "version_3_frame_limit": 96, "decoded_byte_limit": 67108864},
         "art": {"source": "ChatGPT in Brave via official CUA", "requested_model": "GPT Image 2.5 if available", "verified_model": None, "user_approved": False},
         "render_review": {"source_fps": 60, "gif_fps": 30, "turn_frames": 96, "gait_frames": 300, "bounds": bounds, "source_connectivity": connectivity},
-        "checks": ["21 Cocoa turn samples keep the tail root attached and every boot pixel fixed", "Changing desired direction at the same progress produces identical pixels", "Front view is pixel-identical with and without the tail: complete occlusion", "Both idle directions have three visible flex positions and static Reduced Motion", "All 68 recolored frames and attachment metadata survive export/import", "Missing/misaligned/mistimed tail directions are rejected", "Version 3 accepts 96 frames and rejects 97; version 2 still accepts 64 and rejects 65", "Existing anatomy, foot-contact, viewport, expression and library checks pass"],
-        "limitations": ["Arms retain screen-side artwork through torso turns", "Pip non-pixel knees, broader anatomy and production cursor sizing remain unfinished", "No live Studio interaction or native Codex replacement claimed in this review"],
+        "checks": ["21 Cocoa turn samples keep the tail root attached and every boot pixel fixed", "Changing desired direction at the same progress produces identical pixels", "Front view is pixel-identical with and without the tail: complete occlusion", "Both idle directions have three visible flex positions and static Reduced Motion", "All recolored frames and attachment metadata survive export/import", "Missing/misaligned/mistimed tail directions are rejected", "Version 3 accepts 96 frames and rejects 97; version 2 still accepts 64 and rejects 65", "Existing anatomy, foot-contact, viewport, expression and library checks pass"],
+        "limitations": ["Head/antenna perspective still needs craft review", "Pip non-pixel knees, broader anatomy and production cursor sizing remain unfinished", "No live Studio interaction or native Codex replacement claimed in this review"],
         "sha256": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(sources + outputs)},
     }
     (ROOT / "docs/evidence/miso-tail.json").write_text(json.dumps(report, indent=2) + "\n")

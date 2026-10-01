@@ -255,5 +255,119 @@
     "target_top": 42,
     "height": 11
   },
+  "arm_turn": {
+    "source": "artwork/bit/arm-turn-source.png",
+    "sha256": "496bbff9cd1be87332316706fec598c66abb523c7f2081077593f1d590f2e3c7",
+    "source_boxes": [
+      [
+        129,
+        169,
+        321,
+        394
+      ],
+      [
+        471,
+        169,
+        651,
+        394
+      ],
+      [
+        811,
+        169,
+        963,
+        395
+      ],
+      [
+        1144,
+        169,
+        1307,
+        391
+      ],
+      [
+        1494,
+        169,
+        1627,
+        387
+      ],
+      [
+        120,
+        530,
+        258,
+        747
+      ],
+      [
+        446,
+        530,
+        617,
+        747
+      ],
+      [
+        811,
+        528,
+        963,
+        754
+      ],
+      [
+        1129,
+        528,
+        1309,
+        747
+      ],
+      [
+        1455,
+        531,
+        1656,
+        756
+      ]
+    ],
+    "shared_scale": 0.04424778761061947,
+    "height": 10,
+    "resized_roots": [
+      [
+        5,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        0
+      ]
+    ],
+    "registered_shoulder": [
+      34,
+      43
+    ]
+  },
   "status": "User approved Bit's visual direction. Compact collar and coordinated head/torso turns; final animation polish remains pending."
 }

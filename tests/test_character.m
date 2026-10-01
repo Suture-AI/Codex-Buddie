@@ -15,7 +15,7 @@ static NSMutableDictionary *MutableJSON(NSDictionary *json) {
 static void MisoPack(NSURL *root) {
     NSError *error=nil;
     BuddieCharacter *miso=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/miso"] error:&error];
-    NSCAssert(miso && !error && miso.puppetParts.count==20 && miso.materials.count==3,@"Miso loads as a complete editable character: %@",error);
+    NSCAssert(miso && !error && miso.puppetParts.count==24 && miso.materials.count==3,@"Miso loads as a complete editable character: %@",error);
     NSUInteger total=0,weights[3]={0};
     for(NSString *role in miso.clips) {
         BuddieSpriteClip *clip=miso.clips[role]; total+=clip.frames.count;
@@ -28,7 +28,7 @@ static void MisoPack(NSURL *root) {
             }
         }
     }
-    NSCAssert(total==68 && weights[0]>0 && weights[1]>0 && weights[2]>0,@"68 frames within the articulated budget; all three paint channels present");
+    NSCAssert(total==80 && weights[0]>0 && weights[1]>0 && weights[2]>0,@"80 frames within the articulated budget; all three paint channels present");
     for(NSString *role in @[@"headFocus",@"headPress",@"headRelease",@"headHalf",@"headClosed"]) for(int i=0;i<5;i++) {
         NSBitmapImageRep *a=[NSBitmapImageRep imageRepWithData:miso.clips[@"headTurn"].frames[i].TIFFRepresentation];
         NSBitmapImageRep *b=[NSBitmapImageRep imageRepWithData:miso.clips[role].frames[i].TIFFRepresentation]; NSUInteger changed=0;
@@ -56,11 +56,23 @@ static void MisoPack(NSURL *root) {
     }
     NSMutableDictionary *bad=MutableJSON(json); bad[@"puppet"][@"parts"][@"tailTurn"][@"frames"][0][@"duration"]=@.1; Reject(saved,bad);
     NSMutableDictionary *limit=MutableJSON(json); NSMutableArray *frames=limit[@"puppet"][@"parts"][@"tail"][@"frames"];
-    while(frames.count<33) [frames addObject:frames[0]];
+    NSUInteger tailLimit=frames.count+96-total;
+    while(frames.count<tailLimit) [frames addObject:frames[0]];
     Write(saved,limit); BuddieCharacter *atLimit=[BuddieCharacter loadPack:saved error:nil];
-    NSCAssert(atLimit && atLimit.clips[@"tail"].frames[0]==atLimit.clips[@"tail"].frames[32],@"96 logical articulated frames accepted; repeated artwork still shares decoded memory");
+    NSCAssert(atLimit && atLimit.clips[@"tail"].frames[0]==atLimit.clips[@"tail"].frames.lastObject,@"96 logical articulated frames accepted; repeated artwork still shares decoded memory");
     [frames addObject:frames[0]]; Reject(saved,limit);
-    puts("PASS: Miso 68-frame pack; all custom frames round-trip; paired tail directions, matching geometry/timing and 96-frame articulated limit enforced");
+    for(NSString *role in @[@"pawNearTurn",@"pawNearLeft",@"pawFarTurn",@"pawFarLeft"]) {
+        bad=MutableJSON(json); [bad[@"puppet"][@"parts"] removeObjectForKey:role]; Reject(saved,bad);
+        for(NSDictionary *change in @[@{@"pivot":@[@33,@43]},@{@"anchor":@[@32,@51]},@{@"span":@9},@{@"scale":@.9}]) {
+            bad=MutableJSON(json); [bad[@"puppet"][@"parts"][role] addEntriesFromDictionary:change]; Reject(saved,bad);
+        }
+    }
+    for(id span in @[@0,@YES,@99,@"10",NSNull.null]) {
+        bad=MutableJSON(json); bad[@"puppet"][@"parts"][@"pawNear"][@"span"]=span; Reject(saved,bad);
+    }
+    bad=MutableJSON(json); [bad[@"puppet"][@"parts"][@"pawNear"] removeObjectForKey:@"span"]; Reject(saved,bad);
+    bad=MutableJSON(json); bad[@"puppet"][@"parts"][@"pawFarTurn"][@"frames"][0][@"duration"]=@.1; Reject(saved,bad);
+    puts("PASS: Miso 80-frame pack; all custom frames round-trip; arm/tail directions, shoulder spans, geometry/timing and 96-frame limit enforced");
 }
 static void ArticulatedPack(NSURL *root) {
     NSError *error=nil;
@@ -109,7 +121,7 @@ static void ArticulatedPack(NSURL *root) {
     bad=MutableJSON(json); bad[@"puppet"][@"parts"][@"head"][@"frames"][0][@"mask"]=@"body-00-mask.png"; Reject(saved,bad);
     puts("PASS: nine-part articulated pack; shared decode; proportions/geometry/colors round-trip; independent customization; missing roles, unsafe files, incompatible dimensions and invalid transforms rejected");
     BuddieCharacter *bit=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/bit"] error:&error];
-    NSCAssert(bit.pixelArt && bit.puppetParts.count==18 && bit.stride==8 && bit.footSpacing==5,@"Compact pixel rig with authored directions and expression heads loads");
+    NSCAssert(bit.pixelArt && bit.puppetParts.count==22 && bit.stride==8 && bit.footSpacing==5,@"Compact pixel rig with authored directions and expression heads loads");
     NSCAssert(bit.clips[@"bodyTurn"].frames.count==5 && bit.clips[@"bodyLeft"].frames.count==1,@"Torso directions remain independently editable");
     NSCAssert(bit.clips[@"headTurn"].frames.count==5 && bit.clips[@"headLeft"].frames.count==5,@"Turning and left blink art are preserved");
     NSURL *pixelCopy=[root URLByAppendingPathComponent:@"bit.buddie"];
