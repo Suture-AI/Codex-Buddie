@@ -1,0 +1,10 @@
+{
+  "name": "Pip",
+  "status": "Art-direction candidate; not approved final artwork or animated yet",
+  "source": "Generated individually in ChatGPT through Brave",
+  "date": "2026-09-30",
+  "requested_model": "GPT Image 2.5",
+  "verified_model": null,
+  "original_sha256": "e9aa33f8f2b1606e074f207f0e38540db813378c2af319348f07be363073387f",
+  "processing": "Original retained as concept.png; alpha<8 noise removed and transparent margin cropped for cutout.png; size-study uses Lanczos resizing on light/dark backgrounds."
+}

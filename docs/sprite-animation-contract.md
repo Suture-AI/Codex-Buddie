@@ -1,0 +1,46 @@
+# Next animation asset contract (design proposal)
+
+The current v1 pack format animates procedural facial features and feet over a
+body image. The next renderer must also support complete generated poses so a
+character keeps the face, hands and footwear established in its canonical art.
+This document is a proposal; these sprite clips are not implemented yet.
+
+## Minimum useful clips
+
+| Clip | Visual contract | Driver |
+| --- | --- | --- |
+| Idle | Breathing/settling with occasional coherent blinks | Elapsed idle time |
+| Walk right | Full alternating contact, passing and lifted steps | Distance traveled |
+| Walk left | Same construction/lighting, opposite travel | Distance traveled |
+| Press | A deliberate small interaction pose; exact anchor retained | Real pointer down |
+| Release | Short return to the canonical resting stance | Real pointer up |
+
+Generate one coherent clip at a time, grounded in the same original character.
+Start with idle and rightward gait to prove identity and locomotion before
+expanding the collection. Use mirroring only when it does not change asymmetric
+markings or directional lighting. A generated hero image alone is not motion QA.
+
+## Registration and playback
+
+- Every frame shares the same pixel canvas, scale and local hotspot. Register
+  by stable landmarks/baseline. Do not independently fit each pose to its box.
+- Preserve intentional body bob and lifted feet while correcting accidental
+  canvas drift. Do not flatten each frame's feet to a common line.
+- Position belongs to the real cursor driver. Pose playback never adds a second
+  positional spring, changes click coordinates, or delays arrival.
+- Advance gait by world distance. Pause/retarget/reverse without a hard visual
+  snap or a stationary running loop. Preserve the final contact on stopping.
+- Do not infer clicks or agent session states from an unmoving pointer.
+- Reduced Motion holds a still pose and provides a restrained explicit press
+  state. A static preview does not verify native drag or cancellation behavior.
+
+## Acceptance
+
+Inspect frame counts, complete silhouette and transparent edges before assembly.
+Review loops at actual size on light/dark backgrounds. Reject identity/wardrobe
+drift, rubbery limb morphs, foot swaps, cuts between unrelated angles, cropped
+extremities, flickering lighting, inconsistent registration and ghosted
+crossfades. Verify the decoded assets and the runtime's rendered output.
+
+The supported native integration and its visibility/press/drag events remain
+separate unresolved product gates. Sprite work must not imply those are solved.
