@@ -1,0 +1,31 @@
+{
+  "status": "Verified through official CUA in the actual macOS Studio; no native cursor replacement claim.",
+  "color_before": {
+    "visible_swatch": "red",
+    "saved_shell": "#8095F2",
+    "pack": ".build/ui-review/Bit color before.buddie"
+  },
+  "color_after": {
+    "edited_hex": "#EB504D",
+    "visible_robot": "red",
+    "saved_shell": "#EB504D",
+    "pack": ".build/ui-review/Bit Ember.buddie"
+  },
+  "checks": [
+    "Edited hex color immediately changes swatch and actual rendered robot",
+    "UI Save a copy exported #EB504D",
+    "Reopened saved folder after application restart; material value and red robot preserved",
+    "Repeated import kept one Bit Ember entry selected; no blank menu",
+    "Different identities with a shared display name covered by Cocoa regression",
+    "Invalid #GGGGGG restored #EB504D when focus moved to the screen-light color field"
+  ],
+  "limits": [
+    "Native NSColorPanel interaction could not be reliably opened by CUA. Continuous color-well updates are enabled, but this UI path remains unverified.",
+    "Saved UI fixture predates the torso-turn art; it intentionally tests backward-compatible import.",
+    "Imported collection and unsaved settings do not yet persist across launches."
+  ],
+  "sha256": {
+    "Sources/Preview.m": "6f84fd7a89b9d525474862776d53f4b1f00308b5b04cb3487d5285cbb6e9d010",
+    "docs/media/bit-live-color.png": "9578d76891214447b952be07a8a7d7a913401ada6d656e012cd8232ce0556104"
+  }
+}

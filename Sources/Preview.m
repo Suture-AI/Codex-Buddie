@@ -6,6 +6,17 @@
 
 static Class cursorClass, fogClass;
 static NSColor *Ink(void) { return [NSColor colorWithSRGBRed:.16 green:.22 blue:.19 alpha:1]; }
+static NSString *ColorHex(NSColor *color) {
+    color=[color colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
+    return [NSString stringWithFormat:@"#%02X%02X%02X",(int)round(color.redComponent*255),(int)round(color.greenComponent*255),(int)round(color.blueComponent*255)];
+}
+static NSColor *ColorFromHex(NSString *text) {
+    NSString *hex=[text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+    if([hex hasPrefix:@"#"]) hex=[hex substringFromIndex:1];
+    if(hex.length!=6 || [hex rangeOfCharacterFromSet:[[NSCharacterSet characterSetWithCharactersInString:@"0123456789abcdefABCDEF"] invertedSet]].location!=NSNotFound) return nil;
+    unsigned int n=0; [[NSScanner scannerWithString:hex] scanHexInt:&n];
+    return [NSColor colorWithSRGBRed:((n>>16)&255)/255. green:((n>>8)&255)/255. blue:(n&255)/255. alpha:1];
+}
 static NSTextField *Label(NSString *s, CGFloat size, NSColor *color, NSRect frame) {
     NSTextField *l=[NSTextField labelWithString:s];
     l.font=[NSFont systemFontOfSize:size weight:size>24 ? NSFontWeightSemibold:NSFontWeightMedium];
@@ -52,7 +63,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
         [[NSBezierPath bezierPathWithOvalInRect:NSMakeRect(x,y,1.4,1.4)] fill];
 }
 @end
-@interface Delegate : NSObject <NSApplicationDelegate,NSWindowDelegate> {
+@interface Delegate : NSObject <NSApplicationDelegate,NSWindowDelegate,NSTextFieldDelegate> {
     BuddieJourney _journey;
     BuddiePoint _anchor;
     double _nextMove, _releaseAt;
@@ -70,6 +81,8 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 @property NSTextField *settingsHeading;
 @property NSTextField *artNote;
 @property NSMutableArray<NSView *> *materialControls;
+@property NSMutableDictionary<NSString *,NSTextField *> *materialFields;
+@property NSMutableDictionary<NSString *,NSColorWell *> *materialWells;
 @property BuddieCharacter *character;
 @property BOOL playing;
 @property BOOL software;
@@ -82,6 +95,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     self.sliders=[NSMutableDictionary new];
     self.settingLabels=[NSMutableDictionary new];
     self.materialControls=[NSMutableArray new];
+    self.materialFields=[NSMutableDictionary new]; self.materialWells=[NSMutableDictionary new];
     self.window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,960,700) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable backing:NSBackingStoreBuffered defer:NO];
     self.window.title=@"Codex Buddie — Character Studio"; self.window.delegate=self;
     self.window.appearance=[NSAppearance appearanceNamed:NSAppearanceNameAqua];
@@ -142,15 +156,24 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
         [control removeFromSuperview];
     }
     [self.materialControls removeAllObjects];
+    [self.materialFields removeAllObjects]; [self.materialWells removeAllObjects];
     NSUInteger row=0;
     for(NSDictionary *material in self.character.materials) {
         CGFloat y=puppet ? 247-35*row++:369-42*row++;
-        NSTextField *label=Label(material[@"name"],12,Ink(),NSMakeRect(700,y+6,130,20));
+        NSTextField *label=Label(material[@"name"],12,Ink(),NSMakeRect(700,y+6,81,20));
         NSColorWell *well=[[NSColorWell alloc] initWithFrame:NSMakeRect(858,y,66,30)];
         well.identifier=material[@"id"]; well.accessibilityLabel=material[@"name"];
-        well.color=self.character.materialColors[material[@"id"]]; well.target=self; well.action=@selector(paint:); well.continuous=NO;
-        [self.materialControls addObjectsFromArray:@[label,well]];
-        [self.window.contentView addSubview:label]; [self.window.contentView addSubview:well];
+        // A color well has no separate Apply step. Deliver panel changes as
+        // they happen so the swatch, renderer and exported pack stay in sync.
+        well.color=self.character.materialColors[material[@"id"]]; well.target=self; well.action=@selector(paint:); well.continuous=YES;
+        NSTextField *hex=[[NSTextField alloc] initWithFrame:NSMakeRect(782,y+4,72,23)];
+        hex.font=[NSFont monospacedSystemFontOfSize:11 weight:NSFontWeightRegular];
+        hex.stringValue=ColorHex(well.color); hex.identifier=well.identifier; hex.delegate=self;
+        hex.accessibilityLabel=[material[@"name"] stringByAppendingString:@" hex color"];
+        hex.toolTip=@"Enter a color as #RRGGBB.";
+        self.materialFields[well.identifier]=hex; self.materialWells[well.identifier]=well;
+        [self.materialControls addObjectsFromArray:@[label,hex,well]];
+        [self.window.contentView addSubview:label]; [self.window.contentView addSubview:hex]; [self.window.contentView addSubview:well];
     }
     NSArray *visible=puppet ? @[@"spriteHeight",@"torsoWidth",@"torsoHeight",@"headScale",@"stride",@"footLift"]:sprite ? @[@"spriteHeight",@"stride"]:@[@"width",@"height",@"eyeSpacing",@"eyeSize",@"faceY",@"stride",@"footLift"];
     for(NSString *key in self.sliders) {
@@ -167,10 +190,22 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 }
 - (void)paint:(NSColorWell *)sender {
     NSColor *color=[[sender.color colorUsingColorSpace:NSColorSpace.sRGBColorSpace] colorWithAlphaComponent:1];
+    NSTextField *hex=self.materialFields[sender.identifier];
+    if(!hex.currentEditor) hex.stringValue=ColorHex(color);
+    if([ColorHex(self.character.materialColors[sender.identifier]) isEqual:ColorHex(color)]) return;
     NSMutableDictionary *colors=[self.character.materialColors mutableCopy]; colors[sender.identifier]=color;
     self.character.materialColors=colors;
     // Warm every pose before resuming animation, avoiding work at frame changes.
     [self.character prepareAppearance]; self.buddy.needsDisplay=YES;
+}
+- (void)controlTextDidChange:(NSNotification *)notification {
+    NSTextField *field=notification.object; NSColor *color=ColorFromHex(field.stringValue);
+    NSColorWell *well=self.materialWells[field.identifier];
+    if(color && well) { well.color=color; [self paint:well]; }
+}
+- (void)controlTextDidEndEditing:(NSNotification *)notification {
+    NSTextField *field=notification.object; NSColorWell *well=self.materialWells[field.identifier];
+    if(well) { [self controlTextDidChange:notification]; field.stringValue=ColorHex(well.color); }
 }
 - (void)createCursor {
     if(self.cursor) { [self.window removeChildWindow:self.cursor]; [self.cursor orderOut:nil]; self.cursor.contentView=nil; }
@@ -222,6 +257,20 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     else if([key isEqual:@"height"]) self.character.bodySize=NSMakeSize(self.character.bodySize.width,sender.doubleValue);
     else [self.character setValue:@(sender.doubleValue) forKey:key];
 }
+- (void)addCharacterToCollection:(BuddieCharacter *)character {
+    NSUInteger index=[self.collection indexOfObjectPassingTest:^BOOL(BuddieCharacter *item,NSUInteger i,BOOL *stop) {
+        return [item.identifier isEqual:character.identifier];
+    }];
+    if(index==NSNotFound) {
+        index=self.collection.count; [self.collection addObject:character];
+        // addItemWithTitle: removes an existing item with the same title.
+        // Different portable packs may legitimately share a display name.
+        [self.picker.menu addItem:[[NSMenuItem alloc] initWithTitle:character.name action:nil keyEquivalent:@""]];
+    } else {
+        self.collection[index]=character; [self.picker itemAtIndex:index].title=character.name;
+    }
+    [self.picker selectItemAtIndex:index]; [self selectCharacter:nil];
+}
 - (void)importPack:(id)sender {
     NSOpenPanel *panel=[NSOpenPanel openPanel]; panel.canChooseDirectories=YES; panel.canChooseFiles=NO; panel.allowsMultipleSelection=NO;
     panel.message=@"Choose a buddy folder containing buddy.json and its PNG artwork.";
@@ -229,7 +278,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
         if(response!=NSModalResponseOK) return;
         NSError *error=nil; BuddieCharacter *c=[BuddieCharacter loadPack:panel.URL error:&error];
         if(!c) { NSAlert *alert=[NSAlert new]; alert.messageText=@"Couldn’t open this buddy"; alert.informativeText=error.localizedDescription; [alert beginSheetModalForWindow:self.window completionHandler:nil]; return; }
-        [self.collection addObject:c]; [self.picker addItemWithTitle:c.name]; [self.picker selectItemAtIndex:self.collection.count-1]; [self selectCharacter:nil];
+        [self addCharacterToCollection:c];
     }];
 }
 - (void)savePack:(id)sender {
@@ -244,7 +293,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
         if(![copy savePack:panel.URL error:&error]) {
             NSAlert *alert=[NSAlert new]; alert.messageText=@"Couldn’t save this buddy"; alert.informativeText=error.localizedDescription ?: @"The artwork could not be encoded."; [alert beginSheetModalForWindow:self.window completionHandler:nil];
         } else {
-            [self.collection addObject:copy]; [self.picker addItemWithTitle:copy.name]; [self.picker selectItemAtIndex:self.collection.count-1]; [self selectCharacter:nil];
+            [self addCharacterToCollection:copy];
             self.status.stringValue=@"Buddy saved. Import this folder to use it again or share it with a friend.";
         }
     }];
@@ -328,6 +377,27 @@ static BOOL SaveView(NSView *view, NSString *path) {
     NSBitmapImageRep *rep=[[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL pixelsWide:view.bounds.size.width pixelsHigh:view.bounds.size.height bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace bytesPerRow:0 bitsPerPixel:0];
     [view cacheDisplayInRect:view.bounds toBitmapImageRep:rep];
     return [[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:path atomically:YES];
+}
+static NSBitmapImageRep *TurnImage(BuddieCharacter *character,double progress,BOOL desiredLeft) {
+    NSImage *image=[NSImage imageWithSize:NSMakeSize(320,320) flipped:YES drawingHandler:^BOOL(NSRect rect) {
+        BuddiePose pose={0}; pose.squash=1;
+        pose.feet[0].x=-character.footSpacing; pose.feet[1].x=character.footSpacing;
+        NSGraphicsContext.currentContext.imageInterpolation=NSImageInterpolationNone;
+        NSAffineTransform *scale=[NSAffineTransform transform]; [scale scaleBy:4]; [scale concat];
+        BuddieDrawPuppet(character,pose,desiredLeft,progress,0,NO); return YES;
+    }];
+    return [NSBitmapImageRep imageRepWithData:image.TIFFRepresentation];
+}
+static int ExportTurn(NSString *path) {
+    if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
+    BuddieCharacter *bit=ArticulatedNamed(@"bit");
+    for(int i=0;i<96;i++) {
+        double p=i<18 ? 0:i<36 ? (i-18)/18.:i<54 ? 1:i<72 ? 1-(i-54)/18.:0;
+        NSBitmapImageRep *rep=TurnImage(bit,p,i<54);
+        NSString *file=[path stringByAppendingPathComponent:[NSString stringWithFormat:@"turn-%04d.png",i]];
+        if(![[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:file atomically:YES]) return 1;
+    }
+    puts("Exported actual Cocoa puppet turn, with fixed planted feet, in both directions."); return 0;
 }
 static int ExportPuppet(NSString *path, NSString *identifier) {
     if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
@@ -414,6 +484,33 @@ static void TestPuppet(BuddieView *view) {
     view.reduceMotion=YES; [view animateAtTime:501 anchor:(BuddiePoint){50,0}]; NSData *bitStill=snapshot();
     [view animateAtTime:502 anchor:(BuddiePoint){100,0}]; NSCAssert([bitStill isEqual:snapshot()],@"Pixel Reduced Motion stays still");
     puts("PASS: pixel bot rendering; authored turn traversal and reversal without restart; Reduced Motion");
+    BuddieCharacter *bit=ArticulatedNamed(@"bit"); NSMutableSet *torsos=[NSMutableSet new]; NSData *feet=nil;
+    for(int i=0;i<5;i++) {
+        NSBitmapImageRep *a=TurnImage(bit,i/4.,YES),*b=TurnImage(bit,i/4.,NO);
+        NSCAssert([[a representationUsingType:NSBitmapImageFileTypePNG properties:@{}] isEqual:[b representationUsingType:NSBitmapImageFileTypePNG properties:@{}]],@"Changing the desired direction mid-turn cannot mirror any part");
+        NSMutableData *chest=[NSMutableData new],*sole=[NSMutableData new];
+        for(int y=212;y<280;y++) for(int x=120;x<224;x++) {
+            NSUInteger pixel[4]; [a getPixel:pixel atX:x y:y];
+            if(y<240 && x>=144 && x<192) [chest appendBytes:pixel length:sizeof(pixel)];
+            if(y>=252) [sole appendBytes:pixel length:sizeof(pixel)];
+        }
+        [torsos addObject:chest]; if(feet) NSCAssert([feet isEqual:sole],@"Turning in place preserves actual boot pixels"); else feet=sole;
+    }
+    NSCAssert(torsos.count==5,@"Torso visibly passes through five different authored perspectives");
+    puts("PASS: five rendered torso directions; direction-independent intermediate poses; stable boot pixels through turns");
+}
+
+static void TestCollection(void) {
+    Delegate *studio=[Delegate new]; studio.collection=[NSMutableArray new];
+    studio.picker=[[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+    BuddieCharacter *first=ArticulatedNamed(@"bit"); [studio addCharacterToCollection:first];
+    BuddieCharacter *reload=[first copy]; reload.torsoWidth=1.22; [studio addCharacterToCollection:reload];
+    NSCAssert(studio.collection.count==1 && studio.picker.numberOfItems==1 && studio.character.torsoWidth==1.22,@"Reimport reloads an identity without breaking selection");
+    BuddieCharacter *sameName=[first copy]; sameName.identifier=@"another-bit"; [studio addCharacterToCollection:sameName];
+    NSCAssert(studio.collection.count==2 && studio.picker.numberOfItems==2 && studio.picker.indexOfSelectedItem==1,@"Distinct packs with the same title keep separate menu entries");
+    [studio addCharacterToCollection:reload];
+    NSCAssert(studio.picker.indexOfSelectedItem==0 && [studio.picker.titleOfSelectedItem isEqual:reload.name],@"Repeated imports select the matching identity");
+    puts("PASS: repeated imports and duplicate display names preserve collection/menu identity");
 }
 
 static int SelfTest(void) {
@@ -467,6 +564,7 @@ static int SelfTest(void) {
     puts("PASS: software + fog replacement, unchanged geometry, detached artwork, repeated assignment, unrelated windows, unknown renderer fallback");
     puts("PASS: complete sprite drawing, timed blink, Reduced Motion stability, stopped facing, unchanged sprite hotspot");
     TestPuppet(sprite);
+    TestCollection();
     return 0;
 }
 int main(int argc,const char **argv) {
@@ -480,6 +578,7 @@ int main(int argc,const char **argv) {
         if(argc>2 && strcmp(argv[1],"--export-frames")==0) return ExportFrames([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:nil);
         if(argc>2 && strcmp(argv[1],"--export-palettes")==0) return ExportPalettes([NSString stringWithUTF8String:argv[2]]);
         if(argc>2 && strcmp(argv[1],"--export-puppet")==0) return ExportPuppet([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"pip-articulated");
+        if(argc>2 && strcmp(argv[1],"--export-turn")==0) return ExportTurn([NSString stringWithUTF8String:argv[2]]);
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         InstallMenus();
         Delegate *delegate=[Delegate new]; NSApp.delegate=delegate; [NSApp run];

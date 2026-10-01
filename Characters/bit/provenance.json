@@ -146,5 +146,44 @@
     ],
     "retained_collar_rows": 1
   },
-  "status": "User approved Bit's visual direction and requested a shorter neck. One-row collar restores the compact concept; body turn and final animation polish remain pending."
+  "body_turn": {
+    "source": "artwork/bit/body-turn-source.png",
+    "sha256": "cfeda8ebe482d66f8e7ddf32af2a3b0b97155ef25f58389b8f63083b10480475",
+    "trimmed_boxes": [
+      [
+        93,
+        210,
+        409,
+        480
+      ],
+      [
+        501,
+        210,
+        831,
+        480
+      ],
+      [
+        924,
+        209,
+        1249,
+        479
+      ],
+      [
+        1341,
+        209,
+        1672,
+        479
+      ],
+      [
+        1763,
+        210,
+        2079,
+        480
+      ]
+    ],
+    "shared_scale": 0.040740740740740744,
+    "target_top": 42,
+    "height": 11
+  },
+  "status": "User approved Bit's visual direction. Compact collar and coordinated head/torso turns; final animation polish remains pending."
 }

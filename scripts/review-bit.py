@@ -15,6 +15,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("slow", type=Path)
     parser.add_argument("fast", type=Path)
+    parser.add_argument("--turn", type=Path)
     args = parser.parse_args()
     output = ROOT / "docs/media"
     names = ["Original","Round","Tall","Big-head","Original","Rose","Moss","Lilac"]
@@ -43,10 +44,20 @@ def main():
         subprocess.run(["/opt/homebrew/bin/ffmpeg","-y","-loglevel","error","-framerate","60","-i",str(directory/pattern),"-filter_complex","fps=30,split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=none","-loop","0",str(output/name)],check=True)
     paths=[*ROOT.glob("Sources/Buddie*.*"),ROOT/"Sources/Preview.m",ROOT/"scripts/build-bit.py",ROOT/"scripts/review-bit.py",*ROOT.glob("Characters/bit/*.png"),ROOT/"Characters/bit/buddy.json"]
     paths += [output/name for name in ["bit-studio-customization.png","bit-studio-walk.gif","bit-studio-fast-travel.gif"]]
+    if args.turn:
+        strip=Image.new("RGB",(1100,350),"#f4f3ef"); pen=ImageDraw.Draw(strip)
+        for i,frame in enumerate([18,23,27,31,36]):
+            im=Image.open(args.turn/f"turn-{frame:04d}.png").convert("RGBA").crop((76,0,248,290))
+            strip.paste(im,(i*220+24,34),im)
+            pen.text((i*220+24,12),["Right","Turning","Front","Turning","Left"][i],font=font,fill="#293533")
+        pen.text((24,324),"Actual Cocoa renderer · coordinated head and torso perspective · planted feet",font=font,fill="#293533")
+        strip.save(output/"bit-studio-turn.png")
+        subprocess.run(["/opt/homebrew/bin/ffmpeg","-y","-loglevel","error","-framerate","60","-i",str(args.turn/"turn-%04d.png"),"-filter_complex","fps=30,split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=none","-loop","0",str(output/"bit-studio-turn.gif")],check=True)
+        paths += [output/"bit-studio-turn.png",output/"bit-studio-turn.gif"]
     report={"status":"User approved Bit's visual direction and requested a shorter neck. Updated one-row collar; animation polish and live CUA integration remain unfinished.",
             "source_fps":60,"gif_fps":30,"slow_frames":420,"fast_frames":240,"proportion_corner_bounds":bounds,
-            "checks":["v1/v2/v3 regression tests","Bit portable pixel/turn metadata","Localized blink edits with unchanged alpha","Five authored head directions; reversal retraces the current turn","Independent feet from the motion core; generated walk sheets rejected","Reduced Motion and fixed hotspot","Eight proportion corners fit the review view"],
-            "limitations":["Body still mirrors beneath authored head turns","Pixel joints and fast-travel landing need further visual polish","Native service IPC and true cursor-size legibility remain unresolved","Image model identifier not exposed by ChatGPT"],
+            "checks":["v1/v2/v3 regression tests","Bit portable pixel/turn metadata","Localized blink edits with unchanged alpha","Five coordinated head/torso directions; reversal retraces the current turn","Intermediate poses do not change when desired direction reverses","Actual boot pixels remain unchanged during a stationary turn","Independent feet from the motion core; generated walk sheets rejected","Reduced Motion and fixed hotspot","Eight proportion corners fit the review view","Repeated imports and shared display names preserve collection/menu identity"],
+            "limitations":["Directional highlights still vary in the generated art","Pixel joints and fast-travel landing need further visual polish","Native service IPC and true cursor-size legibility remain unresolved","Image model identifier not exposed by ChatGPT"],
             "sha256":{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(paths)}}
     (ROOT/"docs/evidence/bit-studio.json").write_text(json.dumps(report,indent=2)+"\n")
     print("Saved Bit's actual Cocoa motion, customization and geometry review.")

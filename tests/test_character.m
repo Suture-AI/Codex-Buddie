@@ -52,7 +52,8 @@ static void ArticulatedPack(NSURL *root) {
     bad=MutableJSON(json); bad[@"puppet"][@"parts"][@"head"][@"frames"][0][@"mask"]=@"body-00-mask.png"; Reject(saved,bad);
     puts("PASS: nine-part articulated pack; shared decode; proportions/geometry/colors round-trip; independent customization; missing roles, unsafe files, incompatible dimensions and invalid transforms rejected");
     BuddieCharacter *bit=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/bit"] error:&error];
-    NSCAssert(bit.pixelArt && bit.puppetParts.count==11 && bit.stride==8 && bit.footSpacing==5,@"Compact pixel rig with authored directional heads loads");
+    NSCAssert(bit.pixelArt && bit.puppetParts.count==13 && bit.stride==8 && bit.footSpacing==5,@"Compact pixel rig with authored head and torso directions loads");
+    NSCAssert(bit.clips[@"bodyTurn"].frames.count==5 && bit.clips[@"bodyLeft"].frames.count==1,@"Torso directions remain independently editable");
     NSCAssert(bit.clips[@"headTurn"].frames.count==5 && bit.clips[@"headLeft"].frames.count==5,@"Turning and left blink art are preserved");
     NSURL *pixelCopy=[root URLByAppendingPathComponent:@"bit.buddie"];
     NSCAssert([bit savePack:pixelCopy error:&error],@"Save pixel sampling and optional head tracks: %@",error);
@@ -74,6 +75,7 @@ static void ArticulatedPack(NSURL *root) {
     NSDictionary *pixelJSON=[NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:[pixelCopy URLByAppendingPathComponent:@"buddy.json"]] options:0 error:nil];
     bad=MutableJSON(pixelJSON); bad[@"puppet"][@"pixelArt"]=@1; Reject(pixelCopy,bad);
     bad=MutableJSON(pixelJSON); bad[@"puppet"][@"parts"][@"headTurn"][@"pivot"]=@[@99,@99]; Reject(pixelCopy,bad);
+    bad=MutableJSON(pixelJSON); [bad[@"puppet"][@"parts"] removeObjectForKey:@"bodyLeft"]; Reject(pixelCopy,bad);
     puts("PASS: pixel rig import/export, optional directional heads, compact stride, stable blink silhouettes and localized eye changes");
 }
 int main(void) {

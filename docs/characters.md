@@ -30,15 +30,29 @@ The head and arm attachment positions follow the torso's proportions.
 
 `proportions` supports `torsoWidth` (0.85–1.22), `torsoHeight` (0.85–1.18) and
 `headScale` (0.85–1.15), each defaulting to 1. Studio exposes these alongside
-size, stride, step height and material colors. Save/import preserves the
+size, stride, step height and material colors, with swatches and editable
+`#RRGGBB` values. Complete valid hex values update the preview immediately;
+unfinished/invalid entries restore the current color when editing ends.
+Save/import preserves the
 original part pixels, masks, blink timings, attachments and selected values.
 Optional `headTurn` and `headLeft` parts use the same pivot/anchor/frame format.
 The turn sequence runs from right through front to left. The renderer moves
 through its duration in either direction; a mid-turn reversal retraces the
 current progress. Head placement crosses its attachment offset gradually.
-The left head can carry its own blink frames. These authored heads are not
-mirrored again, while the torso/paws still use mirrored travel. This is an
-intermediate head-turn solution, not a complete authored body turnaround.
+The left head can carry its own blink frames. Authored heads are not mirrored again.
+
+Optional `bodyTurn` and `bodyLeft` must be supplied together. Their frames use
+the body's neutral pivot and attachment, with right/front/left ordering matching
+the head track. Both tracks share normalized progress; the head duration drives
+the turn when present, otherwise the body duration does. Physical limbs keep
+their screen-side attachments and highlights while the torso changes perspective.
+Bit supplies five head and five torso directions; a direction reversal cannot
+flip an intermediate pose. Older packs retain their mirrored-limb rendering.
+Review the [Cocoa turn](media/bit-studio-turn.gif) and [five poses](media/bit-studio-turn.png).
+
+Reimporting a saved identity reloads its collection entry. Different identities
+can share a display name without losing menu entries or selection. Imported
+packs remain session-local; keep the exported folder to reopen it later.
 
 Set `pixelArt: true` in `puppet` (or version 2's `sprites`) for nearest-neighbor
 sampling. Pixel parts snap their local attachments to canvas pixels, avoid

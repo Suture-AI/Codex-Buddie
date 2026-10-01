@@ -83,7 +83,7 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
         if(_motion.moving && fabs(_motion.velocity.x)>3) _spriteFacingLeft=_motion.velocity.x<0;
         double turnTarget=_spriteFacingLeft ? 1:0;
         double dt=isfinite(_spriteLastTime) ? MAX(0,MIN(.25,time-_spriteLastTime)):0; _spriteLastTime=time;
-        BuddieSpriteClip *turn=c.clips[c.puppetParts.count ? @"headTurn":@"turn"];
+        BuddieSpriteClip *turn=c.puppetParts.count ? (c.clips[@"headTurn"] ?: c.clips[@"bodyTurn"]):c.clips[@"turn"];
         // One authored right -> front -> left sequence. Reversing partway
         // walks backward from the current frame, without restarting the turn.
         if(turn && !reduced) {

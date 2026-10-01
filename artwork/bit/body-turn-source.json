@@ -1,0 +1,10 @@
+{
+  "source": "ChatGPT in Brave via official CUA",
+  "conversation": "https://chatgpt.com/c/6abdd0db-1804-83e8-8ac9-505a7e27ca9b",
+  "image_number": 5,
+  "download_title": "BIT Robot Torso Rotation Sprite Sheet.png",
+  "requested_model": "GPT Image 2.5 if available",
+  "verified_model": null,
+  "sha256": "cfeda8ebe482d66f8e7ddf32af2a3b0b97155ef25f58389b8f63083b10480475",
+  "review": "Five distinct torso orientations; chest light moves through front. Generated shoulder pads and hip stub need trimming/registration. Directional lighting is imperfect."
+}

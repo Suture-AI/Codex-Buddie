@@ -26,7 +26,10 @@ NSPoint BuddiePuppetSole(BuddieCharacter *c, BuddiePose p, NSUInteger foot) {
     return NSMakePoint(base.x+p.feet[foot].x*c.puppetMotionScale,base.y+(p.feet[foot].y-p.footLift[foot])*c.puppetMotionScale);
 }
 void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double turnProgress, double elapsed, BOOL reduced) {
-    double facing=facingLeft && c.mirrorWalk ? -1:1;
+    BOOL directionalBody=c.clips[@"bodyTurn"] && c.clips[@"bodyLeft"];
+    // Authored torso perspective changes while physical limbs keep their
+    // screen-side attachments and lighting. Contacts never swap on reversal.
+    double facing=!directionalBody && facingLeft && c.mirrorWalk ? -1:1;
     double lean=p.lean*.5*facing, bob=p.bodyY*c.puppetMotionScale;
     double squash=.75+.25*p.squash, width=c.torsoWidth/sqrt(MAX(.5,squash)),height=c.torsoHeight*squash;
     NSPoint origin=PartPoint(c.puppetParts[@"body"][@"anchor"]);
@@ -51,10 +54,13 @@ void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double 
     }
     double swing=sin(p.phase*2*M_PI)*.18*p.walkWeight;
     Part(c,@"pawFar",attach(@"pawFar"),lean-swing,1,1,elapsed,reduced);
-    Part(c,@"body",NSMakePoint(origin.x,origin.y+bob),lean,width,height,elapsed,reduced);
+    BOOL inTurn=turnProgress>1e-8 && turnProgress<1-1e-8;
+    NSString *body=directionalBody ? (inTurn ? @"bodyTurn":turnProgress>=.5 ? @"bodyLeft":@"body"):@"body";
+    Part(c,body,NSMakePoint(origin.x,origin.y+bob),lean,width,height,[body isEqual:@"bodyTurn"] ? turnProgress*c.clips[body].duration:elapsed,reduced);
     Part(c,@"pawNear",attach(@"pawNear"),lean+swing,1,1,elapsed,reduced);
-    BOOL turning=c.clips[@"headTurn"] && turnProgress>1e-8 && turnProgress<1-1e-8;
-    NSString *head=turning ? @"headTurn":facingLeft && c.clips[@"headLeft"] ? @"headLeft":@"head";
+    BOOL turning=c.clips[@"headTurn"] && inTurn;
+    BOOL leftHead=c.clips[@"headTurn"] ? turnProgress>=.5:facingLeft;
+    NSString *head=turning ? @"headTurn":leftHead && c.clips[@"headLeft"] ? @"headLeft":@"head";
     NSPoint neck=attach(head);
     if(c.clips[@"headTurn"]) {
         double worldX=c.spriteHotspot.x+(neck.x-c.spriteHotspot.x)*(1-2*turnProgress);

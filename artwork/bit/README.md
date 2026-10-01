@@ -10,7 +10,7 @@ neck, closer to the original generated concept.
 
 ## Generated sources
 
-All four images were generated sequentially through ChatGPT in Brave in
+All five images were generated sequentially through ChatGPT in Brave in
 [this art conversation](https://chatgpt.com/c/6abdd0db-1804-83e8-8ac9-505a7e27ca9b).
 The prompt requested GPT Image 2.5 if available; the UI did not expose the image
 model identifier. No exact model version is certified.
@@ -21,6 +21,9 @@ model identifier. No exact model version is certified.
 - [Second walking attempt](walk-attempt-2.png), image 3: rejected because the
   second half still repeats the leading-foot relationship.
 - [Head turn source](turn-source.png), image 4: five right/front/left heads.
+- [Torso turn source](body-turn-source.png), image 5: five chest directions.
+  The builder removes the bottom hip peg, registers an 11 px torso at its
+  existing attachment, and quantizes it into the shared palette.
 
 The user's reference image was not added to the repository. Browser upload
 was blocked by extension file access, so its visual direction was described
@@ -50,8 +53,9 @@ authored perspective; it is not flipped again. Reversing partway retraces the
 turn progress. Right and left blink variants alter only localized screen-eye
 pixels, with identical alpha and unchanged surrounding head art.
 
-This remains a motion study. The body still mirrors beneath the authored head
-turn, lighting/antenna perspective is imperfect, pixel joints need cleanup,
+The torso now follows the head through five authored directions, while limbs
+keep their physical screen-side positions. See the [turn review](../../docs/media/bit-studio-turn.png).
+This remains a motion study: lighting/antenna perspective is imperfect, pixel joints need cleanup,
 and fast-travel entry/landing needs further visual refinement. Native UI
 observation has recovered, and the Studio's size/proportion controls have now
 been exercised through official CUA. These exports still demonstrate the
@@ -68,7 +72,8 @@ bash scripts/build.sh
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --self-test
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-puppet .build/bit-review bit
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-frames .build/bit-cocoa bit
-uv run --with pillow python scripts/review-bit.py .build/bit-review .build/bit-cocoa
+".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-turn .build/bit-turn
+uv run --with pillow python scripts/review-bit.py .build/bit-review .build/bit-cocoa --turn .build/bit-turn
 ```
 
 The PNG frame directories are regenerable intermediates. The retained
@@ -77,3 +82,5 @@ The PNG frame directories are regenerable intermediates. The retained
 customization sheet and [review measurements](../../docs/evidence/bit-studio.json)
 are the published outputs. The earlier Pip evidence pins revision
 `ad4b018`; it is historical evidence rather than a checksum of today's source.
+The neck comparison/record similarly describes revision `1baeb50`, before
+the coordinated torso-turn update.

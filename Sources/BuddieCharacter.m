@@ -346,7 +346,8 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
         if(![definitions isKindOfClass:NSDictionary.class]) return Fail(error,@"Expected a clips or parts object.");
         if(puppet) {
             NSSet *keys=[NSSet setWithArray:definitions.allKeys];
-            if(sprites[@"clips"] || ![[NSSet setWithArray:roles] isSubsetOfSet:keys] || ![keys isSubsetOfSet:[NSSet setWithArray:[roles arrayByAddingObjectsFromArray:@[@"headTurn",@"headLeft"]]]]) return Fail(error,@"Articulated packs need nine body parts, with optional headTurn and headLeft artwork.");
+            if(sprites[@"clips"] || ![[NSSet setWithArray:roles] isSubsetOfSet:keys] || ![keys isSubsetOfSet:[NSSet setWithArray:[roles arrayByAddingObjectsFromArray:@[@"headTurn",@"headLeft",@"bodyTurn",@"bodyLeft"]]]]) return Fail(error,@"Articulated packs need nine body parts, with optional head/body turn and left artwork.");
+            if((definitions[@"bodyTurn"]!=nil)!=(definitions[@"bodyLeft"]!=nil)) return Fail(error,@"Provide bodyTurn and bodyLeft together.");
             if(!NumberInRange(sprites[@"motionScale"],.25,8)) return Fail(error,@"motionScale must be between 0.25 and 8 canvas pixels per motion unit.");
             c.puppetMotionScale=[sprites[@"motionScale"] doubleValue];
             NSDictionary *proportions=sprites[@"proportions"] ?: @{};

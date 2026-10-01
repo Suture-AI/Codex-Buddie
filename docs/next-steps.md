@@ -27,15 +27,24 @@ and turns. Pip is now a reusable motion/customization study.
 
 **Bit · Pixel bot** is now the default Studio selection. It has a compact
 pixel rig, independent limbs, preserved-alpha screen blinks, editable shape and
-three colors, and five authored head directions with reversible turn progress.
+three colors, and five coordinated head/torso directions with reversible turn progress.
 The generated walk sheets were rejected after anatomy review. See
 [Bit's review](evidence/bit-studio.json) and [source notes](../artwork/bit/README.md).
 The user approved Bit's appearance and asked for a shorter neck. The generated
 head strip's long neck is now a one-row collar, registered at the head pivot
 through all five directions and tested with the user's smaller-head proportions.
-Next verify live color-well updates: one native screenshot showed a red Shell
-well while the robot remained blue, despite passing recoloring/export checks.
-Then improve the whole-body turn, pixel joints and fast-travel landing. Native integration and
+The color-well mismatch reproduced as a blue exported pack despite a red swatch.
+Wells now send live changes, and hex inputs provide exact editable colors. Official
+CUA verified red rendering, red saved material values, reopen and repeated import.
+See the [live UI capture](media/bit-live-color.png) and [verification record](evidence/bit-live-color.json).
+Repeated imports also exposed a duplicate-name popup bug, now fixed and covered
+by Cocoa regression checks. Native macOS color-panel interaction itself remains
+unverified because CUA did not open that panel reliably.
+
+The whole torso now turns with the head, and actual boot pixels stay fixed
+during a stationary turn. See [the turn](media/bit-studio-turn.gif).
+Next improve pixel leg joints and fast-travel landing, add richer expressions,
+and persist the installed collection/settings across launches. Native integration and
 production cursor size remain separate unresolved gates.
 
 The root Studio also includes **Pip · Articulated**, a version-3 pack with nine

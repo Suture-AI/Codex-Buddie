@@ -313,6 +313,62 @@
             "mask": "turn-4-mask.png"
           }
         ]
+      },
+      "bodyLeft": {
+        "pivot": [
+          34,
+          51
+        ],
+        "anchor": [
+          42,
+          59
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "bodyLeft.png",
+            "duration": 1,
+            "mask": "bodyLeft-mask.png"
+          }
+        ]
+      },
+      "bodyTurn": {
+        "pivot": [
+          34,
+          51
+        ],
+        "anchor": [
+          42,
+          59
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "body-turn-0.png",
+            "duration": 0.045,
+            "mask": "body-turn-0-mask.png"
+          },
+          {
+            "image": "body-turn-1.png",
+            "duration": 0.045,
+            "mask": "body-turn-1-mask.png"
+          },
+          {
+            "image": "body-turn-2.png",
+            "duration": 0.045,
+            "mask": "body-turn-2-mask.png"
+          },
+          {
+            "image": "body-turn-3.png",
+            "duration": 0.045,
+            "mask": "body-turn-3-mask.png"
+          },
+          {
+            "image": "body-turn-4.png",
+            "duration": 0.045,
+            "mask": "body-turn-4-mask.png"
+          }
+        ]
       }
     }
   }

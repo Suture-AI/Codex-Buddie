@@ -123,6 +123,26 @@ def main():
         parts[role]["frames"] = [frame(role,2.3),frame(role+"-half",.05),frame(role+"-closed",.085),frame(role+"-half",.05),frame(role,1.1)]
     parts["headTurn"] = dict(parts["head"])
     parts["headTurn"]["frames"] = [frame(f"turn-{i}",.045) for i in range(5)]
+    torsos = Image.open(ART / "body-turn-source.png").convert("RGBA")
+    body_boxes = []
+    for i in range(5):
+        left, right = round(i*torsos.width/5), round((i+1)*torsos.width/5)
+        box = torsos.crop((left,0,right,torsos.height)).getchannel("A").point(lambda a:255 if a>=128 else 0).getbbox()
+        assert box and box[0]>2 and box[2]<right-left-2, "Review torso gutters."
+        # The independent leg rig owns the hip joint, not this generated peg.
+        body_boxes.append((left+box[0],box[1],left+box[2],box[3]-31))
+    body_scale = 11/max(b[3]-b[1] for b in body_boxes)
+    for i, box in enumerate(body_boxes):
+        body = torsos.crop(box)
+        body = body.resize((round(body.width*body_scale),11),Image.Resampling.NEAREST)
+        alpha = body.getchannel("A").point(lambda a:255 if a>=128 else 0)
+        body = body.convert("RGB").quantize(palette=palette,dither=Image.Dither.NONE).convert("RGBA"); body.putalpha(alpha)
+        out = Image.new("RGBA",(64,64)); out.alpha_composite(body,(34-body.width//2,42))
+        images[f"body-turn-{i}"] = out
+    images["body"] = images["body-turn-0"].copy()
+    images["bodyLeft"] = images["body-turn-4"].copy()
+    parts["bodyLeft"] = dict(parts["body"],frames=[frame("bodyLeft")])
+    parts["bodyTurn"] = dict(parts["body"],frames=[frame(f"body-turn-{i}",.045) for i in range(5)])
     for name, image in images.items():
         image.save(PACK / (name+".png"))
         mask = Image.new("RGBA", image.size, (0, 0, 0, 255))
@@ -144,7 +164,8 @@ def main():
                   "source_bounds": source_box, "part_rectangles": {k:v[0] for k,v in definitions.items()}, "eye_boxes": eye_boxes,
                   "turn_source": "artwork/bit/turn-source.png", "turn_source_sha256": hashlib.sha256((ART / "turn-source.png").read_bytes()).hexdigest(),
                   "turn_geometry": {"source_boxes":boxes,"shared_scale":scale,"source_baseline":baseline,"target_neck":[32,42],"source_collar_rows":collar_starts,"retained_collar_rows":1},
-                  "status": "User approved Bit's visual direction and requested a shorter neck. One-row collar restores the compact concept; body turn and final animation polish remain pending."}
+                  "body_turn": {"source":"artwork/bit/body-turn-source.png","sha256":hashlib.sha256((ART/"body-turn-source.png").read_bytes()).hexdigest(),"trimmed_boxes":body_boxes,"shared_scale":body_scale,"target_top":42,"height":11},
+                  "status": "User approved Bit's visual direction. Compact collar and coordinated head/torso turns; final animation polish remains pending."}
     (PACK / "provenance.json").write_text(json.dumps(provenance, indent=2)+"\n")
     print(json.dumps({"eyes":eye_boxes,"colors":len(set(base.getpixel((x,y))[:3] for y in range(64) for x in range(64) if base.getpixel((x,y))[3]))}))
 
