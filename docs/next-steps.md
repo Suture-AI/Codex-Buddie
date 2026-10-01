@@ -48,7 +48,7 @@ The independent passive experiment under `experiments/passive-overlay/` adds:
 - Three original character presets and a local PNG sprite-pack loader.
 - Passive tracking of actual native computer-use cursor windows, observed during official CUA actions.
 - An ordinary preview window and click-test control for repeatable UI checks.
-- 26 passing core checks via `bash experiments/passive-overlay/scripts/test.sh`.
+- 36 passing core checks via `bash experiments/passive-overlay/scripts/test.sh`.
 - Versioned evidence locating native cursor classes, the `SoftwareCursor` asset, browser image renderer and private cursor-location callback.
 
 Read the [runtime research](../experiments/passive-overlay/docs/research.md) and the root README. The native and browser renderers are different integrations. The passive prototype uses public macOS APIs to observe a private app's window naming convention; it does not hook the actual renderer. Its observed newer service versions have not been certified for the root native shim.

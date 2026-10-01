@@ -35,7 +35,7 @@ procedural presets. See the [art direction](docs/art-direction.md) and
 
 An independently tested [passive macOS overlay](experiments/passive-overlay/README.md)
 is included under `experiments/passive-overlay/`. It has three presets, custom
-sprite support, and 26 core checks. Its live trace proves that the native cursor's
+sprite support, and 36 core checks. Its live trace proves that the native cursor's
 window bounds can be observed, but it does **not** replace the original artwork.
 The renderer experiment at the repository root remains the direct-replacement
 track.
