@@ -84,8 +84,27 @@ failed-write rollback. Live restart verification is still pending because CUA
 currently returns `cgWindowNotFound` for the already running Studio.
 See the [source-pinned library checks](evidence/studio-library.json).
 
-Next refine knee/tail articulation and extend anatomy controls. Native
-integration and production cursor size remain separate unresolved gates.
+Arm length, leg length, boot width and stance are now editable, portable and
+persistent. Body/Limbs/Gait sections organize the controls without obscuring
+colors; numeric readouts show current values. Pixel calves now fold around a
+knee and stay connected to both hip and cuff. Leg length moves the complete
+upper body while keeping the short neck registration and sole height.
+Review [all three buddies](media/anatomy-collection.png),
+[Bit](media/bit-anatomy.gif), [Miso](media/miso-anatomy.gif),
+[Pip](media/pip-anatomy.gif), the [native layout export](media/studio-limbs-layout.png)
+and [the checks](evidence/limb-customization.json). The layout images are
+explicitly labelled as Cocoa exports, not live CUA screenshots.
+
+288 anatomy/size/frame-rate combinations preserve 49,440 planted contacts,
+including a stance change during travel. 108 pixel calf images remain
+four-connected, and all 128 extremes of seven proportions fit both tested
+viewport layouts at idle and in flight. These checks exercise the renderer;
+they do not establish native integration or small-cursor legibility.
+
+Next refine directional limb/tail artwork and non-pixel knee articulation.
+Live Studio interaction/restart, native integration and production cursor size
+remain unresolved gates. The broader anatomy goal still includes more than
+the current biped rig and scalar controls.
 
 The root Studio also includes **Pip · Articulated**, a version-3 pack with nine
 independent generated parts, stable blink textures, live torso width/height and

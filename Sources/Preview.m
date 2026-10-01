@@ -80,11 +80,13 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 @property BuddieLibrary *library;
 @property NSTextField *status;
 @property NSPopUpButton *picker;
+@property NSSegmentedControl *settingsGroup;
 @property NSButton *playButton;
 @property NSButton *reduceButton;
 @property NSMutableArray<BuddieCharacter *> *collection;
 @property NSMutableDictionary<NSString *,NSSlider *> *sliders;
 @property NSMutableDictionary<NSString *,NSTextField *> *settingLabels;
+@property NSMutableDictionary<NSString *,NSTextField *> *settingValues;
 @property NSTextField *settingsHeading;
 @property NSTextField *artNote;
 @property NSMutableArray<NSView *> *materialControls;
@@ -97,14 +99,15 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 @end
 @implementation Delegate
 - (BuddieView *)buddy { return (BuddieView *)self.cursor.contentView; }
-- (void)applicationDidFinishLaunching:(NSNotification *)notification {
-    self.library=[[BuddieLibrary alloc] initWithURL:BuddieLibrary.defaultURL bundled:BuddieCollection()];
+- (void)buildStudio {
+    if(!self.library) self.library=[[BuddieLibrary alloc] initWithURL:BuddieLibrary.defaultURL bundled:BuddieCollection()];
     self.collection=[self.library.characters mutableCopy];
     NSString *selected=self.library.selectedIdentifier;
-    if(![self.library characterForIdentifier:selected]) selected=@"bit";
+    if(![[self.collection valueForKey:@"identifier"] containsObject:selected]) selected=@"bit";
     self.character=[self.library characterForIdentifier:selected] ?: [self.collection.firstObject copy];
     self.sliders=[NSMutableDictionary new];
     self.settingLabels=[NSMutableDictionary new];
+    self.settingValues=[NSMutableDictionary new];
     self.materialControls=[NSMutableArray new];
     self.materialFields=[NSMutableDictionary new]; self.materialWells=[NSMutableDictionary new];
     self.window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,960,700) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable backing:NSBackingStoreBuffered defer:NO];
@@ -123,11 +126,20 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     self.picker.target=self; self.picker.action=@selector(selectCharacter:); [v addSubview:self.picker];
     [v addSubview:Button(@"Import buddy…",self,@selector(importPack:),NSMakeRect(696,558,230,32))];
     self.settingsHeading=Label(@"SHAPE & EXPRESSION",11,NSColor.secondaryLabelColor,NSMakeRect(700,508,230,20)); [v addSubview:self.settingsHeading];
-    NSArray *settings=@[@[@"width",@"Body width",@24,@42],@[@"height",@"Body height",@24,@40],@[@"eyeSpacing",@"Eye spacing",@8,@20],@[@"eyeSize",@"Eye size",@3,@7],@[@"faceY",@"Face position",@(-7),@7],@[@"stride",@"Stride",@8,@40],@[@"footLift",@"Step height",@2,@8],@[@"spriteHeight",@"Size",@32,@96],@[@"torsoWidth",@"Body width",@.85,@1.22],@[@"torsoHeight",@"Body height",@.85,@1.18],@[@"headScale",@"Head size",@.85,@1.15]];
+    self.settingsGroup=[NSSegmentedControl segmentedControlWithLabels:@[@"Body",@"Limbs",@"Gait"] trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(selectSettingsGroup:)];
+    self.settingsGroup.frame=NSMakeRect(696,463,230,40); self.settingsGroup.selectedSegment=0;
+    self.settingsGroup.accessibilityLabel=@"Customization section"; [v addSubview:self.settingsGroup];
+    NSMutableArray *settings=[@[@[@"width",@"Body width",@24,@42],@[@"height",@"Body height",@24,@40],@[@"eyeSpacing",@"Eye spacing",@8,@20],@[@"eyeSize",@"Eye size",@3,@7],@[@"faceY",@"Face position",@(-7),@7],@[@"stride",@"Stride",@8,@40],@[@"footLift",@"Step height",@2,@8],@[@"spriteHeight",@"Size",@32,@96]] mutableCopy];
+    for(NSArray *pair in @[@[@"torsoWidth",@"Body width"],@[@"torsoHeight",@"Body height"],@[@"headScale",@"Head size"],@[@"armLength",@"Arm length"],@[@"legLength",@"Leg length"],@[@"bootWidth",@"Boot width"],@[@"stanceWidth",@"Stance"]]) {
+        NSArray *range=BuddieCharacter.puppetProportionRanges[pair[0]]; [settings addObject:@[pair[0],pair[1],range[0],range[1]]];
+    }
     int row=0;
     for(NSArray *setting in settings) {
         CGFloat y=465-row*43;
-        NSTextField *label=Label(setting[1],12,Ink(),NSMakeRect(700,y+6,110,20)); self.settingLabels[setting[0]]=label; [v addSubview:label];
+        NSTextField *label=Label(setting[1],12,Ink(),NSMakeRect(700,y+6,81,20)); self.settingLabels[setting[0]]=label; [v addSubview:label];
+        NSTextField *value=Label(@"",11,NSColor.secondaryLabelColor,NSMakeRect(773,y+6,32,20));
+        value.font=[NSFont monospacedDigitSystemFontOfSize:11 weight:NSFontWeightRegular]; value.alignment=NSTextAlignmentRight;
+        value.accessibilityLabel=[setting[1] stringByAppendingString:@" value"]; self.settingValues[setting[0]]=value; [v addSubview:value];
         NSSlider *slider=[NSSlider sliderWithValue:0 minValue:[setting[2] doubleValue] maxValue:[setting[3] doubleValue] target:self action:@selector(tune:)];
         slider.frame=NSMakeRect(809,y+4,115,24); slider.identifier=setting[0]; slider.continuous=YES;
         slider.accessibilityLabel=setting[1]; self.sliders[setting[0]]=slider; [v addSubview:slider]; row++;
@@ -150,6 +162,10 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [v addSubview:Button(@"Native size",self,@selector(style:),NSMakeRect(324,116,130,34))];
     [v addSubview:Label(@"Tap another stop mid-walk to change direction.",12,NSColor.secondaryLabelColor,NSMakeRect(34,86,620,22))];
     self.status=Label(@"Character preview • live Codex replacement is still under development",11,NSColor.secondaryLabelColor,NSMakeRect(34,34,890,22)); [v addSubview:self.status];
+    [self syncSliders];
+}
+- (void)applicationDidFinishLaunching:(NSNotification *)notification {
+    [self buildStudio];
     [self.window center]; [self.window makeKeyAndOrderFront:nil]; [NSApp activateIgnoringOtherApps:YES];
     _anchor=(BuddiePoint){250,370}; _journey.end=_anchor;
     [self createCursor]; [self syncSliders];
@@ -161,6 +177,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 - (void)syncSliders {
     _syncingControls=YES;
     BOOL sprite=self.character.clips.count>0,puppet=self.character.puppetParts.count>0;
+    self.settingsGroup.hidden=!puppet;
     self.settingsHeading.stringValue=sprite ? @"MAKE IT YOURS":@"SHAPE & EXPRESSION";
     self.artNote.hidden=!sprite || puppet;
     self.artNote.stringValue=self.character.materials.count ? @"Your colors, with all the original shading. Your changes are saved automatically.":@"The face and outfit belong together. Import another buddy to try a different look.";
@@ -190,19 +207,27 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
         [self.materialControls addObjectsFromArray:@[label,hex,well]];
         [self.window.contentView addSubview:label]; [self.window.contentView addSubview:hex]; [self.window.contentView addSubview:well];
     }
-    NSArray *visible=puppet ? @[@"spriteHeight",@"torsoWidth",@"torsoHeight",@"headScale",@"stride",@"footLift"]:sprite ? @[@"spriteHeight",@"stride"]:@[@"width",@"height",@"eyeSpacing",@"eyeSize",@"faceY",@"stride",@"footLift"];
+    NSArray *groups=@[@[@"spriteHeight",@"torsoWidth",@"torsoHeight",@"headScale"],@[@"armLength",@"legLength",@"bootWidth",@"stanceWidth"],@[@"stride",@"footLift"]];
+    NSInteger group=MAX(0,MIN(2,self.settingsGroup.selectedSegment));
+    NSArray *visible=puppet ? groups[group]:sprite ? @[@"spriteHeight",@"stride"]:@[@"width",@"height",@"eyeSpacing",@"eyeSize",@"faceY",@"stride",@"footLift"];
     for(NSString *key in self.sliders) {
         if([key isEqual:@"stride"]) self.sliders[key].maxValue=self.character.pixelArt ? MAX(16,self.character.stride):40;
         self.sliders[key].doubleValue=[key isEqual:@"width"] ? self.character.bodySize.width : [key isEqual:@"height"] ? self.character.bodySize.height : [[self.character valueForKey:key] doubleValue];
         BOOL supported=[visible containsObject:key];
-        self.sliders[key].hidden=!supported; self.settingLabels[key].hidden=!supported;
+        self.sliders[key].hidden=!supported; self.settingLabels[key].hidden=!supported; self.settingValues[key].hidden=!supported;
         if(!supported) continue;
-        CGFloat y=465-[visible indexOfObject:key]*(puppet ? 35:43);
-        [self.sliders[key] setFrameOrigin:NSMakePoint(809,y+4)];
+        CGFloat y=(puppet ? 424:465)-[visible indexOfObject:key]*43;
+        self.sliders[key].frame=NSMakeRect(809,y-4,115,40);
         [self.settingLabels[key] setFrameOrigin:NSMakePoint(700,y+6)];
+        [self.settingValues[key] setFrameOrigin:NSMakePoint(773,y+6)]; [self updateSettingValue:key];
     }
     self.status.stringValue=puppet ? @"Articulated character study • live Codex replacement is still under development":sprite ? @"Complete character poses • motion study • live Codex replacement is still under development":@"Character preview • live Codex replacement is still under development";
     _syncingControls=NO;
+}
+- (void)selectSettingsGroup:(NSSegmentedControl *)sender { [self.window makeFirstResponder:nil]; [self syncSliders]; }
+- (void)updateSettingValue:(NSString *)key {
+    double value=self.sliders[key].doubleValue;
+    self.settingValues[key].stringValue=BuddieCharacter.puppetProportionRanges[key] ? [NSString stringWithFormat:@"%.0f%%",value*100]:[NSString stringWithFormat:@"%.0f",value];
 }
 - (void)paint:(NSColorWell *)sender {
     if(_syncingControls || self.materialWells[sender.identifier]!=sender) return;
@@ -309,6 +334,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     if([key isEqual:@"width"]) self.character.bodySize=NSMakeSize(sender.doubleValue,self.character.bodySize.height);
     else if([key isEqual:@"height"]) self.character.bodySize=NSMakeSize(self.character.bodySize.width,sender.doubleValue);
     else [self.character setValue:@(sender.doubleValue) forKey:key];
+    [self updateSettingValue:key];
     [self scheduleSave];
 }
 - (BOOL)addCharacterToCollection:(BuddieCharacter *)character {
@@ -547,6 +573,155 @@ static int ExportPuppet(NSString *path, NSString *identifier) {
     puts("Exported articulated Cocoa slow gait, proportion variants, palettes and all eight proportion corners."); return 0;
 }
 
+static NSArray *AnatomyVariants(void) {
+    return @[@[@"Original",@1,@1,@1,@1],@[@"Compact",@.7,@.65,@1.2,@1.1],
+        @[@"Long limbs",@1.3,@1.8,@.85,@.9],@[@"Big boots",@.9,@1.3,@1.35,@1.4]];
+}
+static BuddieCharacter *AnatomyCharacter(NSString *identifier,NSArray *variant) {
+    BuddieCharacter *c=ArticulatedNamed(identifier);
+    c.armLength=[variant[1] doubleValue]; c.legLength=[variant[2] doubleValue]; c.bootWidth=[variant[3] doubleValue]; c.stanceWidth=[variant[4] doubleValue]; return c;
+}
+static NSBitmapImageRep *AnatomyImage(BuddieCharacter *c,BuddiePose pose,double progress,double elapsed) {
+    NSImage *image=[NSImage imageWithSize:NSMakeSize(400,400) flipped:YES drawingHandler:^BOOL(NSRect rect) {
+        NSGraphicsContext.currentContext.imageInterpolation=c.pixelArt ? NSImageInterpolationNone:NSImageInterpolationHigh;
+        NSAffineTransform *t=[NSAffineTransform transform]; [t translateXBy:40 yBy:40]; [t scaleBy:320/c.spriteCanvas.height]; [t concat];
+        BuddieDrawPuppet(c,pose,progress>.5,progress,elapsed,NO); return YES;
+    }];
+    return [NSBitmapImageRep imageRepWithData:image.TIFFRepresentation];
+}
+static int ExportAnatomy(NSString *path,NSString *identifier) {
+    if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
+    BuddieView *view=[[BuddieView alloc] initWithFrame:NSMakeRect(0,0,240,240)]; view.manualAnimation=YES;
+    NSUInteger variantIndex=0;
+    for(NSArray *variant in AnatomyVariants()) {
+        view.character=AnatomyCharacter(identifier,variant); if(!view.character) return 1;
+        for(int i=0;i<240;i++) {
+            double t=i/60.,x=t<.25 ? 0:t<1.2 ? (t-.25)*24:t<1.65 ? 22.8+(t-1.2)*80:t<2 ? 58.8+(t-1.65)*16:t<2.45 ? 64.4:t<3.3 ? 64.4-(t-2.45)*24:44;
+            double unit=view.character.spriteHeight/view.character.spriteCanvas.height*view.character.puppetMotionScale;
+            if(i==209) [view press:YES atTime:100+t]; if(i==218) [view press:NO atTime:100+t];
+            [view animateAtTime:100+t anchor:(BuddiePoint){x*unit,0}];
+            NSBitmapImageRep *rep=AnatomyImage(view.character,view.motionPose,view.facingProgress,t);
+            NSString *file=[path stringByAppendingPathComponent:[NSString stringWithFormat:@"variant-%lu-%04d.png",(unsigned long)variantIndex,i]];
+            if(![[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:file atomically:YES]) return 1;
+        }
+        variantIndex++;
+    }
+    puts("Exported four anatomy variants through walking, flight, landing, reversal and clicks in the Cocoa renderer."); return 0;
+}
+static int ExportStudio(NSString *path) {
+    if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
+    NSURL *root=[NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[@"buddie-layout-" stringByAppendingString:NSUUID.UUID.UUIDString]]];
+    Delegate *studio=[Delegate new];
+    @try {
+        studio.library=[[BuddieLibrary alloc] initWithURL:root bundled:BuddieCollection()]; [studio buildStudio];
+        BuddieView *preview=[[BuddieView alloc] initWithFrame:NSMakeRect(100,220,300,300)];
+        preview.manualAnimation=YES; preview.reduceMotion=YES; preview.characterScale=2; preview.character=studio.character;
+        [studio.window.contentView addSubview:preview];
+        NSArray *names=@[@"body",@"limbs",@"gait"];
+        for(int i=0;i<3;i++) {
+            studio.settingsGroup.selectedSegment=i; [studio selectSettingsGroup:studio.settingsGroup];
+            if(!SaveView(studio.window.contentView,[path stringByAppendingPathComponent:[names[i] stringByAppendingString:@".png"]])) return 1;
+        }
+        puts("Exported hidden Cocoa Studio layout views; these are not live CUA screenshots."); return 0;
+    } @finally { [NSFileManager.defaultManager removeItemAtURL:root error:nil]; }
+}
+
+static void AssertConnectedPixels(NSBitmapImageRep *rep) {
+    NSUInteger w=rep.pixelsWide,h=rep.pixelsHigh,total=0,start=0,pixel[4];
+    NSMutableData *mask=[NSMutableData dataWithLength:w*h]; unsigned char *bits=mask.mutableBytes;
+    for(NSUInteger y=0;y<h;y++) for(NSUInteger x=0;x<w;x++) {
+        [rep getPixel:pixel atX:x y:y]; if(pixel[3]) { bits[y*w+x]=1; start=y*w+x; total++; }
+    }
+    NSCAssert(total>0,@"Calf must render");
+    NSMutableData *queue=[NSMutableData dataWithLength:w*h*sizeof(NSUInteger)]; NSUInteger *q=queue.mutableBytes,read=0,write=0;
+    q[write++]=start; bits[start]=0;
+    while(read<write) {
+        NSUInteger v=q[read++],x=v%w,y=v/w; NSInteger offsets[]={-1,1,-(NSInteger)w,(NSInteger)w};
+        for(int d=0;d<4;d++) {
+            if((d==0 && x==0)||(d==1 && x==w-1)||(d==2 && y==0)||(d==3 && y==h-1)) continue;
+            NSUInteger next=v+offsets[d]; if(bits[next]) { bits[next]=0; q[write++]=next; }
+        }
+    }
+    NSCAssert(total==write,@"Folded legs remain one four-connected pixel shape");
+}
+static void AssertViewFits(BuddieView *view) {
+    // Render beyond the view's clipping rectangle so out-of-bounds pixels are
+    // detected rather than silently cropped by the normal Cocoa capture path.
+    int width=NSWidth(view.bounds),height=NSHeight(view.bounds),padding=20;
+    NSImage *image=[NSImage imageWithSize:NSMakeSize(width+padding*2,height+padding*2) flipped:YES drawingHandler:^BOOL(NSRect rect) {
+        NSAffineTransform *t=[NSAffineTransform transform]; [t translateXBy:padding yBy:padding]; [t concat];
+        [view drawRect:view.bounds]; return YES;
+    }];
+    NSBitmapImageRep *rep=[NSBitmapImageRep imageRepWithData:image.TIFFRepresentation]; NSUInteger pixel[4];
+    for(int y=0;y<height+2*padding;y++) for(int x=0;x<width+2*padding;x++) {
+        if(x>=padding && x<padding+width && y>=padding && y<padding+height) continue;
+        [rep getPixel:pixel atX:x y:y];
+        NSCAssert(pixel[3]==0,@"Customized %@ must fit its %@ viewport (%.2f/%.2f/%.2f, %.2f/%.2f/%.2f/%.2f): pixel %d,%d",view.character.identifier,view.softwareStyle ? @"software":@"Studio",view.character.torsoWidth,view.character.torsoHeight,view.character.headScale,view.character.armLength,view.character.legLength,view.character.bootWidth,view.character.stanceWidth,x,y);
+    }
+}
+static void TestAnatomy(void) {
+    BuddieView *view=[[BuddieView alloc] initWithFrame:NSMakeRect(0,0,300,300)]; view.manualAnimation=YES;
+    NSArray *keys=@[@"armLength",@"legLength",@"bootWidth",@"stanceWidth"];
+    NSUInteger contacts=0;
+    for(NSString *identifier in @[@"bit",@"miso",@"pip-articulated"]) {
+        BuddieCharacter *original=ArticulatedNamed(identifier);
+        for(int corner=0;corner<16;corner++) for(NSNumber *rate in @[@30,@60,@120]) for(int height=64;height<=96;height+=32) {
+            BuddieCharacter *c=[original copy];
+            for(int k=0;k<4;k++) [c setValue:BuddieCharacter.puppetProportionRanges[keys[k]][(corner>>k)&1] forKey:keys[k]];
+            c.spriteHeight=height; view.character=c;
+            double unit=c.spriteHeight/c.spriteCanvas.height,dt=1./rate.doubleValue;
+            [view animateAtTime:100 anchor:(BuddiePoint){0,0}];
+            NSPoint hotspot=view.hotspot;
+            for(int i=1;i<=rate.intValue*2;i++) {
+                double x=i*12*dt; BuddiePose before=view.motionPose;
+                if(i==rate.intValue) c.stanceWidth=c.stanceWidth<1 ? 1.4:.8;
+                [view animateAtTime:100+i*dt anchor:(BuddiePoint){x*unit*c.puppetMotionScale,0}];
+                BuddiePose after=view.motionPose;
+                for(int foot=0;foot<2;foot++) if(before.footLift[foot]<1e-8 && after.footLift[foot]<1e-8 && !NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion) {
+                    NSPoint a=BuddiePuppetSole(c,before,foot),b=BuddiePuppetSole(c,after,foot);
+                    NSCAssert(fabs((x-12*dt)*unit*c.puppetMotionScale+a.x*unit-x*unit*c.puppetMotionScale-b.x*unit)<1e-7,@"Limb/stance customization preserves planted contact through live stance changes"); contacts++;
+                }
+                NSCAssert(NSEqualPoints(hotspot,view.hotspot),@"Limb proportions never move the input hotspot");
+            }
+        }
+        view.character=[original copy]; view.character.armLength=.7; view.character.legLength=1.8; view.character.bootWidth=1.35; view.character.stanceWidth=1.4;
+        view.reduceMotion=YES; [view animateAtTime:200 anchor:(BuddiePoint){0,0}];
+        NSData *first=[AnatomyImage(view.character,view.motionPose,0,0) representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+        [view animateAtTime:202 anchor:(BuddiePoint){60,0}];
+        // Hold the source art time too: the production renderer passes reduced=YES.
+        NSData *second=[AnatomyImage(view.character,view.motionPose,0,0) representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+        NSCAssert([first isEqual:second],@"Custom limbs hold their static geometry with Reduced Motion"); view.reduceMotion=NO;
+        NSArray *allKeys=[BuddieCharacter.puppetProportionRanges.allKeys sortedArrayUsingSelector:@selector(compare:)];
+        for(int corner=0;corner<128;corner++) for(int software=0;software<2;software++) {
+            view.frame=software ? NSMakeRect(0,0,20,23):NSMakeRect(0,0,300,300); view.softwareStyle=software;
+            BuddieCharacter *c=[original copy]; c.spriteHeight=96;
+            for(NSUInteger k=0;k<allKeys.count;k++) [c setValue:BuddieCharacter.puppetProportionRanges[allKeys[k]][(corner>>k)&1] forKey:allKeys[k]];
+            view.character=c; [view animateAtTime:100 anchor:(BuddiePoint){0,0}]; AssertViewFits(view);
+            double unit=c.spriteHeight/c.spriteCanvas.height*c.puppetMotionScale;
+            for(int i=1;i<=12;i++) [view animateAtTime:100+i/60. anchor:(BuddiePoint){i*80/60.*unit,0}];
+            AssertViewFits(view);
+        }
+        view.frame=NSMakeRect(0,0,300,300); view.softwareStyle=NO;
+    }
+    NSUInteger folds=0;
+    for(NSString *identifier in @[@"bit",@"miso"]) for(NSNumber *length in @[@.65,@1,@1.8]) for(int foot=0;foot<2;foot++) {
+        BuddieCharacter *c=ArticulatedNamed(identifier); c.legLength=length.doubleValue;
+        NSString *role=foot ? @"legFar":@"legNear"; c.clips=@{role:c.clips[role]};
+        double bodyLift=([c.puppetParts[@"legNear"][@"span"] doubleValue]+[c.puppetParts[@"legFar"][@"span"] doubleValue])*.5*(c.legLength-1);
+        NSArray *hip=c.puppetParts[role][@"anchor"],*boot=c.puppetParts[foot ? @"bootFar":@"bootNear"][@"anchor"],*cuff=c.puppetParts[role][@"cuff"];
+        for(int dx=-8;dx<=8;dx+=8) for(int lift=0;lift<=8;lift+=4) {
+            BuddiePose p={0}; p.squash=1; p.feet[foot].x=dx; p.footLift[foot]=lift;
+            NSBitmapImageRep *rep=AnatomyImage(c,p,0,0); NSUInteger pixel[4];
+            [rep getPixel:pixel atX:40+4*round([hip[0] doubleValue])+2 y:40+4*round([hip[1] doubleValue]-bodyLift)+2];
+            NSCAssert(pixel[3]>0,@"A custom folded leg reaches its hip");
+            [rep getPixel:pixel atX:40+4*round([boot[0] doubleValue]+dx+[cuff[0] doubleValue])+2 y:40+4*round([boot[1] doubleValue]-lift+[cuff[1] doubleValue])+2];
+            NSCAssert(pixel[3]>0,@"A custom folded leg reaches its cuff");
+            AssertConnectedPixels(rep); folds++;
+        }
+    }
+    printf("PASS: 288 anatomy/size/rate scenarios, %lu planted contacts including live stance changes; 1536 idle/flight viewport checks; static Reduced Motion; %lu connected knee/hip/cuff rasters\n",(unsigned long)contacts,(unsigned long)folds);
+}
+
 static void TestPuppet(BuddieView *view) {
     BuddieCharacter *pip=ArticulatedNamed(@"pip-articulated"); NSCAssert(pip,@"Bundled articulated Pip loads");
     for(int height=32;height<=96;height+=32) for(int zoom=1;zoom<=2;zoom++) {
@@ -726,28 +901,32 @@ static void TestStudioPersistence(void) {
         NSArray *bundled=BuddieCollection();
         NSCAssert([NSSet setWithArray:[bundled valueForKey:@"identifier"]].count==bundled.count,@"Classic fixtures and generated packs have distinct identities");
         studio.library=[[BuddieLibrary alloc] initWithURL:root bundled:bundled];
-        studio.collection=[bundled mutableCopy];
-        studio.window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,960,700) styleMask:0 backing:NSBackingStoreBuffered defer:NO];
-        studio.materialControls=[NSMutableArray new]; studio.materialFields=[NSMutableDictionary new]; studio.materialWells=[NSMutableDictionary new];
-        studio.reduceButton=[NSButton checkboxWithTitle:@"Reduced motion" target:nil action:nil];
-        studio.picker=[[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
-        for(BuddieCharacter *c in bundled) [studio.picker.menu addItem:[[NSMenuItem alloc] initWithTitle:c.name action:nil keyEquivalent:@""]];
+        [studio buildStudio];
+        NSArray *groups=@[@[@"spriteHeight",@"torsoWidth",@"torsoHeight",@"headScale"],@[@"armLength",@"legLength",@"bootWidth",@"stanceWidth"],@[@"stride",@"footLift"]];
+        for(int group=0;group<3;group++) {
+            studio.settingsGroup.selectedSegment=group; [studio selectSettingsGroup:studio.settingsGroup];
+            for(NSString *key in studio.sliders) {
+                NSCAssert(studio.sliders[key].hidden!=[groups[group] containsObject:key],@"Each section exposes exactly its relevant controls");
+                if(!studio.sliders[key].hidden) NSCAssert(NSMinY(studio.sliders[key].frame)>280 && NSMaxY(studio.sliders[key].frame)<475,@"Controls stay between the section selector and palette");
+            }
+        }
         NSUInteger bit=[[bundled valueForKey:@"identifier"] indexOfObject:@"bit"],miso=[[bundled valueForKey:@"identifier"] indexOfObject:@"miso"];
         [studio.picker selectItemAtIndex:bit]; [studio selectCharacter:nil];
         NSTextField *field=studio.materialFields[@"shell"]; field.stringValue=@"#EB504D";
         [studio controlTextDidChange:[NSNotification notificationWithName:NSControlTextDidChangeNotification object:field]];
         NSSlider *width=[NSSlider sliderWithValue:1.12 minValue:.85 maxValue:1.22 target:nil action:nil]; width.identifier=@"torsoWidth"; [studio tune:width];
+        studio.sliders[@"legLength"].doubleValue=1.6; [studio tune:studio.sliders[@"legLength"]];
         [studio.picker selectItemAtIndex:miso]; [studio selectCharacter:nil];
         NSCAssert([ColorHex(studio.character.materialColors[@"shell"]) isEqual:@"#FCEFD5"],@"Other buddy retains its own colors");
         [studio.picker selectItemAtIndex:bit]; [studio selectCharacter:nil];
-        NSCAssert(studio.character.torsoWidth==1.12 && [studio.materialFields[@"shell"].stringValue isEqual:@"#EB504D"],@"Switching away and back restores the edited model and controls");
+        NSCAssert(studio.character.torsoWidth==1.12 && studio.character.legLength==1.6 && studio.sliders[@"legLength"].doubleValue==1.6 && [studio.materialFields[@"shell"].stringValue isEqual:@"#EB504D"],@"Switching away and back restores the edited model and controls");
         studio.reduceButton.state=NSControlStateValueOn;
         [studio applicationWillTerminate:[NSNotification notificationWithName:NSApplicationWillTerminateNotification object:NSApp]];
         BuddieLibrary *reopened=[[BuddieLibrary alloc] initWithURL:root bundled:bundled];
         NSCAssert([reopened.selectedIdentifier isEqual:@"bit"] && reopened.reducedMotion && [reopened characterForIdentifier:@"bit"].torsoWidth==1.12,@"Quit flushes pending edits and preferences");
         [studio resetCharacter:nil];
         reopened=[[BuddieLibrary alloc] initWithURL:root bundled:bundled];
-        NSCAssert([reopened characterForIdentifier:@"bit"].torsoWidth==1 && studio.character.torsoWidth==1 && ![studio.materialFields[@"shell"].stringValue isEqual:@"#EB504D"],@"Reset restores original controls and persists across relaunch");
+        NSCAssert([reopened characterForIdentifier:@"bit"].torsoWidth==1 && [reopened characterForIdentifier:@"bit"].legLength==1 && studio.character.torsoWidth==1 && ![studio.materialFields[@"shell"].stringValue isEqual:@"#EB504D"],@"Reset restores original controls and persists across relaunch");
         puts("PASS: Studio selection restores independent edits; quit flushes preferences; reset persists; built-in identities remain distinct");
     } @finally { [studio.saveTimer invalidate]; [NSFileManager.defaultManager removeItemAtURL:root error:nil]; }
 }
@@ -805,6 +984,7 @@ static int SelfTest(void) {
     TestPuppet(sprite);
     TestCollection();
     TestStudioPersistence();
+    TestAnatomy();
     return 0;
 }
 int main(int argc,const char **argv) {
@@ -821,6 +1001,8 @@ int main(int argc,const char **argv) {
         if(argc>2 && strcmp(argv[1],"--export-turn")==0) return ExportTurn([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"bit");
         if(argc>2 && strcmp(argv[1],"--export-gait")==0) return ExportGait([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"bit");
         if(argc>2 && strcmp(argv[1],"--export-faces")==0) return ExportFaces([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"bit");
+        if(argc>2 && strcmp(argv[1],"--export-anatomy")==0) return ExportAnatomy([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"bit");
+        if(argc>2 && strcmp(argv[1],"--export-studio")==0) return ExportStudio([NSString stringWithUTF8String:argv[2]]);
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         InstallMenus();
         Delegate *delegate=[Delegate new]; NSApp.delegate=delegate; [NSApp run];

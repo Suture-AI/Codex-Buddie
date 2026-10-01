@@ -28,9 +28,28 @@ updating the gait. This keeps planted soles fixed at different sizes. The
 hotspot, foot contacts and boot orientation do not inherit torso bob/stretch.
 The head and arm attachment positions follow the torso's proportions.
 
-`proportions` supports `torsoWidth` (0.85–1.22), `torsoHeight` (0.85–1.18) and
-`headScale` (0.85–1.15), each defaulting to 1. Studio exposes these alongside
-size, stride, step height and material colors, with swatches and editable
+All `proportions` fields are optional and default to 1:
+
+| Field | Range | Effect |
+| --- | --- | --- |
+| `torsoWidth` | 0.85–1.22 | Torso width and its attachment positions |
+| `torsoHeight` | 0.85–1.18 | Torso height and its attachment positions |
+| `headScale` | 0.85–1.15 | Head size around the neck pivot |
+| `armLength` | 0.7–1.3 | Vertical arm length around each shoulder pivot |
+| `legLength` | 0.65–1.8 | Raise/lower the complete upper body over fixed soles |
+| `bootWidth` | 0.8–1.35 | Boot width around its sole; unchanged sole height |
+| `stanceWidth` | 0.8–1.4 | Multiplier on the motion planner's resting foot spacing |
+
+Pixel legs use two connected bones and the original calf texture. When the
+hip-to-cuff distance shortens, the knee folds; when travel requires extra reach,
+the chain extends to retain both attachments. Sampling stays on the pixel grid.
+Pip's non-pixel legs retain their original straight textured stretch. Stance is
+applied before planning a step, never by scaling already planted foot positions.
+Changing leg length preserves the original head-to-body registration and short
+collar. These fields survive portable save/import and local library persistence.
+
+Studio groups controls into **Body**, **Limbs** and **Gait**, with immediate
+section switching and numeric readouts. Material colors use swatches and editable
 `#RRGGBB` values. Complete valid hex values update the preview immediately;
 unfinished/invalid entries restore the current color when editing ends.
 Save/import preserves the

@@ -24,6 +24,7 @@ int main(void) {
             BuddieCharacter *edited=[library characterForIdentifier:@"bit"];
             edited.torsoWidth=1.12; edited.torsoHeight=.91; edited.headScale=.93;
             edited.spriteHeight=76; edited.stride=15; edited.footLift=5;
+            edited.armLength=.8; edited.legLength=1.6; edited.bootWidth=1.2; edited.stanceWidth=1.4;
             edited.materialColors=@{@"shell":NSColor.redColor,@"face":NSColor.greenColor,@"antenna":NSColor.blueColor};
             [edited prepareAppearance]; NSData *paint=[edited imageForClip:@"headPress" frame:2].TIFFRepresentation;
             [library rememberCharacter:edited]; library.selectedIdentifier=@"miso"; library.reducedMotion=YES;
@@ -31,6 +32,7 @@ int main(void) {
             BuddieLibrary *reopened=[[BuddieLibrary alloc] initWithURL:libraryURL bundled:bundled];
             BuddieCharacter *restored=[reopened characterForIdentifier:@"bit"];
             NSCAssert(restored.torsoWidth==1.12 && restored.torsoHeight==.91 && restored.headScale==.93 && restored.spriteHeight==76 && restored.stride==15 && restored.footLift==5,@"Every exposed articulated control survives reopening");
+            NSCAssert(restored.armLength==.8 && restored.legLength==1.6 && restored.bootWidth==1.2 && restored.stanceWidth==1.4,@"All limb controls survive reopening");
             NSCAssert([[restored imageForClip:@"headPress" frame:2].TIFFRepresentation isEqual:paint],@"Reopening renders identical custom colors");
             NSCAssert([reopened.selectedIdentifier isEqual:@"miso"] && reopened.reducedMotion,@"Selection and Reduced Motion survive reopening");
             NSCAssert([reopened characterForIdentifier:@"miso"].torsoWidth==1 && bit.torsoWidth==1,@"Editing a buddy never changes another or its original");

@@ -30,7 +30,8 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 - (void)dealloc { [_animationTimer invalidate]; }
 - (void)setCharacter:(BuddieCharacter *)character {
     _character=character ?: [BuddieCharacter new]; BuddieMotionInit(&_motion);
-    _motion.pose.feet[0].x=-_character.footSpacing; _motion.pose.feet[1].x=_character.footSpacing;
+    double spacing=_character.footSpacing*(_character.puppetParts.count ? _character.stanceWidth:1);
+    _motion.pose.feet[0].x=-spacing; _motion.pose.feet[1].x=spacing;
     [_character prepareAppearance];
     _spriteFacingLeft=NO; _spriteReleasing=NO; _spriteEpoch=NAN;
     _puppetElapsed=0; _lastMotionScale=0;
@@ -77,7 +78,9 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
         if(fabs(geometry-_lastMotionScale)>1e-8) { BOOL pressed=_motion.pressed; BuddieMotionInit(&_motion); _motion.pressed=pressed; _lastMotionScale=geometry; }
         anchor.x/=unit; anchor.y/=unit;
     }
-    BuddieMotionUpdate(&_motion,anchor,time,(BuddieRig){c.stride,c.footSpacing,c.footLift},reduced);
+    // Stance belongs to the motion planner. Scaling posed feet in the renderer
+    // would also scale their counter-travel and make planted feet slide.
+    BuddieMotionUpdate(&_motion,anchor,time,(BuddieRig){c.stride,c.footSpacing*(c.puppetParts.count ? c.stanceWidth:1),c.footLift},reduced);
     if(c.clips.count && isfinite(time)) {
         if(!isfinite(_spriteEpoch) || time<_spriteEpoch) _spriteEpoch=time;
         if(_motion.moving && fabs(_motion.velocity.x)>3) _spriteFacingLeft=_motion.velocity.x<0;

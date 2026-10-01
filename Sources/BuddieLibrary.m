@@ -7,9 +7,10 @@ static BOOL Identifier(id value) {
     return [value isKindOfClass:NSString.class] && [value length]>0 && [value length]<=80;
 }
 static NSDictionary *SettingRanges(void) {
-    return @{@"width":@[@24,@42],@"height":@[@24,@40],@"eyeSpacing":@[@8,@20],
+    NSMutableDictionary *ranges=[@{@"width":@[@24,@42],@"height":@[@24,@40],@"eyeSpacing":@[@8,@20],
         @"eyeSize":@[@3,@7],@"faceY":@[@(-7),@7],@"stride":@[@8,@40],@"footLift":@[@2,@8],
-        @"spriteHeight":@[@32,@96],@"torsoWidth":@[@.85,@1.22],@"torsoHeight":@[@.85,@1.18],@"headScale":@[@.85,@1.15]};
+        @"spriteHeight":@[@32,@96]} mutableCopy];
+    [ranges addEntriesFromDictionary:BuddieCharacter.puppetProportionRanges]; return ranges;
 }
 static NSString *Hex(NSColor *color) {
     color=[color colorUsingColorSpace:NSColorSpace.sRGBColorSpace];

@@ -41,11 +41,16 @@
 @property CGFloat torsoWidth;
 @property CGFloat torsoHeight;
 @property CGFloat headScale;
+@property CGFloat armLength;
+@property CGFloat legLength;
+@property CGFloat bootWidth;
+@property CGFloat stanceWidth;
 @property(nonatomic,copy) NSArray<NSDictionary *> *materials;
 @property(nonatomic,copy) NSDictionary<NSString *,NSColor *> *materialColors;
 - (void)prepareAppearance;
 - (NSImage *)imageForClip:(NSString *)name frame:(NSUInteger)index;
 + (NSArray<BuddieCharacter *> *)presets;
++ (NSDictionary<NSString *,NSArray<NSNumber *> *> *)puppetProportionRanges;
 + (instancetype)bundledDefault;
 + (instancetype)loadPack:(NSURL *)folder error:(NSError **)error;
 - (BOOL)savePack:(NSURL *)folder error:(NSError **)error;

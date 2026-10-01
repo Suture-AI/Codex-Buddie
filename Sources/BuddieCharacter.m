@@ -243,7 +243,9 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
                 }
                 [sprites removeObjectForKey:@"clips"]; sprites[@"parts"]=parts;
                 sprites[@"motionScale"]=@(self.puppetMotionScale);
-                sprites[@"proportions"]=@{@"torsoWidth":@(self.torsoWidth),@"torsoHeight":@(self.torsoHeight),@"headScale":@(self.headScale)};
+                NSMutableDictionary *proportions=[NSMutableDictionary new];
+                for(NSString *key in BuddieCharacter.puppetProportionRanges) proportions[key]=[self valueForKey:key];
+                sprites[@"proportions"]=proportions;
                 json[@"puppet"]=sprites;
             } else json[@"sprites"]=sprites;
         }
@@ -262,13 +264,18 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
         _faceY=0; _footSpacing=10; _footSize=8; _stride=28; _footLift=5;
         _clips=@{}; _spriteHeight=64; _materials=@[]; _materialColors=@{}; _paintedFrames=[NSMutableDictionary new];
         _puppetParts=@{}; _puppetMotionScale=3; _torsoWidth=1; _torsoHeight=1; _headScale=1;
+        _armLength=1; _legLength=1; _bootWidth=1; _stanceWidth=1;
     } return self;
 }
 - (id)copyWithZone:(NSZone *)zone {
     BuddieCharacter *c=[[[self class] allocWithZone:zone] init];
-    for(NSString *key in @[@"identifier",@"name",@"bodyColor",@"inkColor",@"accentColor",@"bodySize",@"cornerRadius",@"eyeSpacing",@"eyeSize",@"faceY",@"footSpacing",@"footSize",@"stride",@"footLift",@"bodyImage",@"footImage",@"clips",@"spriteCanvas",@"spriteHotspot",@"spriteHeight",@"mirrorWalk",@"directionalIdle",@"pixelArt",@"materials",@"materialColors",@"puppetParts",@"puppetMotionScale",@"torsoWidth",@"torsoHeight",@"headScale"])
+    for(NSString *key in [@[@"identifier",@"name",@"bodyColor",@"inkColor",@"accentColor",@"bodySize",@"cornerRadius",@"eyeSpacing",@"eyeSize",@"faceY",@"footSpacing",@"footSize",@"stride",@"footLift",@"bodyImage",@"footImage",@"clips",@"spriteCanvas",@"spriteHotspot",@"spriteHeight",@"mirrorWalk",@"directionalIdle",@"pixelArt",@"materials",@"materialColors",@"puppetParts",@"puppetMotionScale"] arrayByAddingObjectsFromArray:BuddieCharacter.puppetProportionRanges.allKeys])
         [c setValue:[self valueForKey:key] forKey:key];
     return c;
+}
++ (NSDictionary<NSString *,NSArray<NSNumber *> *> *)puppetProportionRanges {
+    return @{@"torsoWidth":@[@.85,@1.22],@"torsoHeight":@[@.85,@1.18],@"headScale":@[@.85,@1.15],
+        @"armLength":@[@.7,@1.3],@"legLength":@[@.65,@1.8],@"bootWidth":@[@.8,@1.35],@"stanceWidth":@[@.8,@1.4]};
 }
 + (NSArray<BuddieCharacter *> *)presets {
     BuddieCharacter *sprout=[self new];
@@ -352,7 +359,7 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
             c.puppetMotionScale=[sprites[@"motionScale"] doubleValue];
             NSDictionary *proportions=sprites[@"proportions"] ?: @{};
             if(![proportions isKindOfClass:NSDictionary.class]) return Fail(error,@"proportions must be an object.");
-            NSDictionary *ranges=@{@"torsoWidth":@[@.85,@1.22],@"torsoHeight":@[@.85,@1.18],@"headScale":@[@.85,@1.15]};
+            NSDictionary *ranges=self.puppetProportionRanges;
             for(NSString *key in proportions) {
                 NSArray *range=ranges[key];
                 if(!range || !NumberInRange(proportions[key],[range[0] doubleValue],[range[1] doubleValue])) return Fail(error,@"Invalid articulated proportion.");

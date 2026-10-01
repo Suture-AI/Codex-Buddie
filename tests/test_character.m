@@ -55,6 +55,8 @@ static void ArticulatedPack(NSURL *root) {
     NSCAssert(pip && !error && pip.puppetParts.count==9 && pip.clips[@"head"].frames.count==5,@"Articulated pack loads every part: %@",error);
     NSCAssert(pip.clips[@"head"].frames[0]==pip.clips[@"head"].frames[4],@"Repeated blink poses share decoded pixels");
     BuddieCharacter *custom=[pip copy]; custom.torsoWidth=1.22; custom.torsoHeight=1.18; custom.headScale=1.15;
+    NSCAssert(pip.armLength==1 && pip.legLength==1 && pip.bootWidth==1 && pip.stanceWidth==1,@"Older packs preserve their original anatomy without new fields");
+    custom.armLength=.7; custom.legLength=1.8; custom.bootWidth=1.35; custom.stanceWidth=.8;
     custom.materialColors=@{@"coat":[NSColor colorWithSRGBRed:.4 green:.6 blue:.3 alpha:1],@"boots":NSColor.whiteColor};
     [custom prepareAppearance];
     NSCAssert(pip.torsoWidth==1 && custom.torsoWidth!=pip.torsoWidth,@"Proportions are independent per buddy");
@@ -62,6 +64,8 @@ static void ArticulatedPack(NSURL *root) {
     NSCAssert([custom savePack:saved error:&error],@"Save articulated pixels, masks, pivots, clips and proportions: %@",error);
     BuddieCharacter *restored=[BuddieCharacter loadPack:saved error:&error];
     NSCAssert(restored && restored.torsoWidth==1.22 && restored.torsoHeight==1.18 && restored.headScale==1.15,@"Proportions round-trip");
+    BuddieCharacter *copied=[custom copy];
+    NSCAssert(restored.armLength==.7 && restored.legLength==1.8 && restored.bootWidth==1.35 && restored.stanceWidth==.8 && copied.legLength==1.8,@"All four limb proportions survive copy and portable round-trip");
     NSCAssert([restored.puppetParts isEqual:custom.puppetParts] && restored.puppetMotionScale==custom.puppetMotionScale,@"Attachment geometry round-trips");
     for(NSString *role in custom.clips) for(NSUInteger i=0;i<custom.clips[role].frames.count;i++)
         NSCAssert([[restored imageForClip:role frame:i].TIFFRepresentation isEqual:[custom imageForClip:role frame:i].TIFFRepresentation],@"Every editable colored part survives save/import: %@",role);
@@ -69,8 +73,11 @@ static void ArticulatedPack(NSURL *root) {
     for(NSString *key in @[@"parts",@"proportions",@"motionScale"]) {
         NSMutableDictionary *bad=MutableJSON(json); bad[@"puppet"][key]=NSNull.null; Reject(saved,bad);
     }
-    for(NSString *key in @[@"torsoWidth",@"torsoHeight",@"headScale",@"unexpected"]) {
+    for(NSString *key in [BuddieCharacter.puppetProportionRanges.allKeys arrayByAddingObject:@"unexpected"]) {
         NSMutableDictionary *bad=MutableJSON(json); bad[@"puppet"][@"proportions"][key]=@99; Reject(saved,bad);
+    }
+    for(NSString *key in @[@"armLength",@"legLength",@"bootWidth",@"stanceWidth"]) for(id value in @[@(-1),@YES,@"1",NSNull.null]) {
+        NSMutableDictionary *bad=MutableJSON(json); bad[@"puppet"][@"proportions"][key]=value; Reject(saved,bad);
     }
     for(NSString *role in pip.puppetParts) {
         NSMutableDictionary *bad=MutableJSON(json); [bad[@"puppet"][@"parts"] removeObjectForKey:role]; Reject(saved,bad);

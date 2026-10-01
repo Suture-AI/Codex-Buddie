@@ -1,0 +1,121 @@
+{
+  "status": "Editable limb anatomy and pixel knee folding verified in Cocoa exports and automated checks; live UI verification is pending.",
+  "new_controls": {
+    "armLength": [
+      0.7,
+      1.3
+    ],
+    "legLength": [
+      0.65,
+      1.8
+    ],
+    "bootWidth": [
+      0.8,
+      1.35
+    ],
+    "stanceWidth": [
+      0.8,
+      1.4
+    ]
+  },
+  "variants": {
+    "Original": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "Compact": [
+      0.7,
+      0.65,
+      1.2,
+      1.1
+    ],
+    "Long limbs": [
+      1.3,
+      1.8,
+      0.85,
+      0.9
+    ],
+    "Big boots": [
+      0.9,
+      1.3,
+      1.35,
+      1.4
+    ]
+  },
+  "review": {
+    "frames_per_character": 960,
+    "source_fps": 60,
+    "gif_fps": 30,
+    "all_frame_bounds": {
+      "bit": [
+        124,
+        72,
+        292,
+        312
+      ],
+      "miso": [
+        112,
+        72,
+        292,
+        312
+      ],
+      "pip": [
+        109,
+        78,
+        277,
+        300
+      ]
+    },
+    "layout": "Hidden native Cocoa views built by the same Studio code; no live CUA screenshot claimed."
+  },
+  "checks": {
+    "contact_scenarios": 288,
+    "planted_contacts": 49440,
+    "connected_calf_rasters": 108,
+    "viewport_checks": 1536,
+    "viewport_scope": "All 128 extremes of seven proportions, three bundled articulated buddies, idle/flight, 300x300 Studio and 20x23 software layout; rendered beyond clip to detect overflow.",
+    "other": [
+      "Default anatomy for older packs",
+      "Copy/save/import and library persistence",
+      "Bad values rejected",
+      "UI sections show matching controls without palette overlap",
+      "Static Reduced Motion geometry",
+      "Existing motion, faces, registration and portable-pack tests"
+    ]
+  },
+  "limitations": [
+    "CUA returns cgWindowNotFound for Studio and Activity Monitor; native input/relaunch is unverified",
+    "Pip uses its existing straight textured legs; knee folding applies to pixel rigs",
+    "Limbs and Miso's tail retain screen-side attachments through authored torso turns",
+    "Stock Codex cursor replacement, release installation and production sizing remain unfinished"
+  ],
+  "sha256": {
+    "Sources/BuddieCharacter.h": "abf8e3dc45b996b1d87626ca5e7d5405c22b32f4a7b4d166230a329822b24b19",
+    "Sources/BuddieCharacter.m": "54aa2e59e09b984373acdccea07586527894839709b2dbc7de327149a12416a7",
+    "Sources/BuddieLibrary.h": "41fe67c7548df0ef4da755678a99db0a9642d6acdbe802da8adaaa387a2e0400",
+    "Sources/BuddieLibrary.m": "774cf75c7a3aa9972baf967f26a19bbaea3ebce0c02560ced82185d5913f73d4",
+    "Sources/BuddieMotion.c": "c7cf84d642960df7b3a5dda50970c502028227fab71b6d1d9a30cd30bc694506",
+    "Sources/BuddieMotion.h": "054f3f1d091cfce9625d4462fbc4fd8598462c9caa7d980598401bd6cc0950d7",
+    "Sources/BuddiePuppet.h": "0f2218442b267e6e61e94c5b26fa777985241e62dcafe7036c5902ae62b157ac",
+    "Sources/BuddiePuppet.m": "f7029ac944fae6edf34b71cde27fc52324bc207aa18cb3f07ef218bf0dace2f2",
+    "Sources/BuddieView.h": "bca88d8818c6cb9ade0420cf6eacc1da5000a45c6344dde974416b6392225e44",
+    "Sources/BuddieView.m": "b4a470567456557a2d64e294a579607b76dc0f28acee0d000b912e4d6cfc2c2b",
+    "Sources/Preview.m": "ea74c0e1d98eb0b446bec520069f9a88a10268138deecff651a76ef070645f11",
+    "docs/media/anatomy-collection.png": "8f9e2936c8863b901c4afc335a55f7b810b397a5fc6f0ab773098f17fb1449a1",
+    "docs/media/anatomy-gait-sequence.png": "ed95e0f07fc0655e3f943f4be4591fdff809888a8fb067c8b4f087a7c6629f35",
+    "docs/media/bit-anatomy.gif": "d573fce0f4c7c9ed4fe419a24204f48b48549ce366dceed4f0bad0c891fb14e8",
+    "docs/media/miso-anatomy.gif": "fd362eaf577ddd42f20b887dfcf0e127dd8d88d188f5d148b4df8582c3ed9dc3",
+    "docs/media/pip-anatomy.gif": "98dbacb58959810d2873416206c6689671ccef4d21f3515b6a2c494721886d5e",
+    "docs/media/studio-body-layout.png": "3d9363772f8e7afb81ad94d37eb7f4346f857dd3ee8d8c28d72a970d4678e4c7",
+    "docs/media/studio-gait-layout.png": "847344af133c595fa429390e6d0797cc6e111caa60f431a70dc8bb9763b9d0df",
+    "docs/media/studio-limbs-layout.png": "270b761210d1a2e26d826d0d746f673d64ae3b03723b4619dcb4e16ef5052e12",
+    "scripts/build.sh": "765344980c4636235531317dff85bdc8c772ce9ae6be22bcbc40ec014fc97221",
+    "scripts/review-anatomy.py": "6edccee770d8f6475da92ce438faf0123461b7609085b9673dccad588856a663",
+    "scripts/test-animation.sh": "3a2b17950ccff89f45c393b47a32f79fd54b4ca35de4065de7c3bc5b2f02a6dd",
+    "tests/test_character.m": "6d2f20859fb0b5cf50dfcb6d43f34bc2ca14d9f05fdc434b1c3769d6b7cab982",
+    "tests/test_library.m": "fe7c8e0a57d4e193642f1596f99da1ea0fa9757605e509e567e9635d526d1f62",
+    "tests/test_motion.c": "26b47bf9006a4de24b7dffa788400bc49e49ed64c46eea6f4840b07bf8ea2b76"
+  }
+}

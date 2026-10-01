@@ -22,7 +22,9 @@ registered on a small pixel canvas with a restrained palette and crisp sampling.
 Independent feet, opposing paws, screen expressions and five coordinated head
 and torso directions animate in the actual Cocoa renderer. An interrupted turn
 retraces its current sequence. Body/head proportions, shell, screen-light and
-antenna colors can be edited and saved as a portable pack.
+antenna colors can be edited and saved as a portable pack. Arm length, leg
+length, boot width and stance are also adjustable. Pixel knees fold during
+lift while soles remain planted through contact.
 
 ![Bit in the actual Studio renderer](docs/media/bit-studio-customization.png)
 
@@ -39,7 +41,7 @@ See [Miso's customization](docs/media/miso-customization.png),
 [walking](docs/media/miso-walk.gif) and [source/review](artwork/miso/README.md).
 
 **Still a motion study.** Bit's visual direction was approved and his neck
-shortened; Miso is a new candidate. Broader anatomy controls, knee articulation,
+shortened; Miso is a new candidate. Directional limb/tail artwork, non-pixel knee articulation,
 production cursor sizing and the native service
 connection remain unfinished. These exports do not show a live Codex task.
 
@@ -72,12 +74,17 @@ cd Codex-Buddie
 ```
 
 Choose a character, then use **Take a walk**, the three stops, and **Try a click**.
-Changing stops during a walk preserves position and velocity. Bit offers size,
-body width/height, head size, stride, step height, **Shell**, **Screen lights**
-and **Antenna** controls. Miso has the same shape controls and separate cream
+Changing stops during a walk preserves position and velocity. **Body** holds
+size, body width/height and head size; **Limbs** holds arm/leg length, boot width
+and stance; **Gait** holds stride and step height. Numeric readouts show the
+current values. Bit also offers **Shell**, **Screen lights** and **Antenna**
+colors. Miso has the same shape controls and separate cream
 shell, coral suit and screen-light colors. Click a color well or enter an exact
 `#RRGGBB` value. Pip has equivalent
 proportion controls and separate raincoat/boot colors.
+See the [limb comparison](docs/media/anatomy-collection.png),
+[Bit in motion](docs/media/bit-anatomy.gif) and
+[verification scope](docs/evidence/limb-customization.json).
 Colors, proportions and gait are saved for each buddy automatically. Switching
 away and back restores your edits; reopening the Studio restores the selected
 buddy and Reduced Motion preference. **Reset character** restores the original
