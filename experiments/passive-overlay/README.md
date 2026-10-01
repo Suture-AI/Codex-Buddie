@@ -42,7 +42,10 @@ System Audio Recording** (called **Screen Recording** on older macOS versions).
 The macOS permission prompt appears only when you click **Allow screen access**.
 
 Use **Open System Settings** to reach that page, and **Check again** after changing
-access. The walkthrough also checks automatically while open and when you return
+access. If the switch is already on, choose **It’s already enabled — check access**.
+This advances when macOS confirms access; otherwise it shows restart and app-copy
+recovery steps. Restarting from setup automatically rechecks access. The
+walkthrough also checks automatically while open and when you return
 to the app. If Buddie is missing from the list, request access first, or use the
 Settings **+** button; **Show app in Finder** locates the exact copy you launched.
 If macOS asks you to quit and reopen, follow that prompt, or use **Restart Buddie**.
