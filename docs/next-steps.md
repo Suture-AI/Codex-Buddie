@@ -74,10 +74,18 @@ controls. Both the regression and the original live Bit-red-to-Miso sequence
 pass; Miso keeps `#FCEFD5`. Suit `#7C9A80`, body width `1.12` and head size `0.93`
 were also exercised live, then reset to the original design.
 
-Next persist per-buddy customization and the installed collection across
-selection changes and launches, refine knee/tail articulation, and extend
-anatomy controls. Native integration and production cursor size remain
-separate unresolved gates.
+The Studio now has a local library. Per-buddy colors, proportions, size and gait
+survive selection changes; the selected buddy, Reduced Motion and imported
+artwork survive relaunch. Imports copy their art once; subsequent edits write
+only a small atomic settings file. Reset uses the original installed design;
+reimport updates it. Regression checks cover controller selection/quit/reset,
+duplicate names, deleted source folders, malformed settings, missing packs and
+failed-write rollback. Live restart verification is still pending because CUA
+currently returns `cgWindowNotFound` for the already running Studio.
+See the [source-pinned library checks](evidence/studio-library.json).
+
+Next refine knee/tail articulation and extend anatomy controls. Native
+integration and production cursor size remain separate unresolved gates.
 
 The root Studio also includes **Pip · Articulated**, a version-3 pack with nine
 independent generated parts, stable blink textures, live torso width/height and
@@ -149,7 +157,7 @@ A renderer we control can implement true replacement directly. That demonstrates
 
 ## Release work after the integration is proven
 
-Save preferences, add robust pack installation, solve detailed-character sizing
+Add collection removal/management, solve detailed-character sizing
 within the native software cursor's tiny bounds, pin the intended agent session,
 measure latency/CPU/battery use, test multiple monitors, sign and notarize
 downloadable builds, and publish an explicit compatibility list. Generated

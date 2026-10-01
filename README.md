@@ -16,7 +16,7 @@ The intended experience is a buddy that **walks along the agent's curved cursor
 path**, stops at the exact hotspot, and animates the click, with no gray arrow or
 glow showing. See the [next implementation brief](docs/next-steps.md).
 
-The **Character Studio** now opens with **Bit · Pixel bot**, an original compact
+The **Character Studio** initially opens with **Bit · Pixel bot**, an original compact
 retro robot inspired by the user's Codex pet reference. Generated artwork is
 registered on a small pixel canvas with a restrained palette and crisp sampling.
 Independent feet, opposing paws, screen expressions and five coordinated head
@@ -40,7 +40,7 @@ See [Miso's customization](docs/media/miso-customization.png),
 
 **Still a motion study.** Bit's visual direction was approved and his neck
 shortened; Miso is a new candidate. Broader anatomy controls, knee articulation,
-collection persistence, production cursor sizing and the native service
+production cursor sizing and the native service
 connection remain unfinished. These exports do not show a live Codex task.
 
 Pip remains available as an articulated customization study and an earlier
@@ -78,14 +78,19 @@ and **Antenna** controls. Miso has the same shape controls and separate cream
 shell, coral suit and screen-light colors. Click a color well or enter an exact
 `#RRGGBB` value. Pip has equivalent
 proportion controls and separate raincoat/boot colors.
-**Save a copy…** exports a portable buddy folder; **Import buddy…** opens it again.
+Colors, proportions and gait are saved for each buddy automatically. Switching
+away and back restores your edits; reopening the Studio restores the selected
+buddy and Reduced Motion preference. **Reset character** restores the original
+design. **Save a copy…** exports a portable buddy folder and adds it to the
+collection; **Import buddy…** installs a local copy of its artwork.
 **Native size** compares the small software-cursor layout with the enlarged
 studio view. **Reduced motion** removes autonomous animation and jumps directly
 to targets. The system accessibility preference is also respected.
 
 The studio simulates the native window; it does not perform computer-use actions.
-Close the window to quit. Nothing is installed globally. Imported/customized
-buddies stay in the current session until explicitly saved. See the
+Close the window to quit. The local library lives in
+`~/Library/Application Support/Codex Buddie/Studio/`; imported artwork is copied
+there, so moving the original download does not break it. See the
 [character pack format and artwork workflow](docs/characters.md).
 
 ## How the experiment works

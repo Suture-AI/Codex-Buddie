@@ -3,6 +3,7 @@
 #import <dlfcn.h>
 #import "BuddieView.h"
 #import "BuddiePuppet.h"
+#import "BuddieLibrary.h"
 
 static Class cursorClass, fogClass;
 static NSColor *Ink(void) { return [NSColor colorWithSRGBRed:.16 green:.22 blue:.19 alpha:1]; }
@@ -48,7 +49,10 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
         NSError *error=nil; BuddieCharacter *c=[BuddieCharacter loadPack:[root URLByAppendingPathComponent:name] error:&error];
         if(c) [all addObject:c];
     }
-    for(BuddieCharacter *c in BuddieCharacter.presets) { c.name=[c.name stringByAppendingString:@" · Classic"]; [all addObject:c]; }
+    for(BuddieCharacter *c in BuddieCharacter.presets) {
+        c.identifier=[@"classic-" stringByAppendingString:c.identifier];
+        c.name=[c.name stringByAppendingString:@" · Classic"]; [all addObject:c];
+    }
     return all;
 }
 @interface LabView : NSView
@@ -72,6 +76,8 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 @property NSWindow *window;
 @property NSWindow *cursor;
 @property NSTimer *timer;
+@property NSTimer *saveTimer;
+@property BuddieLibrary *library;
 @property NSTextField *status;
 @property NSPopUpButton *picker;
 @property NSButton *playButton;
@@ -92,7 +98,11 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 @implementation Delegate
 - (BuddieView *)buddy { return (BuddieView *)self.cursor.contentView; }
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
-    self.collection=[BuddieCollection() mutableCopy]; self.character=[self.collection.firstObject copy];
+    self.library=[[BuddieLibrary alloc] initWithURL:BuddieLibrary.defaultURL bundled:BuddieCollection()];
+    self.collection=[self.library.characters mutableCopy];
+    NSString *selected=self.library.selectedIdentifier;
+    if(![self.library characterForIdentifier:selected]) selected=@"bit";
+    self.character=[self.library characterForIdentifier:selected] ?: [self.collection.firstObject copy];
     self.sliders=[NSMutableDictionary new];
     self.settingLabels=[NSMutableDictionary new];
     self.materialControls=[NSMutableArray new];
@@ -106,9 +116,9 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [v addSubview:Label(@"Pick a buddy. Make it yours. Take it for a walk.",15,Ink(),NSMakeRect(32,577,630,25))];
     [v addSubview:Label(@"YOUR COLLECTION",11,NSColor.secondaryLabelColor,NSMakeRect(700,643,230,20))];
     self.picker=[[NSPopUpButton alloc] initWithFrame:NSMakeRect(696,599,230,34) pullsDown:NO];
-    for(BuddieCharacter *c in self.collection) [self.picker addItemWithTitle:c.name];
-    for(NSUInteger i=0;i<self.collection.count;i++) if([self.collection[i].identifier isEqual:@"bit"]) {
-        [self.picker selectItemAtIndex:i]; self.character=[self.collection[i] copy]; break;
+    for(BuddieCharacter *c in self.collection) [self.picker.menu addItem:[[NSMenuItem alloc] initWithTitle:c.name action:nil keyEquivalent:@""]];
+    for(NSUInteger i=0;i<self.collection.count;i++) if([self.collection[i].identifier isEqual:self.character.identifier]) {
+        [self.picker selectItemAtIndex:i]; break;
     }
     self.picker.target=self; self.picker.action=@selector(selectCharacter:); [v addSubview:self.picker];
     [v addSubview:Button(@"Import buddy…",self,@selector(importPack:),NSMakeRect(696,558,230,32))];
@@ -126,8 +136,9 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     self.artNote.font=[NSFont systemFontOfSize:12]; self.artNote.textColor=NSColor.secondaryLabelColor;
     self.artNote.frame=NSMakeRect(700,315,218,76); [v addSubview:self.artNote];
     self.reduceButton=[NSButton checkboxWithTitle:@"Reduced motion" target:self action:@selector(reduce:)];
+    self.reduceButton.state=self.library.reducedMotion ? NSControlStateValueOn:NSControlStateValueOff;
     self.reduceButton.frame=NSMakeRect(700,146,225,26); [v addSubview:self.reduceButton];
-    [v addSubview:Button(@"Reset character",self,@selector(selectCharacter:),NSMakeRect(696,103,230,32))];
+    [v addSubview:Button(@"Reset character",self,@selector(resetCharacter:),NSMakeRect(696,103,230,32))];
     [v addSubview:Button(@"Save a copy…",self,@selector(savePack:),NSMakeRect(696,65,230,32))];
     NSArray *titles=@[@"Look here",@"Over here",@"One more stop"];
     NSPoint points[]={{116,342},{491,442},{371,250}};
@@ -142,6 +153,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [self.window center]; [self.window makeKeyAndOrderFront:nil]; [NSApp activateIgnoringOtherApps:YES];
     _anchor=(BuddiePoint){250,370}; _journey.end=_anchor;
     [self createCursor]; [self syncSliders];
+    if(self.library.loadError) self.status.stringValue=self.library.loadError.localizedDescription;
     __weak Delegate *weak=self;
     self.timer=[NSTimer timerWithTimeInterval:1./60 repeats:YES block:^(NSTimer *t) { [weak tick]; }];
     [NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];
@@ -151,7 +163,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     BOOL sprite=self.character.clips.count>0,puppet=self.character.puppetParts.count>0;
     self.settingsHeading.stringValue=sprite ? @"MAKE IT YOURS":@"SHAPE & EXPRESSION";
     self.artNote.hidden=!sprite || puppet;
-    self.artNote.stringValue=self.character.materials.count ? @"Your colors, with all the original shading. Save a copy to keep this look.":@"The face and outfit belong together. Import another buddy to try a different look.";
+    self.artNote.stringValue=self.character.materials.count ? @"Your colors, with all the original shading. Your changes are saved automatically.":@"The face and outfit belong together. Import another buddy to try a different look.";
     self.artNote.frame=NSMakeRect(700,self.character.materials.count ? 202:315,218,65);
     for(NSView *control in self.materialControls) {
         if([control isKindOfClass:NSTextField.class]) [(NSTextField *)control setDelegate:nil];
@@ -202,6 +214,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     self.character.materialColors=colors;
     // Warm every pose before resuming animation, avoiding work at frame changes.
     [self.character prepareAppearance]; self.buddy.needsDisplay=YES;
+    [self scheduleSave];
 }
 - (void)controlTextDidChange:(NSNotification *)notification {
     NSTextField *field=notification.object;
@@ -255,21 +268,57 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 - (void)toggle:(id)sender { self.playing=!self.playing; self.playButton.title=self.playing ? @"Pause walk":@"Take a walk"; _nextMove=0; }
 - (void)style:(NSButton *)sender { self.software=!self.software; sender.title=self.software ? @"Studio size":@"Native size"; [self createCursor]; }
 - (void)clickPose:(id)sender { double now=NSProcessInfo.processInfo.systemUptime; [self.buddy press:YES atTime:now]; _releaseAt=now+.15; }
-- (void)reduce:(NSButton *)sender { self.buddy.reduceMotion=sender.state==NSControlStateValueOn; }
+- (void)reduce:(NSButton *)sender { self.buddy.reduceMotion=sender.state==NSControlStateValueOn; [self scheduleSave]; }
+- (void)scheduleSave {
+    if(!self.library) return;
+    [self.saveTimer invalidate];
+    __weak Delegate *weak=self;
+    self.saveTimer=[NSTimer timerWithTimeInterval:.25 repeats:NO block:^(NSTimer *timer) { [weak flushLibrary]; }];
+    [NSRunLoop.mainRunLoop addTimer:self.saveTimer forMode:NSRunLoopCommonModes];
+}
+- (void)flushLibrary {
+    if(!self.library) return;
+    [self.saveTimer invalidate]; self.saveTimer=nil;
+    [self.library rememberCharacter:self.character];
+    self.library.selectedIdentifier=self.character.identifier;
+    self.library.reducedMotion=self.reduceButton.state==NSControlStateValueOn;
+    NSError *error=nil;
+    if(![self.library save:&error]) {
+        self.status.stringValue=@"Your changes are kept for this session, but couldn’t be saved to the library.";
+        self.status.toolTip=error.localizedDescription;
+    }
+}
 - (void)selectCharacter:(id)sender {
     // Commit an active color edit while it still belongs to the old buddy.
     // Removing that field after replacing the model can otherwise repaint the
     // new buddy when both packs use the same material id (e.g. "shell").
     [self.window makeFirstResponder:nil];
-    self.character=[self.collection[self.picker.indexOfSelectedItem] copy]; self.buddy.character=self.character; [self syncSliders];
+    [self.library rememberCharacter:self.character];
+    BuddieCharacter *original=self.collection[self.picker.indexOfSelectedItem];
+    self.character=self.library ? [self.library characterForIdentifier:original.identifier]:[original copy];
+    self.buddy.character=self.character; [self syncSliders]; [self flushLibrary];
+}
+- (void)resetCharacter:(id)sender {
+    [self.window makeFirstResponder:nil];
+    NSString *identifier=self.character.identifier; [self.library resetIdentifier:identifier];
+    self.character=self.library ? [self.library characterForIdentifier:identifier]:[self.collection[self.picker.indexOfSelectedItem] copy];
+    self.buddy.character=self.character; [self syncSliders]; [self flushLibrary];
 }
 - (void)tune:(NSSlider *)sender {
     NSString *key=sender.identifier;
     if([key isEqual:@"width"]) self.character.bodySize=NSMakeSize(sender.doubleValue,self.character.bodySize.height);
     else if([key isEqual:@"height"]) self.character.bodySize=NSMakeSize(self.character.bodySize.width,sender.doubleValue);
     else [self.character setValue:@(sender.doubleValue) forKey:key];
+    [self scheduleSave];
 }
-- (void)addCharacterToCollection:(BuddieCharacter *)character {
+- (BOOL)addCharacterToCollection:(BuddieCharacter *)character {
+    [self.window makeFirstResponder:nil];
+    [self.library rememberCharacter:self.character];
+    NSError *error=nil;
+    if(self.library && ![self.library installCharacter:character error:&error]) {
+        NSAlert *alert=[NSAlert new]; alert.messageText=@"Couldn’t add this buddy to the library";
+        alert.informativeText=error.localizedDescription; [alert beginSheetModalForWindow:self.window completionHandler:nil]; return NO;
+    }
     NSUInteger index=[self.collection indexOfObjectPassingTest:^BOOL(BuddieCharacter *item,NSUInteger i,BOOL *stop) {
         return [item.identifier isEqual:character.identifier];
     }];
@@ -281,7 +330,9 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     } else {
         self.collection[index]=character; [self.picker itemAtIndex:index].title=character.name;
     }
-    [self.picker selectItemAtIndex:index]; [self selectCharacter:nil];
+    // The imported pack is the new original; don't overwrite it with the old edit.
+    self.character=nil;
+    [self.picker selectItemAtIndex:index]; [self selectCharacter:nil]; return YES;
 }
 - (void)importPack:(id)sender {
     NSOpenPanel *panel=[NSOpenPanel openPanel]; panel.canChooseDirectories=YES; panel.canChooseFiles=NO; panel.allowsMultipleSelection=NO;
@@ -294,6 +345,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     }];
 }
 - (void)savePack:(id)sender {
+    [self.window makeFirstResponder:nil];
     NSSavePanel *panel=[NSSavePanel savePanel]; panel.canCreateDirectories=YES;
     panel.nameFieldStringValue=[self.character.name stringByAppendingString:@" Custom.buddie"];
     panel.message=@"Save the artwork and your animation settings as a portable buddy folder.";
@@ -305,12 +357,12 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
         if(![copy savePack:panel.URL error:&error]) {
             NSAlert *alert=[NSAlert new]; alert.messageText=@"Couldn’t save this buddy"; alert.informativeText=error.localizedDescription ?: @"The artwork could not be encoded."; [alert beginSheetModalForWindow:self.window completionHandler:nil];
         } else {
-            [self addCharacterToCollection:copy];
-            self.status.stringValue=@"Buddy saved. Import this folder to use it again or share it with a friend.";
+            if([self addCharacterToCollection:copy]) self.status.stringValue=@"Buddy saved to your collection. Share the exported folder with a friend.";
         }
     }];
 }
 - (void)windowDidMove:(NSNotification *)notification { [self positionCursor]; }
+- (void)applicationWillTerminate:(NSNotification *)notification { [self.window makeFirstResponder:nil]; [self flushLibrary]; }
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender { return YES; }
 @end
 
@@ -667,6 +719,39 @@ static void TestCollection(void) {
     puts("PASS: switching buddies commits the old edit without copying its color; obsolete fields and wells cannot repaint the new selection");
 }
 
+static void TestStudioPersistence(void) {
+    NSURL *root=[NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[@"buddie-studio-test-" stringByAppendingString:NSUUID.UUID.UUIDString]]];
+    Delegate *studio=[Delegate new];
+    @try {
+        NSArray *bundled=BuddieCollection();
+        NSCAssert([NSSet setWithArray:[bundled valueForKey:@"identifier"]].count==bundled.count,@"Classic fixtures and generated packs have distinct identities");
+        studio.library=[[BuddieLibrary alloc] initWithURL:root bundled:bundled];
+        studio.collection=[bundled mutableCopy];
+        studio.window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,960,700) styleMask:0 backing:NSBackingStoreBuffered defer:NO];
+        studio.materialControls=[NSMutableArray new]; studio.materialFields=[NSMutableDictionary new]; studio.materialWells=[NSMutableDictionary new];
+        studio.reduceButton=[NSButton checkboxWithTitle:@"Reduced motion" target:nil action:nil];
+        studio.picker=[[NSPopUpButton alloc] initWithFrame:NSZeroRect pullsDown:NO];
+        for(BuddieCharacter *c in bundled) [studio.picker.menu addItem:[[NSMenuItem alloc] initWithTitle:c.name action:nil keyEquivalent:@""]];
+        NSUInteger bit=[[bundled valueForKey:@"identifier"] indexOfObject:@"bit"],miso=[[bundled valueForKey:@"identifier"] indexOfObject:@"miso"];
+        [studio.picker selectItemAtIndex:bit]; [studio selectCharacter:nil];
+        NSTextField *field=studio.materialFields[@"shell"]; field.stringValue=@"#EB504D";
+        [studio controlTextDidChange:[NSNotification notificationWithName:NSControlTextDidChangeNotification object:field]];
+        NSSlider *width=[NSSlider sliderWithValue:1.12 minValue:.85 maxValue:1.22 target:nil action:nil]; width.identifier=@"torsoWidth"; [studio tune:width];
+        [studio.picker selectItemAtIndex:miso]; [studio selectCharacter:nil];
+        NSCAssert([ColorHex(studio.character.materialColors[@"shell"]) isEqual:@"#FCEFD5"],@"Other buddy retains its own colors");
+        [studio.picker selectItemAtIndex:bit]; [studio selectCharacter:nil];
+        NSCAssert(studio.character.torsoWidth==1.12 && [studio.materialFields[@"shell"].stringValue isEqual:@"#EB504D"],@"Switching away and back restores the edited model and controls");
+        studio.reduceButton.state=NSControlStateValueOn;
+        [studio applicationWillTerminate:[NSNotification notificationWithName:NSApplicationWillTerminateNotification object:NSApp]];
+        BuddieLibrary *reopened=[[BuddieLibrary alloc] initWithURL:root bundled:bundled];
+        NSCAssert([reopened.selectedIdentifier isEqual:@"bit"] && reopened.reducedMotion && [reopened characterForIdentifier:@"bit"].torsoWidth==1.12,@"Quit flushes pending edits and preferences");
+        [studio resetCharacter:nil];
+        reopened=[[BuddieLibrary alloc] initWithURL:root bundled:bundled];
+        NSCAssert([reopened characterForIdentifier:@"bit"].torsoWidth==1 && studio.character.torsoWidth==1 && ![studio.materialFields[@"shell"].stringValue isEqual:@"#EB504D"],@"Reset restores original controls and persists across relaunch");
+        puts("PASS: Studio selection restores independent edits; quit flushes preferences; reset persists; built-in identities remain distinct");
+    } @finally { [studio.saveTimer invalidate]; [NSFileManager.defaultManager removeItemAtURL:root error:nil]; }
+}
+
 static int SelfTest(void) {
     NSRect r=NSMakeRect(0,0,20,23);
     NSWindow *plain=[[NSWindow alloc] initWithContentRect:r styleMask:0 backing:NSBackingStoreBuffered defer:NO];
@@ -719,6 +804,7 @@ static int SelfTest(void) {
     puts("PASS: complete sprite drawing, timed blink, Reduced Motion stability, stopped facing, unchanged sprite hotspot");
     TestPuppet(sprite);
     TestCollection();
+    TestStudioPersistence();
     return 0;
 }
 int main(int argc,const char **argv) {

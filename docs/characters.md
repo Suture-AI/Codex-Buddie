@@ -74,9 +74,21 @@ Review the [Cocoa turn](media/bit-studio-turn.gif) and [five poses](media/bit-st
 
 Reimporting a saved identity reloads its collection entry. Different identities
 can share a display name without losing menu entries or selection. Imported
-packs remain session-local; keep the exported folder to reopen it later.
+packs are installed in `~/Library/Application Support/Codex Buddie/Studio/Packs/`
+under generated directory names. The original folder remains unchanged and is
+no longer required after import. Up to 256 imported identities are supported.
 Changing selection commits the previous hex edit before replacing the model;
 obsolete controls cannot repaint the new buddy even when material ids match.
+
+The library keeps original packs separate from per-character color, proportion,
+size and gait edits. `library.json` is written atomically after a short debounce,
+on selection changes and at quit. The selected character and Reduced Motion
+preference also survive relaunch. Reset restores that pack's original appearance;
+reimport explicitly replaces its original and clears its previous edits. Classic
+fixtures use `classic-` identities to avoid collisions with generated buddies.
+Malformed settings are ignored. An unreadable manifest is left untouched, with
+a visible session-only warning; a missing pack's entry is retained for recovery.
+Failed installs roll back without replacing the previous library record.
 
 Miso uses the same format with 58 frames, a three-pose curled tail, five authored
 head/torso perspectives, and separate `shell`, `suit` and `face` materials.
@@ -256,8 +268,8 @@ view's hotspot. Body bob, lean, squash and facial movement never shift it.
 
 Use **Save a copy…** to write the current settings and artwork together. Existing
 packs are never overwritten. The save is staged, validated with the same loader,
-then moved into place. Re-import the folder in a future session. Imported packs
-are read into memory; source files remain unchanged.
+then moved into place. The exported folder can be shared or imported on another
+computer; the Studio also installs its own copy in your persistent collection.
 
 Artwork filenames must stay directly inside the folder. Symlinks escaping the
 folder and remote paths are rejected. Each PNG needs an alpha channel, dimensions

@@ -1,0 +1,55 @@
+{
+  "status": "Persistent Studio library passes storage and Cocoa controller tests; live CUA restart verification remains pending.",
+  "recorded_at": "2026-10-01T04:53:55.341395+00:00",
+  "previous_art_review_commit": "d0d183da3dd7c1763b1aa0ce8508b4dd2e296c86",
+  "checks": [
+    "Independent colors, torso width/height, head size, display size, stride and step height survive a new library instance",
+    "A recolored directional expression renders identically after reopening",
+    "Selection and Reduced Motion persist",
+    "Import copies complete artwork; removing the original download does not affect it",
+    "Duplicate display names remain distinct; reimport updates an identity and resets stale edits",
+    "Reset restores the original imported proportions",
+    "Malformed numeric/color values cannot alter the rig or identity",
+    "Missing artwork retains its library record for recovery",
+    "Unknown manifest versions and unsafe paths remain untouched and read-only",
+    "Failed manifest write rolls back installation without an unreferenced pack",
+    "Actual Studio controller selection restores the edited controls; quit flushes changes; reset persists",
+    "Classic fixtures and generated packs have separate identities",
+    "Existing motion, pack and Cocoa rendering checks pass"
+  ],
+  "commands": [
+    "bash scripts/build.sh",
+    "bash scripts/test-animation.sh",
+    "\".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab\" --self-test",
+    "git diff --check"
+  ],
+  "live_ui": {
+    "status": "pending",
+    "tool": "official CUA",
+    "error": "Computer Use server error -10005: cgWindowNotFound",
+    "attempts": [
+      "existing binding",
+      "exact app path",
+      "bundle identifier",
+      "fresh CUA JavaScript binding",
+      "Finder recent-app activation"
+    ],
+    "control": "Finder accessibility observation succeeded",
+    "modifications": "No system or vendor-runtime settings changed."
+  },
+  "limitations": [
+    "Live relaunch still needs verification",
+    "Collection removal/management is not implemented",
+    "Native Codex service connection and production cursor sizing remain unresolved"
+  ],
+  "sha256": {
+    "Sources/BuddieLibrary.h": "41fe67c7548df0ef4da755678a99db0a9642d6acdbe802da8adaaa387a2e0400",
+    "Sources/BuddieLibrary.m": "909ec896f08b5cf8ef4c688576087789a0a76839983759d0086a9fc0ef6393f8",
+    "Sources/Preview.m": "7f6e193e15a81df7cdcb705575f808ef06b3706a01c875e4eeabf60af7acc246",
+    "Sources/BuddieCharacter.h": "5925da511af0e9fa7e8926380833d6406b07424638207020da9c909a9b2a3af7",
+    "Sources/BuddieCharacter.m": "43e151fef77d707dae51241489aee89d6e8c72d4bd7b96911b83422c2d883591",
+    "tests/test_library.m": "d54c5456fd10f1b5539013c85e1bd049f6344382c52586eec64298bdaf80b433",
+    "scripts/build.sh": "765344980c4636235531317dff85bdc8c772ce9ae6be22bcbc40ec014fc97221",
+    "scripts/test-animation.sh": "3a2b17950ccff89f45c393b47a32f79fd54b4ca35de4065de7c3bc5b2f02a6dd"
+  }
+}
