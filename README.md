@@ -2,8 +2,8 @@
 
 A little character **in place of Codex's computer-use cursor**.
 
-The antenna tip is the click point. The character uses the agent's cursor
-window; your own mouse stays independent.
+The intended character uses the agent's cursor window and keeps its click
+coordinate; your own mouse stays independent.
 
 **Experimental macOS prototype.** The renderer works in the included lab. A
 modified copy of the native service boots with the renderer library loaded.
@@ -15,16 +15,21 @@ The intended experience is a buddy that **walks along the agent's curved cursor
 path**, stops at the exact hotspot, and animates the click, with no gray arrow or
 glow showing. See the [next implementation brief](docs/next-steps.md).
 
-![Three generated buddies walking, turning and clicking in the studio](docs/media/buddies-walking.gif)
+![Pip motion study rendered by the native Character Studio](docs/media/pip-motion-study.gif)
 
-The **Character Studio** includes Sprout, Mochi and Orbit, generated individually
-in ChatGPT, plus three lightweight procedural presets. Body artwork, animated
-eyes, mouth and feet are separate layers. Blinks, gaze, planted steps, gentle body
-motion and click poses all share a fixed hotspot. This recording is the studio's
-controlled renderer; it does not establish live Codex integration.
+The **Character Studio** now opens with **Pip**, a soft otter in a cobalt rain
+hood and orange boots, generated in ChatGPT through Brave. Its full character
+poses preserve the designed face, paws and footwear. It has a six-frame blink
+and a four-key-pose walking study, with no tether or procedural face drawn over
+the art. Size and stride are editable; complete animation packs can be imported
+and saved. This is the studio's controlled renderer, not live Codex integration.
 
-**Art direction is being reworked.** This first generated set is retained as rig
-test artwork; it is not the approved final character collection.
+**Still a motion study.** Pip's direction is awaiting user feedback. The gait
+needs in-betweens, stronger leg separation and authored turn/settle poses. Left
+travel currently mirrors the right-facing artwork and its lighting. Sprout,
+Mochi and Orbit are retained as rejected art-direction fixtures, alongside the
+procedural presets. See the [art direction](docs/art-direction.md) and
+[review evidence](artwork/pip/walk-study/review.json).
 
 ## Additional runtime research
 
@@ -45,14 +50,14 @@ compatibility entry; those observations do not certify the patch for newer build
 Requires macOS 13+ and Xcode Command Line Tools (`xcode-select --install`).
 
 ```sh
-git clone https://github.com/Suture-AI/Codex-Buddie.git
+git clone --branch feature/animated-character-rig https://github.com/Suture-AI/Codex-Buddie.git
 cd Codex-Buddie
 ./scripts/run.sh
 ```
 
 Choose a character, then use **Take a walk**, the three stops, and **Try a click**.
-Changing stops during a walk preserves position and velocity. Tune body shape,
-eye size and spacing, face position, stride and step height with the sliders.
+Changing stops during a walk preserves position and velocity. Pip offers size
+and stride controls; the older layered presets also offer body and face controls.
 **Save a copy…** exports a portable buddy folder; **Import buddy…** opens it again.
 **Native size** compares the small software-cursor layout with the enlarged
 studio view. **Reduced motion** removes autonomous animation and jumps directly
@@ -165,7 +170,10 @@ bash scripts/test-animation.sh
 Animation checks cover frame-rate-independent gait, planted contact, the fixed
 click anchor, reduced motion, teleport recovery, curved arrival and interruption
 continuity. Pack checks cover the three real PNGs, export/import, independent
-customization, invalid settings, missing files and paths that escape a pack.
+customization, full sprite packs, timed blink boundaries, shared frame dimensions,
+invalid settings, missing files and paths that escape a pack. The native harness
+also compares rendered blink and Reduced Motion frames and verifies the fixed
+sprite hotspot.
 See [the animation validation notes](docs/animation-validation.md).
 
 ## Next milestone

@@ -39,3 +39,30 @@ movement/press/drag/visibility signals, browser and picture-in-picture surfaces,
 multi-display accuracy, lifecycle/performance profiling, durable collection
 management, and signed distribution. The native IPC signing blocker still
 applies. No claim of seamless replacement in stock Codex is made by this update.
+# Complete-pose Pip follow-up
+
+The studio now loads version 2 packs with shared canvases/hotspots, per-frame
+timings, distance-driven gait selection, optional leftward mirroring and explicit
+press/release clips. Pip supplies six idle/blink frames and four walk key poses.
+
+Passed locally: pack validation, timing boundaries, complete-frame save/import,
+shared dimensions, invalid durations/types/paths, build, and native harness
+checks comparing actual rendered blink frames and stable Reduced Motion output.
+The sprite hotspot remains fixed through press. Existing motion and Mach-O
+checks also passed. Official CUA inspection verified Pip in the studio, the
+revised size/stride controls and active walking. No live replacement is implied.
+
+The [recording](media/pip-motion-study.gif) comes from 240 AppKit-rendered frames
+at 60 Hz, sampled to 30 fps for the GIF; [contact sheet](media/pip-render-contact.png).
+Recreate raw frames with:
+
+```sh
+".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-frames /tmp/pip-frames pip
+```
+
+Ten PNGs have shared 256×320 canvases, transparent margins, no edge clipping and
+opaque coverage at the declared `(128,48)` hotspot. Hashes and remaining visual
+gaps are recorded in [the review](../artwork/pip/walk-study/review.json). The
+four-pose gait still needs in-betweens, clearer leg separation and an authored
+idle/turn transition. Mirrored lighting and small native software-cursor bounds
+also remain limitations. These facts prevent claiming finished animation quality.

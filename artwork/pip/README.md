@@ -1,7 +1,7 @@
 # Pip — art-direction candidate
 
 Original character generated in ChatGPT through Brave after the user referenced
-ChatGPT Pets. **This is a design candidate, not an approved or animated pack.**
+ChatGPT Pets. **This is a design candidate, not approved final art.**
 
 - `concept.png`: unchanged downloaded image.
 - `cutout.png`: transparent crop, with alpha <8 noise removed.
@@ -15,6 +15,8 @@ proportions, curious expression, coherent soft toon shading, clear color groups,
 and smooth precise edges. Complete face, paws and footwear were generated
 together. Requested transparent background, no tether, text, scenery or shadow.
 
-The image is not yet connected to the native renderer. Do not reuse the first
-rig's generic eyes and oval feet over this character. Generate grounded complete
-animation poses or artist-consistent part layers that retain this face and boots.
+Grounded blink and four-key-pose walk studies are now connected to the native
+Character Studio through [Pip's version 2 pack](../../Characters/pip/). The
+renderer draws complete poses without generic eyes, oval feet or a tether.
+[See the rendered motion study](../../docs/media/pip-motion-study.gif).
+Further gait/turn work and live Codex integration remain outstanding.

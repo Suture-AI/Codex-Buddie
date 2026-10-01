@@ -1,0 +1,71 @@
+{
+  "version": 2,
+  "id": "pip",
+  "name": "Pip \u00b7 Motion study",
+  "colors": {
+    "body": "#2263E8",
+    "ink": "#443025",
+    "accent": "#FF921F"
+  },
+  "rig": {
+    "stride": 32
+  },
+  "sprites": {
+    "canvas": [
+      256,
+      320
+    ],
+    "hotspot": [
+      128,
+      48
+    ],
+    "height": 64,
+    "mirrorWalk": true,
+    "clips": {
+      "idle": [
+        {
+          "image": "idle-00.png",
+          "duration": 2.4
+        },
+        {
+          "image": "idle-01.png",
+          "duration": 0.05
+        },
+        {
+          "image": "idle-02.png",
+          "duration": 0.05
+        },
+        {
+          "image": "idle-03.png",
+          "duration": 0.08
+        },
+        {
+          "image": "idle-04.png",
+          "duration": 0.06
+        },
+        {
+          "image": "idle-05.png",
+          "duration": 0.8
+        }
+      ],
+      "walkRight": [
+        {
+          "image": "walk-00.png",
+          "duration": 0.125
+        },
+        {
+          "image": "walk-01.png",
+          "duration": 0.125
+        },
+        {
+          "image": "walk-02.png",
+          "duration": 0.125
+        },
+        {
+          "image": "walk-03.png",
+          "duration": 0.125
+        }
+      ]
+    }
+  }
+}

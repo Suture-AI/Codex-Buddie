@@ -2,7 +2,64 @@
 
 A buddy is a local directory containing `buddy.json` and optional transparent
 PNG artwork. No executable code, remote URLs, or credentials are needed. The
-studio bundles three generated characters and three procedural alternatives.
+studio bundles Pip's complete-pose motion study, three earlier generated rig
+fixtures and three procedural alternatives.
+
+## Version 2: complete character poses
+
+Use this format for new characters. Faces, clothing, hands and footwear stay in
+the artwork. The renderer adds no generic eyes, legs or tether. See
+[`Characters/pip/buddy.json`](../Characters/pip/buddy.json) for a working pack.
+
+```json
+{
+  "version": 2,
+  "id": "my-pet",
+  "name": "My Pet",
+  "rig": { "stride": 32 },
+  "sprites": {
+    "canvas": [256, 320],
+    "hotspot": [128, 48],
+    "height": 64,
+    "mirrorWalk": false,
+    "clips": {
+      "idle": [{ "image": "idle-00.png", "duration": 2.4 }],
+      "walkRight": [{ "image": "walk-00.png", "duration": 0.125 }]
+    }
+  }
+}
+```
+
+All PNGs share one canvas (16–1024 whole pixels per dimension), registration and
+hotspot. `height` is the preferred canvas height in drawing points (32–96),
+subject to the native view's available space. The hotspot lies inside the
+canvas. Pip's `(128,48)` lies within its hood in every supplied frame; it maps
+exactly to the native view's click coordinate. Mirroring uses this same pivot.
+
+`idle` is required. Optional clips are `walkRight`, `walkLeft`, `press` and
+`release`. Each clip is an array of PNG filenames and frame durations in seconds
+(1/120–30). At most 64 frames and 64 MB of decoded pixel artwork are accepted.
+Duplicate filenames share the loaded image. Files remain local and data-only.
+
+Idle follows elapsed time. Walking follows distance divided by `rig.stride`;
+durations determine each pose's share of a cycle. Missing walking clips leave
+the idle artwork visible. `mirrorWalk: true` explicitly allows the rightward
+clip to serve left travel when no `walkLeft` exists. Mirroring also reverses
+lighting and asymmetric details; Pip currently uses it only as a motion study.
+
+Press/release clips are explicit event-driven one-shots. Without them, the
+studio applies a small whole-character press response around the fixed hotspot.
+Reduced Motion holds the first pose. No interpolation or ghosted crossfade is
+applied between unrelated character images. Smoothness therefore depends on
+authored pose density and transitions; four keyframes are not a finished gait.
+
+**Save a copy…** preserves every frame, its timing, size, stride and hotspot.
+The studio hides face/body sliders for complete art because those features are
+already painted into the frames. Editing them coherently requires new artwork.
+The very small native software-cursor bounds limit detailed sprite legibility;
+the enlarged studio does not prove that production sizing is solved.
+
+## Version 1: earlier layered rig
 
 ```json
 {
@@ -49,15 +106,18 @@ from 16 to 4096 pixels, and a file size up to 16 MB. The manifest is limited to
 
 ## Generate a new buddy in ChatGPT
 
-1. Start a new chat and generate **one body shell**. Specify a front view, an
-   original silhouette, a blank face area, and no facial features or limbs.
-2. Request a true transparent PNG with generous margins, no ground shadow,
-   no text and no baked checkerboard. Download the original file.
-3. Check the alpha channel; a black editor background does not prove transparency.
-4. Trim unused transparent margin, preserve antialiased edges, and reduce the
-   longest edge to about 512 px. Choose width/height that preserve the silhouette.
-5. Add `buddy.json`, import it, and tune the eyes and gait. Check both studio size
-   and native size, movement in both directions, click poses and Reduced Motion.
+1. Generate one complete original character: face, hands, feet and outfit. Aim
+   for a readable silhouette at 48–96 px, with soft forms and restrained detail.
+2. Use that same image as the reference for one animation clip at a time. Request
+   transparent PNGs, full silhouettes, consistent camera/scale and generous gaps.
+3. Inspect actual alpha and detected character bounds before extracting frames.
+   `scripts/extract-poses.py` detects connected artwork, rather than assuming cells.
+4. Register locomotion against reviewed source landmarks with `--registration`.
+   Preserve lift and body bob; do not independently resize or bottom-align steps.
+5. Inspect the loops, opposing feet, wardrobe and lighting at small sizes on light
+   and dark backgrounds. Reject repeated poses and identity changes.
+6. Add a version 2 manifest, import it, then verify the actual app's drawing,
+   movement, turns, click response and Reduced Motion. A hero image is not motion QA.
 
 The bundled Sprout, Mochi and Orbit images were generated individually through
 ChatGPT in Brave on 2026-09-30 at the user's request. The prompts requested GPT

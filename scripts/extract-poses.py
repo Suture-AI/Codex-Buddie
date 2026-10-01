@@ -3,7 +3,8 @@
 Connected alpha regions locate the characters. Small detached details are grouped
 with their nearest character. The supplied grid orders detected poses; it does
 not slice the source into assumed equal cells. This is for grounded idle
-sheets; locomotion and jumping need registration that preserves vertical displacement.
+sheets by default. Locomotion needs a reviewed registration file with source
+origins, a shared scale and a target origin, preserving vertical displacement.
 """
 import argparse
 from collections import deque
@@ -44,7 +45,7 @@ def center(box):
     return ((box[0]+box[2])/2, (box[1]+box[3])/2)
 
 
-def extract(source, output, columns, rows):
+def extract(source, output, columns, rows, registration=None):
     image = Image.open(source).convert('RGBA')
     alpha = image.getchannel('A')
     if alpha.getextrema()[0] != 0:
@@ -83,6 +84,10 @@ def extract(source, output, columns, rows):
     widths = [b[2]-b[0] for b in boxes]; heights = [b[3]-b[1] for b in boxes]
     # Uniform fit; the source's pose geometry is never individually stretched.
     scale = min(216/max(widths),272/max(heights))
+    if registration:
+        if len(registration['origins']) != count or not 0 < registration['scale'] <= 4:
+            raise ValueError('Registration needs one origin per pose and a positive shared scale.')
+        scale = registration['scale']
     output.mkdir(parents=True, exist_ok=True)
     sheet = Image.new('RGB', (columns*256, rows*320), '#f4f3ef')
     frames = []
@@ -90,13 +95,21 @@ def extract(source, output, columns, rows):
         crop = image.crop(box)
         crop = crop.resize((round(crop.width*scale),round(crop.height*scale)),Image.Resampling.LANCZOS)
         frame = Image.new('RGBA',(256,320))
-        frame.alpha_composite(crop,((256-crop.width)//2,296-crop.height))
+        if registration:
+            origin = registration['origins'][i]
+            target = registration['target']
+            position = (round(target[0]+(box[0]-origin[0])*scale),round(target[1]+(box[1]-origin[1])*scale))
+        else:
+            position = ((256-crop.width)//2,296-crop.height)
+        if position[0]<0 or position[1]<0 or position[0]+crop.width>256 or position[1]+crop.height>320:
+            raise ValueError(f'Pose {i+1} does not fit its canvas; review scale and registration.')
+        frame.alpha_composite(crop,position)
         frame.save(output/f'pose-{i:02d}.png',optimize=True)
         frames.append(frame)
         sheet.paste(frame,((i%columns)*256,(i//columns)*320),frame)
         ImageDraw.Draw(sheet).text(((i%columns)*256+12,(i//columns)*320+10),str(i+1),fill='#30353a')
     sheet.save(output/'contact.png')
-    report={'source':str(source),'source_size':list(image.size),'expected_count':count,'detected_count':len(main),'boxes':boxes,'shared_scale':scale,'canvas':[256,320],'registration':'Centered by detected complete bounds; shared foot baseline. Review for drift; not suitable for jump poses.','height_ratio':max(heights)/min(heights),'width_ratio':max(widths)/min(widths),'visual_review':'pending'}
+    report={'source':str(source),'source_size':list(image.size),'expected_count':count,'detected_count':len(main),'boxes':boxes,'shared_scale':scale,'canvas':[256,320],'registration':registration or 'Centered by detected complete bounds; shared foot baseline. Review for drift; not suitable for jump poses.','height_ratio':max(heights)/min(heights),'width_ratio':max(widths)/min(widths),'visual_review':'pending'}
     (output/'geometry.json').write_text(json.dumps(report,indent=2)+'\n')
     return frames
 
@@ -107,7 +120,8 @@ if __name__ == '__main__':
     parser.add_argument('output',type=Path)
     parser.add_argument('--columns',type=int,required=True)
     parser.add_argument('--rows',type=int,required=True)
+    parser.add_argument('--registration',type=Path,help='Reviewed JSON with scale, origins, and target; preserves movement relative to those origins.')
     args=parser.parse_args()
     if not 1<=args.columns<=16 or not 1<=args.rows<=16:
         parser.error('Grid dimensions must be between 1 and 16.')
-    extract(args.source,args.output,args.columns,args.rows)
+    extract(args.source,args.output,args.columns,args.rows,json.loads(args.registration.read_text()) if args.registration else None)

@@ -1,0 +1,69 @@
+{
+  "source": "artwork/pip/walk-study/source.png",
+  "source_size": [
+    1254,
+    1254
+  ],
+  "expected_count": 4,
+  "detected_count": 4,
+  "boxes": [
+    [
+      121,
+      37,
+      555,
+      617
+    ],
+    [
+      724,
+      38,
+      1153,
+      617
+    ],
+    [
+      115,
+      636,
+      582,
+      1218
+    ],
+    [
+      730,
+      635,
+      1177,
+      1222
+    ]
+  ],
+  "shared_scale": 0.46,
+  "canvas": [
+    256,
+    320
+  ],
+  "registration": {
+    "scale": 0.46,
+    "origins": [
+      [
+        352,
+        615
+      ],
+      [
+        964,
+        615
+      ],
+      [
+        352,
+        1218
+      ],
+      [
+        964,
+        1218
+      ]
+    ],
+    "target": [
+      128,
+      296
+    ],
+    "method": "Manually reviewed source-space ground lines and body origins. One scale for every pose. Each row uses one ground line, preserving lift and bob; no per-frame fit or bottom normalization."
+  },
+  "height_ratio": 1.0138169257340242,
+  "width_ratio": 1.0885780885780887,
+  "visual_review": "pending"
+}

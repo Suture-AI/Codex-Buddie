@@ -17,7 +17,7 @@ static NSButton *Button(NSString *s, id target, SEL action, NSRect frame) {
 static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     NSMutableArray *all=[NSMutableArray new];
     NSURL *root=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Characters"];
-    for(NSString *name in @[@"sprout",@"mochi",@"orbit"]) {
+    for(NSString *name in @[@"pip",@"sprout",@"mochi",@"orbit"]) {
         NSError *error=nil; BuddieCharacter *c=[BuddieCharacter loadPack:[root URLByAppendingPathComponent:name] error:&error];
         if(c) [all addObject:c];
     }
@@ -50,6 +50,9 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 @property NSButton *reduceButton;
 @property NSMutableArray<BuddieCharacter *> *collection;
 @property NSMutableDictionary<NSString *,NSSlider *> *sliders;
+@property NSMutableDictionary<NSString *,NSTextField *> *settingLabels;
+@property NSTextField *settingsHeading;
+@property NSTextField *artNote;
 @property BuddieCharacter *character;
 @property BOOL playing;
 @property BOOL software;
@@ -60,6 +63,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
     self.collection=[BuddieCollection() mutableCopy]; self.character=[self.collection.firstObject copy];
     self.sliders=[NSMutableDictionary new];
+    self.settingLabels=[NSMutableDictionary new];
     self.window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,960,700) styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable backing:NSBackingStoreBuffered defer:NO];
     self.window.title=@"Codex Buddie — Character Studio"; self.window.delegate=self;
     self.window.appearance=[NSAppearance appearanceNamed:NSAppearanceNameAqua];
@@ -72,16 +76,19 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     for(BuddieCharacter *c in self.collection) [self.picker addItemWithTitle:c.name];
     self.picker.target=self; self.picker.action=@selector(selectCharacter:); [v addSubview:self.picker];
     [v addSubview:Button(@"Import buddy…",self,@selector(importPack:),NSMakeRect(696,558,230,32))];
-    [v addSubview:Label(@"SHAPE & EXPRESSION",11,NSColor.secondaryLabelColor,NSMakeRect(700,508,230,20))];
-    NSArray *settings=@[@[@"width",@"Body width",@24,@42],@[@"height",@"Body height",@24,@40],@[@"eyeSpacing",@"Eye spacing",@8,@20],@[@"eyeSize",@"Eye size",@3,@7],@[@"faceY",@"Face position",@(-7),@7],@[@"stride",@"Stride",@16,@40],@[@"footLift",@"Step height",@2,@8]];
+    self.settingsHeading=Label(@"SHAPE & EXPRESSION",11,NSColor.secondaryLabelColor,NSMakeRect(700,508,230,20)); [v addSubview:self.settingsHeading];
+    NSArray *settings=@[@[@"width",@"Body width",@24,@42],@[@"height",@"Body height",@24,@40],@[@"eyeSpacing",@"Eye spacing",@8,@20],@[@"eyeSize",@"Eye size",@3,@7],@[@"faceY",@"Face position",@(-7),@7],@[@"stride",@"Stride",@16,@40],@[@"footLift",@"Step height",@2,@8],@[@"spriteHeight",@"Size",@32,@96]];
     int row=0;
     for(NSArray *setting in settings) {
         CGFloat y=465-row*43;
-        [v addSubview:Label(setting[1],12,Ink(),NSMakeRect(700,y+6,110,20))];
+        NSTextField *label=Label(setting[1],12,Ink(),NSMakeRect(700,y+6,110,20)); self.settingLabels[setting[0]]=label; [v addSubview:label];
         NSSlider *slider=[NSSlider sliderWithValue:0 minValue:[setting[2] doubleValue] maxValue:[setting[3] doubleValue] target:self action:@selector(tune:)];
         slider.frame=NSMakeRect(809,y+4,115,24); slider.identifier=setting[0]; slider.continuous=YES;
         slider.accessibilityLabel=setting[1]; self.sliders[setting[0]]=slider; [v addSubview:slider]; row++;
     }
+    self.artNote=[NSTextField wrappingLabelWithString:@"Pip’s face and outfit belong together. Import another buddy to try a different look."];
+    self.artNote.font=[NSFont systemFontOfSize:12]; self.artNote.textColor=NSColor.secondaryLabelColor;
+    self.artNote.frame=NSMakeRect(700,315,218,76); [v addSubview:self.artNote];
     self.reduceButton=[NSButton checkboxWithTitle:@"Reduced motion" target:self action:@selector(reduce:)];
     self.reduceButton.frame=NSMakeRect(700,146,225,26); [v addSubview:self.reduceButton];
     [v addSubview:Button(@"Reset character",self,@selector(selectCharacter:),NSMakeRect(696,103,230,32))];
@@ -104,7 +111,19 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];
 }
 - (void)syncSliders {
-    for(NSString *key in self.sliders) self.sliders[key].doubleValue=[key isEqual:@"width"] ? self.character.bodySize.width : [key isEqual:@"height"] ? self.character.bodySize.height : [[self.character valueForKey:key] doubleValue];
+    BOOL sprite=self.character.clips.count>0;
+    self.settingsHeading.stringValue=sprite ? @"SIZE & MOVEMENT":@"SHAPE & EXPRESSION";
+    self.artNote.hidden=!sprite;
+    self.artNote.stringValue=@"The face and outfit belong together. Import another buddy to try a different look.";
+    for(NSString *key in self.sliders) {
+        self.sliders[key].doubleValue=[key isEqual:@"width"] ? self.character.bodySize.width : [key isEqual:@"height"] ? self.character.bodySize.height : [[self.character valueForKey:key] doubleValue];
+        BOOL supported=sprite ? [@[@"stride",@"spriteHeight"] containsObject:key]:![key isEqual:@"spriteHeight"];
+        self.sliders[key].hidden=!supported; self.settingLabels[key].hidden=!supported;
+        CGFloat y=[key isEqual:@"stride"] ? (sprite ? 422:250):[key isEqual:@"spriteHeight"] ? 465:self.sliders[key].frame.origin.y-4;
+        [self.sliders[key] setFrameOrigin:NSMakePoint(809,y+4)];
+        [self.settingLabels[key] setFrameOrigin:NSMakePoint(700,y+6)];
+    }
+    self.status.stringValue=self.character.clips.count ? @"Complete character poses • motion study • live Codex replacement is still under development":@"Character preview • live Codex replacement is still under development";
 }
 - (void)createCursor {
     if(self.cursor) { [self.window removeChildWindow:self.cursor]; [self.cursor orderOut:nil]; self.cursor.contentView=nil; }
@@ -201,15 +220,16 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [super drawRect:rect];
 }
 @end
-static int ExportFrames(NSString *path) {
+static int ExportFrames(NSString *path, NSString *identifier) {
     NSError *error=nil;
     if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&error]) { fprintf(stderr,"%s\n",error.localizedDescription.UTF8String); return 1; }
     NSWindow *window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,840,480) styleMask:0 backing:NSBackingStoreBuffered defer:NO];
     window.appearance=[NSAppearance appearanceNamed:NSAppearanceNameAqua];
     ExportView *view=[[ExportView alloc] initWithFrame:NSMakeRect(0,0,840,480)]; view.manualAnimation=YES; view.characterScale=2; window.contentView=view;
-    NSArray *characters=BuddieCollection();
+    NSArray<BuddieCharacter *> *characters=BuddieCollection();
     int frame=0;
-    for(NSUInteger index=0;index<MIN(3,characters.count);index++) {
+    for(NSUInteger index=0;index<characters.count;index++) {
+        if(identifier ? ![characters[index].identifier isEqual:identifier]:index>=3) continue;
         view.character=[characters[index] copy];
         BuddiePoint point={95,220}; BuddieJourney journey={0}; journey.end=point;
         for(int i=0;i<240;i++,frame++) {
@@ -246,7 +266,26 @@ static int SelfTest(void) {
     NSCAssert(cursor.contentView==unknown,@"Unknown renderer must fail open");
     NSView *fog=[[fogClass alloc] initWithFrame:r]; cursor.contentView=fog;
     NSCAssert([NSStringFromClass(cursor.contentView.class) isEqual:@"BuddieView"],@"Native fog must be replaced");
+    NSWindow *spriteWindow=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,300,300) styleMask:0 backing:NSBackingStoreBuffered defer:NO];
+    BuddieView *sprite=[[BuddieView alloc] initWithFrame:NSMakeRect(0,0,300,300)];
+    sprite.manualAnimation=YES; sprite.characterScale=2; sprite.character=[BuddieCollection().firstObject copy]; spriteWindow.contentView=sprite;
+    NSCAssert(sprite.character.clips[@"idle"],@"Sprite integration test needs the bundled Pip pack");
+    NSData *(^snapshot)(void)=^NSData *{
+        NSBitmapImageRep *rep=[sprite bitmapImageRepForCachingDisplayInRect:sprite.bounds];
+        [sprite cacheDisplayInRect:sprite.bounds toBitmapImageRep:rep];
+        return [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+    };
+    NSPoint hotspot=sprite.hotspot;
+    [sprite animateAtTime:100 anchor:(BuddiePoint){0,0}]; NSData *open=snapshot();
+    [sprite animateAtTime:102.57 anchor:(BuddiePoint){0,0}]; NSData *blink=snapshot();
+    if(!NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion) NSCAssert(![open isEqual:blink],@"Elapsed idle time must render different blink artwork");
+    sprite.reduceMotion=YES;
+    [sprite animateAtTime:103 anchor:(BuddiePoint){50,0}]; NSData *still=snapshot();
+    [sprite animateAtTime:104 anchor:(BuddiePoint){100,20}]; NSCAssert([still isEqual:snapshot()],@"Reduced Motion renders the same complete pose while moving");
+    [sprite press:YES atTime:104]; [sprite animateAtTime:104.1 anchor:(BuddiePoint){100,20}];
+    NSCAssert(NSEqualPoints(sprite.hotspot,hotspot),@"Sprite press keeps the native click coordinate");
     puts("PASS: software + fog replacement, unchanged geometry, detached artwork, repeated assignment, unrelated windows, unknown renderer fallback");
+    puts("PASS: complete sprite drawing, timed blink, Reduced Motion stability, unchanged sprite hotspot");
     return 0;
 }
 int main(int argc,const char **argv) {
@@ -257,7 +296,7 @@ int main(int argc,const char **argv) {
         NSString *path=[NSBundle.mainBundle.privateFrameworksPath stringByAppendingPathComponent:@"libBuddie.dylib"];
         if(!dlopen(path.fileSystemRepresentation,RTLD_NOW)) { fprintf(stderr,"%s\n",dlerror()); return 1; }
         if(argc>1 && strcmp(argv[1],"--self-test")==0) return SelfTest();
-        if(argc>2 && strcmp(argv[1],"--export-frames")==0) return ExportFrames([NSString stringWithUTF8String:argv[2]]);
+        if(argc>2 && strcmp(argv[1],"--export-frames")==0) return ExportFrames([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:nil);
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         Delegate *delegate=[Delegate new]; NSApp.delegate=delegate; [NSApp run];
     }

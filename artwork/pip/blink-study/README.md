@@ -2,8 +2,9 @@
 
 ![Blink at small and large preview sizes](blink.gif)
 
-This is a generated facial animation study, not an installed buddy or a native
-cursor integration. The user has not approved the Pip art direction yet.
+This generated facial animation study is now included in the Character Studio's
+Pip pack. It does not establish live native cursor integration. The user has not
+approved the Pip art direction yet.
 
 `source.png` was generated in the same ChatGPT conversation with the original
 Pip image explicitly attached as an edit reference. The request specified six
@@ -18,8 +19,10 @@ registration; `review.json` records actual file checks and visual observations.
 
 The idle blink holds the open eyes, closes over several short frames and reopens.
 The GIF uses 2400/50/50/80/60/800 ms frame durations. Review this together with the
-contact sheet. Source bounds vary by 0.4% in height and 1.14% in width, so runtime
-review still needs to check for visible drift at the intended character size.
+contact sheet. Source bounds vary by 0.4% in height and 1.14% in width. The native
+harness verifies differing open/closed rendered frames and stable Reduced Motion
+output; the studio was inspected through official CUA. Minor generated body
+variation remains a visual polish concern.
 
 To reproduce extraction (Pillow required):
 

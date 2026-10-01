@@ -1,0 +1,180 @@
+{
+  "asset_checks": [
+    {
+      "file": "idle-00.png",
+      "sha256": "868be8f4b3f3cfe276a57890136fe96d62da471fa069b83ee64155e2e8004fda",
+      "canvas": [
+        256,
+        320
+      ],
+      "bounds": [
+        35,
+        26,
+        221,
+        295
+      ],
+      "alpha_at_hotspot": 253,
+      "touches_edge": false
+    },
+    {
+      "file": "idle-01.png",
+      "sha256": "8d99ccec3c965e02c3fa997ca17f6832ffa6e1e8c543a76f3e25d4753860fda7",
+      "canvas": [
+        256,
+        320
+      ],
+      "bounds": [
+        34,
+        26,
+        221,
+        295
+      ],
+      "alpha_at_hotspot": 253,
+      "touches_edge": false
+    },
+    {
+      "file": "idle-02.png",
+      "sha256": "abd9bcbf100a87f8ae49106984f63777a6af8ed2ea123d4fcf7fc4739e215466",
+      "canvas": [
+        256,
+        320
+      ],
+      "bounds": [
+        34,
+        26,
+        222,
+        295
+      ],
+      "alpha_at_hotspot": 253,
+      "touches_edge": false
+    },
+    {
+      "file": "idle-03.png",
+      "sha256": "ec4f4192cb266c10ed55b249bbeb78f48dd83a66c0ae07e8ed2f0b20ad77f2db",
+      "canvas": [
+        256,
+        320
+      ],
+      "bounds": [
+        33,
+        26,
+        222,
+        294
+      ],
+      "alpha_at_hotspot": 253,
+      "touches_edge": false
+    },
+    {
+      "file": "idle-04.png",
+      "sha256": "f537fd1f17bdda532faff7c661ca7c779ebd7f312e6a3e951c4c4e4e313cd6b6",
+      "canvas": [
+        256,
+        320
+      ],
+      "bounds": [
+        33,
+        26,
+        221,
+        294
+      ],
+      "alpha_at_hotspot": 253,
+      "touches_edge": false
+    },
+    {
+      "file": "idle-05.png",
+      "sha256": "b0a59cb96310a2df264fe0494321b3f4e4d4c4ebb41efb6634cc3301cb46b0d1",
+      "canvas": [
+        256,
+        320
+      ],
+      "bounds": [
+        33,
+        26,
+        223,
+        294
+      ],
+      "alpha_at_hotspot": 253,
+      "touches_edge": false
+    },
+    {
+      "file": "walk-00.png",
+      "sha256": "c40e5ba27d0226fcac97e7b62cda9fe28eb5aa1c9de1cff3e43e28486bf05b9c",
+      "canvas": [
+        256,
+        320
+      ],
+      "bounds": [
+        24,
+        32,
+        220,
+        296
+      ],
+      "alpha_at_hotspot": 253,
+      "touches_edge": false
+    },
+    {
+      "file": "walk-01.png",
+      "sha256": "bc1ea5d2f299d98f4b658c1104092f6e4c68f12b74556c1bdade9684dddf58ce",
+      "canvas": [
+        256,
+        320
+      ],
+      "bounds": [
+        20,
+        32,
+        213,
+        296
+      ],
+      "alpha_at_hotspot": 253,
+      "touches_edge": false
+    },
+    {
+      "file": "walk-02.png",
+      "sha256": "3264162a5cf22cc1011e75fa9049404cb07c202e5ca0e391d8dd0e4a3700ca17",
+      "canvas": [
+        256,
+        320
+      ],
+      "bounds": [
+        21,
+        29,
+        232,
+        295
+      ],
+      "alpha_at_hotspot": 253,
+      "touches_edge": false
+    },
+    {
+      "file": "walk-03.png",
+      "sha256": "460670518fb6241b80415aa55c708910ada638576a12b257d1a82f7953cdb2cc",
+      "canvas": [
+        256,
+        320
+      ],
+      "bounds": [
+        21,
+        29,
+        224,
+        297
+      ],
+      "alpha_at_hotspot": 253,
+      "touches_edge": false
+    }
+  ],
+  "runtime_recording": "docs/media/pip-motion-study.gif",
+  "runtime_contact": "docs/media/pip-render-contact.png",
+  "observations": [
+    "All ten full poses fit the shared canvas, keep transparent margins, and cover the declared hotspot.",
+    "Four right-facing walk key poses have opposing arm positions and changed near/far leg layering.",
+    "Registration uses shared row ground lines, retaining the source lift and vertical variation.",
+    "Runtime uses distance-driven gait, timed full-art blinks and explicit press feedback.",
+    "Leftward motion currently mirrors the right-facing study, including its lighting."
+  ],
+  "remaining": [
+    "Four-frame gait needs in-betweens, stronger leg separation and a loop review before it is final.",
+    "Idle is a different view angle; authored turn/settle frames are needed to avoid a visible pose change.",
+    "Pip direction has not been approved by the user.",
+    "No live Codex cursor replacement has been verified.",
+    "Software cursor bounds make the detailed character too small; native geometry needs further work."
+  ]
+}

@@ -7,8 +7,12 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 }
 @interface BuddieView () {
     BuddieMotion _motion;
+    double _spriteEpoch, _spriteEventAt;
+    BOOL _spriteFacingLeft, _spriteReleasing;
 }
 @property NSTimer *animationTimer;
+@property NSString *spriteClipName;
+@property NSUInteger spriteFrame;
 @end
 @implementation BuddieView
 - (instancetype)initWithFrame:(NSRect)frame {
@@ -22,7 +26,9 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 - (NSView *)hitTest:(NSPoint)p { return nil; }
 - (void)dealloc { [_animationTimer invalidate]; }
 - (void)setCharacter:(BuddieCharacter *)character {
-    _character=character ?: [BuddieCharacter new]; BuddieMotionInit(&_motion); self.needsDisplay=YES;
+    _character=character ?: [BuddieCharacter new]; BuddieMotionInit(&_motion);
+    _spriteFacingLeft=NO; _spriteReleasing=NO; _spriteEpoch=NAN;
+    self.spriteClipName=@"idle"; self.spriteFrame=0; self.needsDisplay=YES;
 }
 - (void)setManualAnimation:(BOOL)value { _manualAnimation=value; [self configureTimer]; }
 - (void)viewDidMoveToWindow { [super viewDidMoveToWindow]; [self configureTimer]; }
@@ -41,16 +47,62 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 - (NSPoint)hotspot { return self.softwareStyle ? NSMakePoint(4,4) : NSMakePoint(NSMidX(self.bounds),NSMidY(self.bounds)); }
 - (CGFloat)drawingScale {
     NSPoint h=self.hotspot;
+    if(self.character.clips.count) {
+        BuddieCharacter *c=self.character; double unit=c.spriteHeight/c.spriteCanvas.height;
+        // Reserve both horizontal extents so a mirrored turn cannot resize the pet.
+        double side=MAX(c.spriteHotspot.x,c.spriteCanvas.width-c.spriteHotspot.x)*unit;
+        double top=c.spriteHotspot.y*unit, bottom=(c.spriteCanvas.height-c.spriteHotspot.y)*unit;
+        double scale=MIN(self.characterScale,MIN(h.x/side,(NSWidth(self.bounds)-h.x)/side));
+        if(top>0) scale=MIN(scale,h.y/top);
+        if(bottom>0) scale=MIN(scale,(NSHeight(self.bounds)-h.y)/bottom);
+        return MAX(0,scale);
+    }
     return MAX(0,MIN(self.characterScale,MIN((NSWidth(self.bounds)-h.x)/64.,(NSHeight(self.bounds)-h.y)/66.)));
 }
 - (void)animateAtTime:(double)time anchor:(BuddiePoint)anchor {
     BuddieCharacter *c=self.character;
-    BuddieMotionUpdate(&_motion,anchor,time,(BuddieRig){c.stride,c.footSpacing,c.footLift},self.reduceMotion || NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion);
+    BOOL reduced=self.reduceMotion || NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;
+    BuddieMotionUpdate(&_motion,anchor,time,(BuddieRig){c.stride,c.footSpacing,c.footLift},reduced);
+    if(c.clips.count && isfinite(time)) {
+        if(!isfinite(_spriteEpoch) || time<_spriteEpoch) _spriteEpoch=time;
+        if(_motion.moving && fabs(_motion.velocity.x)>3) _spriteFacingLeft=_motion.velocity.x<0;
+        NSString *name=@"idle"; double elapsed=time-_spriteEpoch; BOOL loop=YES;
+        if(_motion.pressed && c.clips[@"press"]) { name=@"press"; elapsed=time-_spriteEventAt; loop=NO; }
+        else if(_spriteReleasing && c.clips[@"release"] && time-_spriteEventAt<c.clips[@"release"].duration) { name=@"release"; elapsed=time-_spriteEventAt; loop=NO; }
+        else if(!reduced && _motion.pose.walkWeight>.1) {
+            NSString *walk=_spriteFacingLeft && c.clips[@"walkLeft"] ? @"walkLeft":@"walkRight";
+            if(c.clips[walk]) { name=walk; elapsed=_motion.pose.phase*c.clips[walk].duration; }
+        }
+        if(![name isEqual:self.spriteClipName] && [name isEqual:@"idle"]) { _spriteEpoch=time; elapsed=0; }
+        self.spriteClipName=name;
+        self.spriteFrame=reduced ? 0:[c.clips[name] frameIndexAtTime:elapsed loop:loop];
+    }
     self.needsDisplay=YES;
 }
-- (void)press:(BOOL)down atTime:(double)time { BuddieMotionPress(&_motion,down,time); }
+- (void)press:(BOOL)down atTime:(double)time {
+    if(_motion.pressed!=down) { _spriteEventAt=time; _spriteReleasing=!down; }
+    BuddieMotionPress(&_motion,down,time);
+}
+- (void)drawSpriteWithScale:(CGFloat)scale {
+    BuddieCharacter *c=self.character;
+    BuddieSpriteClip *clip=c.clips[self.spriteClipName] ?: c.clips[@"idle"];
+    if(!clip.frames.count) return;
+    BOOL mirror=_spriteFacingLeft && [self.spriteClipName isEqual:@"walkRight"] && c.mirrorWalk;
+    double unit=scale*c.spriteHeight/c.spriteCanvas.height;
+    [NSGraphicsContext saveGraphicsState];
+    NSGraphicsContext.currentContext.imageInterpolation=NSImageInterpolationHigh;
+    NSAffineTransform *t=[NSAffineTransform transform];
+    [t translateXBy:self.hotspot.x yBy:self.hotspot.y];
+    // A small fallback press response, around the exact hotspot, when no clip exists.
+    double press=c.clips[@"press"] ? 1:.75+.25*MIN(1,_motion.pose.squash);
+    [t scaleXBy:(mirror ? -unit:unit)*press yBy:unit*press]; [t concat];
+    NSRect rect=NSMakeRect(-c.spriteHotspot.x,-c.spriteHotspot.y,c.spriteCanvas.width,c.spriteCanvas.height);
+    [clip.frames[MIN(self.spriteFrame,clip.frames.count-1)] drawInRect:rect fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1 respectFlipped:YES hints:nil];
+    [NSGraphicsContext restoreGraphicsState];
+}
 - (void)drawRect:(NSRect)dirty {
     CGFloat scale=self.drawingScale; if(scale<=0) return;
+    if(self.character.clips.count) { [self drawSpriteWithScale:scale]; return; }
     BuddieCharacter *c=self.character; BuddiePose p=_motion.pose;
     [NSGraphicsContext saveGraphicsState];
     NSGraphicsContext.currentContext.imageInterpolation=NSImageInterpolationHigh;

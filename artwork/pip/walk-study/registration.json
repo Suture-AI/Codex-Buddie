@@ -1,0 +1,26 @@
+{
+  "scale": 0.46,
+  "origins": [
+    [
+      352,
+      615
+    ],
+    [
+      964,
+      615
+    ],
+    [
+      352,
+      1218
+    ],
+    [
+      964,
+      1218
+    ]
+  ],
+  "target": [
+    128,
+    296
+  ],
+  "method": "Manually reviewed source-space ground lines and body origins. One scale for every pose. Each row uses one ground line, preserving lift and bob; no per-frame fit or bottom normalization."
+}

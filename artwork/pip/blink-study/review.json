@@ -123,8 +123,13 @@
     "Shared size and foot registration; source height spread is 0.4 percent and width spread 1.14 percent."
   ],
   "limits": [
-    "Generated pose study only; not integrated with cursor motion.",
     "No user approval of Pip art direction yet.",
-    "Real-time playback and walking identity remain unverified."
-  ]
+    "Minor generated body variation remains.",
+    "Live Codex cursor replacement remains unverified."
+  ],
+  "runtime_follow_up": {
+    "pack": "Characters/pip",
+    "evidence": "docs/media/pip-motion-study.gif",
+    "checks": "Native harness verifies visible blink change, stable Reduced Motion frames and fixed hotspot; CUA inspection verified the actual studio."
+  }
 }

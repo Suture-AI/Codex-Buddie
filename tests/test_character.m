@@ -29,9 +29,31 @@ int main(void) {
             BuddieCharacter *loaded=[BuddieCharacter loadPack:saved error:nil];
             NSCAssert(loaded.bodyImage && loaded.eyeSpacing==18 && loaded.stride==20,@"Artwork and customization round-trip");
             NSCAssert(![source savePack:saved error:nil],@"Existing packs must not be overwritten");
+            BuddieCharacter *pip=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/pip"] error:nil];
+            NSCAssert(pip.clips[@"idle"].frames.count==6 && !pip.bodyImage,@"Complete character pack loads its own face and feet");
+            BuddieSpriteClip *blink=pip.clips[@"idle"];
+            NSCAssert([blink frameIndexAtTime:2.39 loop:YES]==0 && [blink frameIndexAtTime:2.426 loop:YES]==1,@"Blink uses per-frame durations, not uniform FPS");
+            NSCAssert([blink frameIndexAtTime:blink.duration+.02 loop:YES]==0,@"Idle wraps at the clip duration");
+            NSCAssert([blink frameIndexAtTime:99 loop:NO]==5 && [blink frameIndexAtTime:NAN loop:YES]==0,@"One-shot clamps and invalid time is safe");
+            NSURL *spriteCopy=[root URLByAppendingPathComponent:@"pip.buddie"];
+            NSCAssert([pip savePack:spriteCopy error:nil],@"Save sprite pack with every frame");
+            BuddieCharacter *pipCopy=[BuddieCharacter loadPack:spriteCopy error:nil];
+            NSCAssert(pipCopy.clips.count==pip.clips.count && pipCopy.clips[@"idle"].duration==blink.duration && NSEqualPoints(pipCopy.spriteHotspot,pip.spriteHotspot),@"Sprite timings and hotspot round-trip");
+            NSData *spriteData=[NSData dataWithContentsOfURL:[spriteCopy URLByAppendingPathComponent:@"buddy.json"]];
+            NSDictionary *spriteJSON=[NSJSONSerialization JSONObjectWithData:spriteData options:0 error:nil];
+            for(NSString *key in @[@"canvas",@"hotspot",@"height",@"mirrorWalk",@"clips"]) {
+                NSMutableDictionary *bad=[spriteJSON mutableCopy], *sprites=[spriteJSON[@"sprites"] mutableCopy];
+                sprites[key]=NSNull.null; bad[@"sprites"]=sprites; Reject(spriteCopy,bad);
+            }
+            for(id frames in @[@[],@[@{@"image":@"idle-00.png",@"duration":@0}],@[@{@"image":@"../outside.png",@"duration":@.1}],@[@{@"image":@"idle-00.png",@"duration":@YES}]]) {
+                NSMutableDictionary *bad=[spriteJSON mutableCopy], *sprites=[spriteJSON[@"sprites"] mutableCopy];
+                sprites[@"clips"]=@{@"idle":frames}; bad[@"sprites"]=sprites; Reject(spriteCopy,bad);
+            }
+            NSMutableDictionary *wrongCanvas=[spriteJSON mutableCopy], *sprites=[spriteJSON[@"sprites"] mutableCopy];
+            sprites[@"canvas"]=@[@512,@512]; wrongCanvas[@"sprites"]=sprites; Reject(spriteCopy,wrongCanvas);
             NSDictionary *valid=@{@"version":@1,@"id":@"test",@"name":@"Test"};
             Write(root,valid); NSCAssert([BuddieCharacter loadPack:root error:nil],@"Procedural pack is valid");
-            Reject(root,@[]); Reject(root,@{@"version":@2});
+            Reject(root,@[]); Reject(root,@{@"version":@2}); Reject(root,@{@"version":@YES,@"id":@"test",@"name":@"Test"});
             for(id rig in @[@[],@{@"width":@9000},@{@"eyeSize":@"large"},@{@"mystery":@4}]) {
                 NSMutableDictionary *p=[valid mutableCopy]; p[@"rig"]=rig; Reject(root,p);
             }
@@ -41,7 +63,7 @@ int main(void) {
             [fm createSymbolicLinkAtURL:[root URLByAppendingPathComponent:@"escape.png"] withDestinationURL:[NSURL fileURLWithPath:[fm.currentDirectoryPath stringByAppendingPathComponent:@"Characters/sprout/body.png"]] error:nil];
             NSMutableDictionary *p=[valid mutableCopy]; p[@"art"]=@{@"body":@"escape.png"}; Reject(root,p);
             p=[valid mutableCopy]; p[@"colors"]=@{@"body":@"#FF0000garbage"}; Reject(root,p);
-            puts("PASS: generated packs, independent copies, procedural fallback, schema/range validation, path traversal, remote path, symlink escape, missing artwork, invalid colors");
+            puts("PASS: generated and sprite packs; timing boundaries; save/import round-trip; independent copies; procedural fallback; schema/range/dimension validation; path traversal; remote path; symlink escape; missing artwork; invalid colors");
         } @finally { [fm removeItemAtURL:root error:nil]; }
     }
 }

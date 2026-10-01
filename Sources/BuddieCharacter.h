@@ -1,5 +1,13 @@
 #import <Cocoa/Cocoa.h>
 
+// Complete poses keep the artist's face, hands, clothes and feet together.
+@interface BuddieSpriteClip : NSObject
+@property(copy) NSArray<NSImage *> *frames;
+@property(copy) NSArray<NSNumber *> *durations;
+@property(readonly) NSTimeInterval duration;
+- (NSUInteger)frameIndexAtTime:(double)time loop:(BOOL)loop;
+@end
+
 // A pack is data and local PNGs, never executable code.
 @interface BuddieCharacter : NSObject <NSCopying>
 @property(copy) NSString *identifier;
@@ -18,6 +26,11 @@
 @property CGFloat footLift;
 @property NSImage *bodyImage;
 @property NSImage *footImage;
+@property(copy) NSDictionary<NSString *,BuddieSpriteClip *> *clips;
+@property NSSize spriteCanvas;
+@property NSPoint spriteHotspot;
+@property CGFloat spriteHeight;
+@property BOOL mirrorWalk;
 + (NSArray<BuddieCharacter *> *)presets;
 + (instancetype)loadPack:(NSURL *)folder error:(NSError **)error;
 - (BOOL)savePack:(NSURL *)folder error:(NSError **)error;

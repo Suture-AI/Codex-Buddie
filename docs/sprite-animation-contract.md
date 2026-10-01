@@ -1,9 +1,9 @@
-# Next animation asset contract (design proposal)
+# Complete-pose animation contract
 
-The current v1 pack format animates procedural facial features and feet over a
-body image. The next renderer must also support complete generated poses so a
-character keeps the face, hands and footwear established in its canonical art.
-This document is a proposal; these sprite clips are not implemented yet.
+Version 2 packs now play complete generated poses, preserving the face, hands
+and footwear established in canonical art. Version 1 still supports the earlier
+layered rig. See [the implemented schema](characters.md). Pip is a working
+blink/four-key-pose motion study, not a final animation-quality reference.
 
 ## Minimum useful clips
 
@@ -44,3 +44,13 @@ crossfades. Verify the decoded assets and the runtime's rendered output.
 
 The supported native integration and its visibility/press/drag events remain
 separate unresolved product gates. Sprite work must not imply those are solved.
+
+## Current gaps against this contract
+
+Pip still cuts between its three-quarter idle and more side-facing walk view;
+there are no authored turn/settle clips. Its four walk poses need in-betweens and
+stronger leg separation. Left travel mirrors lighting. The runtime retains the
+last distance phase while decelerating, then changes to idle; this does not yet
+guarantee a planted final contact. Press/release use a restrained whole-image
+response until authored poses are supplied. These are visible quality gaps,
+not checks satisfied by the pack loader or motion unit tests.

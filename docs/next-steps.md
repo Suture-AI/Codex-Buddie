@@ -19,7 +19,20 @@ and more polished art than the first pear-like Sprout. Detailed sci-fi robots
 are not the current direction. Study the built-in pets' clear silhouettes,
 expressive complete poses and coherent facial/limb design; create original art.
 
-The root Character Studio now has three ChatGPT-generated body packs, independent
+The root Character Studio now opens with **Pip · Motion study**, a complete-pose
+version 2 pack: six blink frames, four walk key poses, size/stride controls,
+mirrored left travel, fixed hood hotspot and import/export of all frames. The
+renderer adds no tether, generic face or feet over its artwork. See
+[`docs/media/pip-motion-study.gif`](media/pip-motion-study.gif),
+[the asset review](../artwork/pip/walk-study/review.json) and the implemented
+[version 2 pack format](characters.md).
+
+Next art work: obtain feedback on Pip, add gait in-betweens and clearer leg
+separation, and author idle/turn/settle and leftward poses. Current whole-pose
+transitions and mirrored lighting are explicit limitations. Do not mark the
+four-keyframe study as smooth final animation.
+
+The studio also retains three earlier ChatGPT-generated body packs, independent
 animated faces/feet, distance-driven planted gait, continuous curved retargeting,
 live proportions/face/gait controls, and pack import/export. `BuddieMotion.c` is
 plain C; `BuddieCharacter.m` owns pack validation and `BuddieView.m` renders poses.
@@ -71,4 +84,8 @@ A renderer we control can implement true replacement directly. That demonstrates
 
 ## Release work after the integration is proven
 
-Save preferences, add a size control and robust pack installation, pin the intended agent session, measure latency/CPU/battery use, test multiple monitors, sign and notarize downloadable builds, and publish an explicit compatibility list. Generated character packs can then reuse the validated sprite pipeline.
+Save preferences, add robust pack installation, solve detailed-character sizing
+within the native software cursor's tiny bounds, pin the intended agent session,
+measure latency/CPU/battery use, test multiple monitors, sign and notarize
+downloadable builds, and publish an explicit compatibility list. Generated
+character packs can then reuse the validated sprite pipeline.
