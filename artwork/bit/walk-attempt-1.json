@@ -1,0 +1,5 @@
+{
+  "generated_image": 2,
+  "source_sha256": "7c5612e1d8b7bc7b2a45bdff5bfef972d86b90c3caaf0824e81c95792044ab57",
+  "status": "Rejected as an eight-frame rightward walk: bottom row reverses direction. Do not concatenate both rows into one loop."
+}

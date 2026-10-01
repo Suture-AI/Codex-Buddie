@@ -25,7 +25,16 @@ shapes, a compact body and expressive screen eyes; improve the animation
 substantially. Develop the original Bit candidate, with proper steps, blinks
 and turns. Pip is now a reusable motion/customization study.
 
-The root Studio includes **Pip · Articulated**, a version-3 pack with nine
+**Bit · Pixel bot** is now the default Studio selection. It has a compact
+pixel rig, independent limbs, preserved-alpha screen blinks, editable shape and
+three colors, and five authored head directions with reversible turn progress.
+The generated walk sheets were rejected after anatomy review. See
+[Bit's review](evidence/bit-studio.json) and [source notes](../artwork/bit/README.md).
+Next improve the whole-body turn, pixel joints and fast-travel landing, then
+obtain user feedback on this smaller robot direction. Native integration and
+production cursor size remain separate unresolved gates.
+
+The root Studio also includes **Pip · Articulated**, a version-3 pack with nine
 independent generated parts, stable blink textures, live torso width/height and
 head size, editable outfit colors and portable save/import. Slow feet stay
 planted across six tested size/zoom combinations. Fast cursor travel uses a

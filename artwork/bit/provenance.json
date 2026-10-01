@@ -1,0 +1,11 @@
+{
+  "chat": "https://chatgpt.com/c/6abdd0db-1804-83e8-8ac9-505a7e27ca9b",
+  "generated_image": 1,
+  "source_file": "Pixel Art Robot Mascot.png",
+  "source_sha256": "b77621fca9925b5c8acfc2cfd6b43d15572f6a77a854bd6f79b4d5d5f7b911da",
+  "requested_model": "GPT Image 2.5 if available",
+  "verified_model": null,
+  "reference": "User supplied blue retro Codex pet screenshot. Browser upload was blocked by extension file-URL access; its visual direction was described in the prompt.",
+  "status": "Original concept source; current animated implementation is Characters/bit, with user approval pending.",
+  "processing": "See scripts/build-bit.py and Characters/bit/provenance.json for canonical pixels, cutouts, palette and turn processing."
+}

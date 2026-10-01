@@ -8,7 +8,7 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 }
 @interface BuddieView () {
     BuddieMotion _motion;
-    double _spriteEpoch, _spriteEventAt, _puppetElapsed, _lastMotionScale;
+    double _spriteEpoch, _spriteEventAt, _puppetElapsed, _lastMotionScale, _spriteLastTime, _spriteTurnProgress;
     BOOL _spriteFacingLeft, _spriteReleasing;
 }
 @property NSTimer *animationTimer;
@@ -25,6 +25,7 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 - (BOOL)isFlipped { return YES; }
 - (BOOL)isOpaque { return NO; }
 - (BuddiePose)motionPose { return _motion.pose; }
+- (double)facingProgress { return _spriteTurnProgress; }
 - (NSView *)hitTest:(NSPoint)p { return nil; }
 - (void)dealloc { [_animationTimer invalidate]; }
 - (void)setCharacter:(BuddieCharacter *)character {
@@ -33,6 +34,7 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
     [_character prepareAppearance];
     _spriteFacingLeft=NO; _spriteReleasing=NO; _spriteEpoch=NAN;
     _puppetElapsed=0; _lastMotionScale=0;
+    _spriteLastTime=NAN; _spriteTurnProgress=0;
     self.spriteClipName=@"idle"; self.spriteFrame=0; self.needsDisplay=YES;
 }
 - (void)setManualAnimation:(BOOL)value { _manualAnimation=value; [self configureTimer]; }
@@ -79,10 +81,21 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
     if(c.clips.count && isfinite(time)) {
         if(!isfinite(_spriteEpoch) || time<_spriteEpoch) _spriteEpoch=time;
         if(_motion.moving && fabs(_motion.velocity.x)>3) _spriteFacingLeft=_motion.velocity.x<0;
+        double turnTarget=_spriteFacingLeft ? 1:0;
+        double dt=isfinite(_spriteLastTime) ? MAX(0,MIN(.25,time-_spriteLastTime)):0; _spriteLastTime=time;
+        BuddieSpriteClip *turn=c.clips[c.puppetParts.count ? @"headTurn":@"turn"];
+        // One authored right -> front -> left sequence. Reversing partway
+        // walks backward from the current frame, without restarting the turn.
+        if(turn && !reduced) {
+            double step=dt/turn.duration;
+            _spriteTurnProgress+=MAX(-step,MIN(step,turnTarget-_spriteTurnProgress));
+        } else _spriteTurnProgress=turnTarget;
         if(c.puppetParts.count) { _puppetElapsed=time-_spriteEpoch; self.needsDisplay=YES; return; }
+        BOOL turning=turn && fabs(_spriteTurnProgress-turnTarget)>1e-8;
         NSString *idle=c.directionalIdle && _spriteFacingLeft && c.clips[@"idleLeft"] ? @"idleLeft":@"idle";
         NSString *name=idle; double elapsed=time-_spriteEpoch; BOOL loop=YES;
-        if(_motion.pressed && c.clips[@"press"]) { name=@"press"; elapsed=time-_spriteEventAt; loop=NO; }
+        if(turning) { name=@"turn"; elapsed=_spriteTurnProgress*turn.duration; loop=NO; }
+        else if(_motion.pressed && c.clips[@"press"]) { name=@"press"; elapsed=time-_spriteEventAt; loop=NO; }
         else if(_spriteReleasing && c.clips[@"release"] && time-_spriteEventAt<c.clips[@"release"].duration) { name=@"release"; elapsed=time-_spriteEventAt; loop=NO; }
         else if(!reduced && _motion.pose.walkWeight>.1) {
             NSString *walk=_spriteFacingLeft && c.clips[@"walkLeft"] ? @"walkLeft":@"walkRight";
@@ -102,15 +115,15 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
     BuddieCharacter *c=self.character;
     BuddieSpriteClip *clip=c.clips[self.spriteClipName] ?: c.clips[@"idle"];
     if(!clip.frames.count) return;
-    BOOL directional=[self.spriteClipName isEqual:@"walkRight"] || (c.directionalIdle && [self.spriteClipName isEqual:@"idle"]);
+    BOOL directional=[self.spriteClipName isEqual:@"walkRight"] || (c.directionalIdle && [@[@"idle",@"press",@"release"] containsObject:self.spriteClipName]);
     BOOL mirror=_spriteFacingLeft && directional && c.mirrorWalk;
     double unit=scale*c.spriteHeight/c.spriteCanvas.height;
     [NSGraphicsContext saveGraphicsState];
-    NSGraphicsContext.currentContext.imageInterpolation=NSImageInterpolationHigh;
+    NSGraphicsContext.currentContext.imageInterpolation=c.pixelArt ? NSImageInterpolationNone:NSImageInterpolationHigh;
     NSAffineTransform *t=[NSAffineTransform transform];
     [t translateXBy:self.hotspot.x yBy:self.hotspot.y];
     // A small fallback press response, around the exact hotspot, when no clip exists.
-    double press=c.clips[@"press"] ? 1:.75+.25*MIN(1,_motion.pose.squash);
+    double press=c.clips[@"press"] || c.pixelArt ? 1:.75+.25*MIN(1,_motion.pose.squash);
     [t scaleXBy:(mirror ? -unit:unit)*press yBy:unit*press]; [t concat];
     NSRect rect=NSMakeRect(-c.spriteHotspot.x,-c.spriteHotspot.y,c.spriteCanvas.width,c.spriteCanvas.height);
     NSString *name=c.clips[self.spriteClipName] ? self.spriteClipName:@"idle";
@@ -122,11 +135,11 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
     if(self.character.puppetParts.count) {
         BuddieCharacter *c=self.character;
         [NSGraphicsContext saveGraphicsState];
-        NSGraphicsContext.currentContext.imageInterpolation=NSImageInterpolationHigh;
+        NSGraphicsContext.currentContext.imageInterpolation=c.pixelArt ? NSImageInterpolationNone:NSImageInterpolationHigh;
         NSAffineTransform *t=[NSAffineTransform transform];
         [t translateXBy:self.hotspot.x yBy:self.hotspot.y]; [t scaleBy:scale*c.spriteHeight/c.spriteCanvas.height];
         [t translateXBy:-c.spriteHotspot.x yBy:-c.spriteHotspot.y]; [t concat];
-        BuddieDrawPuppet(c,_motion.pose,_spriteFacingLeft,_puppetElapsed,self.reduceMotion || NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion);
+        BuddieDrawPuppet(c,_motion.pose,_spriteFacingLeft,_spriteTurnProgress,_puppetElapsed,self.reduceMotion || NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion);
         [NSGraphicsContext restoreGraphicsState]; return;
     }
     if(self.character.clips.count) { [self drawSpriteWithScale:scale]; return; }

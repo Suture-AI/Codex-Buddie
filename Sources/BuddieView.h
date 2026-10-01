@@ -13,6 +13,7 @@
 @property(readonly) CGFloat drawingScale;
 // Read-only geometry for renderer diagnostics, in motion units.
 @property(readonly) BuddiePose motionPose;
+@property(readonly) double facingProgress;
 - (void)animateAtTime:(double)time anchor:(BuddiePoint)anchor;
 - (void)press:(BOOL)down atTime:(double)time;
 @end

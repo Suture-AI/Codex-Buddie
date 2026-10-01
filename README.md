@@ -16,25 +16,29 @@ The intended experience is a buddy that **walks along the agent's curved cursor
 path**, stops at the exact hotspot, and animates the click, with no gray arrow or
 glow showing. See the [next implementation brief](docs/next-steps.md).
 
-The **Character Studio** includes an articulated Pip study: generated head,
-body, paws and boots with live torso/head proportions, outfit colors, blinking,
-planted walking and bounded fast travel. Editable packs can be imported and
-saved. These are actual Cocoa renderer exports, not live Codex recordings.
+The **Character Studio** now opens with **Bit · Pixel bot**, an original compact
+retro robot inspired by the user's Codex pet reference. Generated artwork is
+registered on a small pixel canvas with a restrained palette and crisp sampling.
+Independent feet, opposing paws, stable screen blinks and five authored head
+orientations animate in the actual Cocoa renderer. An interrupted head turn
+retraces its current sequence. Body/head proportions, shell, screen-light and
+antenna colors can be edited and saved as a portable pack.
 
-![Editable articulated Pip](docs/media/pip-studio-customization.png)
+![Bit in the actual Studio renderer](docs/media/bit-studio-customization.png)
 
-The latest user direction is a **smaller retro 8-bit bot**, with soft chunky
-pixel shapes, a simple screen face and substantially better animation. Pip
-remains a customization/motion study. The next original candidate is Bit; see
-[the current brief](docs/art-direction.md).
-
-[Walking review](docs/media/pip-studio-walk.gif) ·
-[Fast-travel review](docs/media/pip-studio-fast-travel.gif) ·
+[Walking review](docs/media/bit-studio-walk.gif) ·
+[Fast-travel review](docs/media/bit-studio-fast-travel.gif) ·
 [Pack format](docs/characters.md) ·
-[Verification evidence](docs/evidence/articulated-studio.json).
-Instant mirrored turns, joint deformation, production cursor sizing and the
-native service connection remain unfinished. Earlier full-pose Pip and rejected
-Sprout/Mochi/Orbit fixtures remain available for comparison.
+[Verification evidence](docs/evidence/bit-studio.json).
+
+**Still a motion study.** The body still mirrors beneath the authored head turn;
+pixel joints and fast-travel landings need further polish. Production cursor
+sizing and the native service connection remain unresolved. These exports do
+not show a live Codex task, and user approval of this design is pending.
+
+Pip remains available as an articulated customization study and an earlier
+complete-pose pack. Sprout/Mochi/Orbit remain rejected art-direction fixtures.
+See the [current brief](docs/art-direction.md) and [Bit's source/provenance](artwork/bit/README.md).
 
 ## Additional runtime research
 
@@ -61,9 +65,10 @@ cd Codex-Buddie
 ```
 
 Choose a character, then use **Take a walk**, the three stops, and **Try a click**.
-Changing stops during a walk preserves position and velocity. Articulated Pip
-offers size, body width/height, head size, stride, step height, **Raincoat** and
-**Boots** controls. Click either color well to choose a color.
+Changing stops during a walk preserves position and velocity. Bit offers size,
+body width/height, head size, stride, step height, **Shell**, **Screen lights**
+and **Antenna** controls. Click a color well to choose a color. Pip has equivalent
+proportion controls and separate raincoat/boot colors.
 **Save a copy…** exports a portable buddy folder; **Import buddy…** opens it again.
 **Native size** compares the small software-cursor layout with the enlarged
 studio view. **Reduced motion** removes autonomous animation and jumps directly

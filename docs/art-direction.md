@@ -9,7 +9,7 @@ than the pear-like first character**. Complex sci-fi machinery is not the target
 bot**, and substantially better animation. They supplied an image of a compact
 blue Codex pet with a dark screen face, simple cyan eyes, chunky pixel contours,
 a tiny torso and short feet. Use this as a style/motion reference for original
-art. The next candidate is Bit: a compact blue screen-faced robot with an offset
+art. The current candidate is Bit: a compact blue screen-faced robot with an offset
 antenna. Keep the silhouette soft through stepped pixel shapes, a limited
 palette and readable expressions. Prioritize proper steps, blinks and turns.
 Pip remains a renderer/customization study, not the final visual target.
@@ -56,3 +56,18 @@ alpha edges, coherent shapes, facial readability, complete feet, and a memorable
 silhouette. Review idle, blink, walk, direction change and click motion before
 adding a new character to the user-facing collection. A polished hero image is
 necessary but does not establish animation quality.
+
+## Bit implementation
+
+Bit now opens as the Studio default. It uses original concept/turn artwork
+generated one image at a time in ChatGPT through Brave. Two walking sheets
+failed inspection (direction reversal, then repeated leading feet), so they
+are retained as rejected evidence rather than used as a fake eight-step loop.
+The renderer instead moves independently extracted limbs using the motion core.
+Screen blinks only change reviewed eye pixels. Five authored head orientations
+bridge right/front/left; the smaller body still mirrors and needs a full turn.
+
+Review [actual customization](media/bit-studio-customization.png),
+[walking](media/bit-studio-walk.gif), [fast travel](media/bit-studio-fast-travel.gif)
+and [source/provenance](../artwork/bit/README.md). The user has not yet approved
+Bit, and these are controlled Studio exports, not live CUA recordings.

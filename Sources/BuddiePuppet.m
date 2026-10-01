@@ -9,6 +9,11 @@ static void Part(BuddieCharacter *c, NSString *role, NSPoint target, double angl
     NSDictionary *part=c.puppetParts[role]; BuddieSpriteClip *clip=c.clips[role];
     NSImage *image=[c imageForClip:role frame:reduced ? 0:[clip frameIndexAtTime:elapsed loop:YES]];
     NSPoint pivot=PartPoint(part[@"pivot"]); double scale=[part[@"scale"] doubleValue];
+    if(c.pixelArt) {
+        if([role hasPrefix:@"paw"]) target.y+=round(sin(angle)*5);
+        target.x=round(target.x); target.y=round(target.y);
+        if(![role hasPrefix:@"leg"]) angle=0;
+    }
     [NSGraphicsContext saveGraphicsState];
     NSAffineTransform *t=[NSAffineTransform transform];
     [t translateXBy:target.x yBy:target.y]; [t rotateByRadians:angle]; [t scaleXBy:scale*sx yBy:scale*sy];
@@ -20,7 +25,7 @@ NSPoint BuddiePuppetSole(BuddieCharacter *c, BuddiePose p, NSUInteger foot) {
     NSPoint base=PartPoint(c.puppetParts[foot ? @"bootFar":@"bootNear"][@"anchor"]);
     return NSMakePoint(base.x+p.feet[foot].x*c.puppetMotionScale,base.y+(p.feet[foot].y-p.footLift[foot])*c.puppetMotionScale);
 }
-void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double elapsed, BOOL reduced) {
+void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double turnProgress, double elapsed, BOOL reduced) {
     double facing=facingLeft && c.mirrorWalk ? -1:1;
     double lean=p.lean*.5*facing, bob=p.bodyY*c.puppetMotionScale;
     double squash=.75+.25*p.squash, width=c.torsoWidth/sqrt(MAX(.5,squash)),height=c.torsoHeight*squash;
@@ -48,6 +53,21 @@ void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double 
     Part(c,@"pawFar",attach(@"pawFar"),lean-swing,1,1,elapsed,reduced);
     Part(c,@"body",NSMakePoint(origin.x,origin.y+bob),lean,width,height,elapsed,reduced);
     Part(c,@"pawNear",attach(@"pawNear"),lean+swing,1,1,elapsed,reduced);
-    Part(c,@"head",attach(@"head"),lean*.6,c.headScale,c.headScale,elapsed,reduced);
+    BOOL turning=c.clips[@"headTurn"] && turnProgress>1e-8 && turnProgress<1-1e-8;
+    NSString *head=turning ? @"headTurn":facingLeft && c.clips[@"headLeft"] ? @"headLeft":@"head";
+    NSPoint neck=attach(head);
+    if(c.clips[@"headTurn"]) {
+        double worldX=c.spriteHotspot.x+(neck.x-c.spriteHotspot.x)*(1-2*turnProgress);
+        neck.x=c.spriteHotspot.x+facing*(worldX-c.spriteHotspot.x);
+    }
+    if(c.pixelArt) { neck.x=round(neck.x); neck.y=round(neck.y); }
+    [NSGraphicsContext saveGraphicsState];
+    if(![head isEqual:@"head"]) {
+        // Authored directional heads already carry their own perspective.
+        NSAffineTransform *counter=[NSAffineTransform transform];
+        [counter translateXBy:neck.x yBy:0]; [counter scaleXBy:facing yBy:1]; [counter translateXBy:-neck.x yBy:0]; [counter concat];
+    }
+    Part(c,head,neck,lean*.6,c.headScale,c.headScale,turning ? turnProgress*c.clips[@"headTurn"].duration:elapsed,reduced);
+    [NSGraphicsContext restoreGraphicsState];
     [NSGraphicsContext restoreGraphicsState];
 }

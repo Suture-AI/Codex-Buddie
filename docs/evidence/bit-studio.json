@@ -1,0 +1,128 @@
+{
+  "status": "Original retro-bot study, responding to the user's supplied Codex pet reference; not final approval or live CUA integration.",
+  "source_fps": 60,
+  "gif_fps": 30,
+  "slow_frames": 420,
+  "fast_frames": 240,
+  "proportion_corner_bounds": {
+    "limit-0": [
+      347,
+      219,
+      473,
+      416
+    ],
+    "limit-1": [
+      347,
+      219,
+      473,
+      416
+    ],
+    "limit-2": [
+      347,
+      207,
+      473,
+      416
+    ],
+    "limit-3": [
+      347,
+      207,
+      473,
+      416
+    ],
+    "limit-4": [
+      325,
+      173,
+      495,
+      416
+    ],
+    "limit-5": [
+      325,
+      173,
+      495,
+      416
+    ],
+    "limit-6": [
+      325,
+      161,
+      495,
+      416
+    ],
+    "limit-7": [
+      325,
+      161,
+      495,
+      416
+    ]
+  },
+  "checks": [
+    "v1/v2/v3 regression tests",
+    "Bit portable pixel/turn metadata",
+    "Localized blink edits with unchanged alpha",
+    "Five authored head directions; reversal retraces the current turn",
+    "Independent feet from the motion core; generated walk sheets rejected",
+    "Reduced Motion and fixed hotspot",
+    "Eight proportion corners fit the review view"
+  ],
+  "limitations": [
+    "Body still mirrors beneath authored head turns",
+    "Pixel joints and fast-travel landing need further visual polish",
+    "Native UI observation returned cgWindowNotFound; new controls not manually exercised",
+    "Native service IPC and true cursor-size legibility remain unresolved",
+    "Image model identifier not exposed by ChatGPT"
+  ],
+  "sha256": {
+    "Characters/bit/body-mask.png": "a2130a801bd1d36d5a7a934c34fee09071401696845b55092385256d1fc95a40",
+    "Characters/bit/body.png": "7a7e588428327c2d0cc75d50898189add5ba43b14131e54e6cd1fc85a78219dd",
+    "Characters/bit/bootFar-mask.png": "f3e92519e2ee31dc694c6f710a33405605bbcb5361854cfba6479bcc6f6161a3",
+    "Characters/bit/bootFar.png": "992b409598d2e9eb5fdedec3b19ad8dcdde47edb660aa4b837d69edb91f7cb42",
+    "Characters/bit/bootNear-mask.png": "66be909ea2c2effcee867d1d0eed6b3e9544170c9219508feef97a48e33e48e2",
+    "Characters/bit/bootNear.png": "1a13eb1138312c9f7d06ed412d349703a6b526855a646b6730c1f44afd86efde",
+    "Characters/bit/buddy.json": "bc56d3a0b4d93b7c99e79933555a7ca889a2ddc4e6c34364d156851b137dbbb7",
+    "Characters/bit/head-closed-mask.png": "89f1fbcae35cc900b67504d433499238831951d059d40750cf6e06fce2b09f77",
+    "Characters/bit/head-closed.png": "760de11e4a5ba0e25161ddf0ed7571e15c6bafee9f1d65cd053bd798d4e62a05",
+    "Characters/bit/head-half-mask.png": "8b3caae83b8d13d3c86c9c908310048ce2623c12aaf86de72702a6e381b9b6a9",
+    "Characters/bit/head-half.png": "83c27de6b38e73f50d8d3bd143f5d187bab78fcb97f87a05e97d77da184db2ec",
+    "Characters/bit/head-mask.png": "f5bf2eee0c865cee1675b91ba78d5e8754e16315ddf4f7f4d22fb7d6377462d0",
+    "Characters/bit/head.png": "284048e4598de1aeb30bfa8434bf6f3ee5db0b82400eaab3f197fcc520f5eebb",
+    "Characters/bit/headLeft-closed-mask.png": "2ff2bc8109c9938fc8f1202515261a0b60801c2fa7e47355f80a144230bb5577",
+    "Characters/bit/headLeft-closed.png": "625168096e5903ae404f73cf94078c522cafc8da533738a5c632527254e886f5",
+    "Characters/bit/headLeft-half-mask.png": "ddc1327a08c6fe5ac2a88fce4fc39ce2ef737397f1b36c52770b00fca729f162",
+    "Characters/bit/headLeft-half.png": "1de92a33bf2ec6afe8e946be65eb95bbe8f476ea06be6138fe69baecc2b5a4b1",
+    "Characters/bit/headLeft-mask.png": "20db4e85d84336840054c88cb15665d1c7d890e26e4e7b90b431b6c4d8d3adc7",
+    "Characters/bit/headLeft.png": "bf4df41da6732a83ed3bc6649fdc60ce959e98224ac852de9f4e2b43b842dcdd",
+    "Characters/bit/legFar-mask.png": "76d9046f3c16636d93278e9c74c5df65604256accf558e1616ceec205128c452",
+    "Characters/bit/legFar.png": "70b7f7018107c9308cdf69b248decab12850ebe2803e0984b6d01599452acd28",
+    "Characters/bit/legNear-mask.png": "6457605e45df9efb767b793a1641e94485d0a7cd5c384b32a85037e034fdbe0a",
+    "Characters/bit/legNear.png": "f78ef8f7428ecb0fe88f3da909cff23475ab33060551ecb33fd9288a7aed77af",
+    "Characters/bit/pawFar-mask.png": "3875f4b6b1b5bfd73c009d73ed0ffceae496d787a54e542e27e4bf312487820c",
+    "Characters/bit/pawFar.png": "5ccf6710bc94a4570eb78d8cd9109239ea967c50e162746f100dae4309ed4f1e",
+    "Characters/bit/pawNear-mask.png": "2f48745cae7e79ab482b08344683153c18df47c7ee7d4e353106e82c760de78a",
+    "Characters/bit/pawNear.png": "3410977c01dd979008cbeef4e807c4f3b6bb716b16ca996aee6ed33b69e48623",
+    "Characters/bit/tail-mask.png": "e0a600268e4e838cbb2d645ad9b64530a4ccac386ae25907aad6d9f68271b733",
+    "Characters/bit/tail.png": "052c48aa8b5e4f2c40bcd0d1bb7a4b93276276285dfa3e8a971b435dc88fdfee",
+    "Characters/bit/turn-0-mask.png": "f5bf2eee0c865cee1675b91ba78d5e8754e16315ddf4f7f4d22fb7d6377462d0",
+    "Characters/bit/turn-0.png": "284048e4598de1aeb30bfa8434bf6f3ee5db0b82400eaab3f197fcc520f5eebb",
+    "Characters/bit/turn-1-mask.png": "6d93ee2ba6f1346532d251d867275df1594e9a46c9d1a87830e3730316754da5",
+    "Characters/bit/turn-1.png": "645f927d1256c9486c482f4bb8383d074325cd001c8a2e8df8cb419776c194eb",
+    "Characters/bit/turn-2-mask.png": "a2008c6a94b64ae8dbec456393167e0311a5123f1e2f1cb7187ee842973b4658",
+    "Characters/bit/turn-2.png": "f8e3ddd6c7e40af24134f7f7ffbbe0f3ee213017ce3ab0bf75147297d4843737",
+    "Characters/bit/turn-3-mask.png": "2ed86daea8fe013f9dafdbcf8320547bc80557efeec0865e9f4b65d1e0d85a14",
+    "Characters/bit/turn-3.png": "235603b18c41eb92e1896311035de6db9b36d3263649b4388900bfb050b7a3ec",
+    "Characters/bit/turn-4-mask.png": "20db4e85d84336840054c88cb15665d1c7d890e26e4e7b90b431b6c4d8d3adc7",
+    "Characters/bit/turn-4.png": "bf4df41da6732a83ed3bc6649fdc60ce959e98224ac852de9f4e2b43b842dcdd",
+    "Sources/BuddieCharacter.h": "5925da511af0e9fa7e8926380833d6406b07424638207020da9c909a9b2a3af7",
+    "Sources/BuddieCharacter.m": "072f91b913d1a24106856605f60f3c41a06e4621b3e54ab0c7cb4238bc606b2f",
+    "Sources/BuddieMotion.c": "6a82918058001007cb20414e0060fa9798f25eb8feb7c34492338f2983bf87cc",
+    "Sources/BuddieMotion.h": "b46ad692445455b98e958dfaa01a9e50ffdaf9b570ebfc2ee457c36e75374ad4",
+    "Sources/BuddiePuppet.h": "0f2218442b267e6e61e94c5b26fa777985241e62dcafe7036c5902ae62b157ac",
+    "Sources/BuddiePuppet.m": "06e4e0343463044adddfd509af5458f9f6149fece140cefaaf2f8fe7c37fa02f",
+    "Sources/BuddieView.h": "bca88d8818c6cb9ade0420cf6eacc1da5000a45c6344dde974416b6392225e44",
+    "Sources/BuddieView.m": "a668f4738c57c2f43abaae32e5e73799db2b3a6aee0cb4d3e8e492f1346223ff",
+    "Sources/Preview.m": "fba6c13f9c3cb4e69fe206598fe9f7b7d13336ef3c96ac2885d31daa606d1d18",
+    "docs/media/bit-studio-customization.png": "c55ba15a25496d557f0a7922cf95df358cc63f504666e3840905af13b84038b4",
+    "docs/media/bit-studio-fast-travel.gif": "2b61534b598582442a0f59ffd27090ebc84a224b85f00aba093eda8b0c7f2e3d",
+    "docs/media/bit-studio-walk.gif": "59cc68a286af51e9f3e3bd424bb9b9b5202b0d6a8877104cba69aa3810c94945",
+    "scripts/build-bit.py": "0ed5b11c056ab654fa7efcb7a34271be2d37e76e0fcd947fe29e4a7bd2f91d86",
+    "scripts/review-bit.py": "e7a5d8bd504340e201074ff55ddfdd43ab08672102fb9f50004906d4be99336c"
+  }
+}

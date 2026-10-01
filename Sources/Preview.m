@@ -18,7 +18,7 @@ static NSButton *Button(NSString *s, id target, SEL action, NSRect frame) {
 static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     NSMutableArray *all=[NSMutableArray new];
     NSURL *root=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Characters"];
-    for(NSString *name in @[@"pip",@"pip-articulated",@"sprout",@"mochi",@"orbit"]) {
+    for(NSString *name in @[@"pip",@"pip-articulated",@"bit",@"sprout",@"mochi",@"orbit"]) {
         NSError *error=nil; BuddieCharacter *c=[BuddieCharacter loadPack:[root URLByAppendingPathComponent:name] error:&error];
         if(c) [all addObject:c];
     }
@@ -77,13 +77,13 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [v addSubview:Label(@"YOUR COLLECTION",11,NSColor.secondaryLabelColor,NSMakeRect(700,643,230,20))];
     self.picker=[[NSPopUpButton alloc] initWithFrame:NSMakeRect(696,599,230,34) pullsDown:NO];
     for(BuddieCharacter *c in self.collection) [self.picker addItemWithTitle:c.name];
-    for(NSUInteger i=0;i<self.collection.count;i++) if([self.collection[i].identifier isEqual:@"pip-articulated"]) {
+    for(NSUInteger i=0;i<self.collection.count;i++) if([self.collection[i].identifier isEqual:@"bit"]) {
         [self.picker selectItemAtIndex:i]; self.character=[self.collection[i] copy]; break;
     }
     self.picker.target=self; self.picker.action=@selector(selectCharacter:); [v addSubview:self.picker];
     [v addSubview:Button(@"Import buddy…",self,@selector(importPack:),NSMakeRect(696,558,230,32))];
     self.settingsHeading=Label(@"SHAPE & EXPRESSION",11,NSColor.secondaryLabelColor,NSMakeRect(700,508,230,20)); [v addSubview:self.settingsHeading];
-    NSArray *settings=@[@[@"width",@"Body width",@24,@42],@[@"height",@"Body height",@24,@40],@[@"eyeSpacing",@"Eye spacing",@8,@20],@[@"eyeSize",@"Eye size",@3,@7],@[@"faceY",@"Face position",@(-7),@7],@[@"stride",@"Stride",@16,@40],@[@"footLift",@"Step height",@2,@8],@[@"spriteHeight",@"Size",@32,@96],@[@"torsoWidth",@"Body width",@.85,@1.22],@[@"torsoHeight",@"Body height",@.85,@1.18],@[@"headScale",@"Head size",@.85,@1.15]];
+    NSArray *settings=@[@[@"width",@"Body width",@24,@42],@[@"height",@"Body height",@24,@40],@[@"eyeSpacing",@"Eye spacing",@8,@20],@[@"eyeSize",@"Eye size",@3,@7],@[@"faceY",@"Face position",@(-7),@7],@[@"stride",@"Stride",@8,@40],@[@"footLift",@"Step height",@2,@8],@[@"spriteHeight",@"Size",@32,@96],@[@"torsoWidth",@"Body width",@.85,@1.22],@[@"torsoHeight",@"Body height",@.85,@1.18],@[@"headScale",@"Head size",@.85,@1.15]];
     int row=0;
     for(NSArray *setting in settings) {
         CGFloat y=465-row*43;
@@ -139,6 +139,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     }
     NSArray *visible=puppet ? @[@"spriteHeight",@"torsoWidth",@"torsoHeight",@"headScale",@"stride",@"footLift"]:sprite ? @[@"spriteHeight",@"stride"]:@[@"width",@"height",@"eyeSpacing",@"eyeSize",@"faceY",@"stride",@"footLift"];
     for(NSString *key in self.sliders) {
+        if([key isEqual:@"stride"]) self.sliders[key].maxValue=self.character.pixelArt ? MAX(16,self.character.stride):40;
         self.sliders[key].doubleValue=[key isEqual:@"width"] ? self.character.bodySize.width : [key isEqual:@"height"] ? self.character.bodySize.height : [[self.character valueForKey:key] doubleValue];
         BOOL supported=[visible containsObject:key];
         self.sliders[key].hidden=!supported; self.settingLabels[key].hidden=!supported;
@@ -304,8 +305,8 @@ static int ExportPalettes(NSString *path) {
     printf("Exported four palettes, each with all 14 poses, to %s\n",path.UTF8String); return 0;
 }
 
-static BuddieCharacter *ArticulatedPip(void) {
-    for(BuddieCharacter *c in BuddieCollection()) if([c.identifier isEqual:@"pip-articulated"]) return [c copy];
+static BuddieCharacter *ArticulatedNamed(NSString *identifier) {
+    for(BuddieCharacter *c in BuddieCollection()) if([c.identifier isEqual:identifier]) return [c copy];
     return nil;
 }
 static BOOL SaveView(NSView *view, NSString *path) {
@@ -313,11 +314,12 @@ static BOOL SaveView(NSView *view, NSString *path) {
     [view cacheDisplayInRect:view.bounds toBitmapImageRep:rep];
     return [[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:path atomically:YES];
 }
-static int ExportPuppet(NSString *path) {
+static int ExportPuppet(NSString *path, NSString *identifier) {
     if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
     NSWindow *window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,840,480) styleMask:0 backing:NSBackingStoreBuffered defer:NO];
     ExportView *view=[[ExportView alloc] initWithFrame:NSMakeRect(0,0,840,480)]; view.manualAnimation=YES; view.characterScale=2; window.contentView=view;
-    view.character=ArticulatedPip(); if(!view.character) return 1;
+    view.character=ArticulatedNamed(identifier); if(!view.character) return 1;
+    BOOL pixel=view.character.pixelArt;
     for(int i=0;i<420;i++) {
         double time=i/60.,x=time<.5 ? 0:time<3.5 ? (time-.5)*24:time<4 ? 72:time<5.5 ? 72-(time-4)*24:36;
         double physical=2*view.character.spriteHeight/view.character.spriteCanvas.height*view.character.puppetMotionScale;
@@ -325,10 +327,10 @@ static int ExportPuppet(NSString *path) {
         [view animateAtTime:100+time anchor:(BuddiePoint){view.exportHotspot.x/view.drawingScale,190/view.drawingScale}];
         if(!SaveView(view,[path stringByAppendingPathComponent:[NSString stringWithFormat:@"slow-%04d.png",i]])) return 1;
     }
-    BuddieView *still=[[BuddieView alloc] initWithFrame:NSMakeRect(0,0,448,448)]; still.manualAnimation=YES; still.reduceMotion=YES; still.characterScale=3.3; window.contentView=still;
-    NSArray *variants=@[@[@"Original",@1,@1,@1],@[@"Round",@1.22,@.94,@1],@[@"Tall",@.92,@1.18,@.96],@[@"Big-hood",@1,@1,@1.15]];
+    BuddieView *still=[[BuddieView alloc] initWithFrame:NSMakeRect(0,0,448,448)]; still.manualAnimation=YES; still.reduceMotion=YES; still.characterScale=pixel ? 5:3.3; window.contentView=still;
+    NSArray *variants=@[@[@"Original",@1,@1,@1],@[@"Round",@1.22,@.94,@1],@[@"Tall",@.92,@1.18,@.96],@[pixel ? @"Big-head":@"Big-hood",@1,@1,@1.15]];
     for(NSArray *variant in variants) {
-        still.character=ArticulatedPip(); still.character.torsoWidth=[variant[1] doubleValue]; still.character.torsoHeight=[variant[2] doubleValue]; still.character.headScale=[variant[3] doubleValue];
+        still.character=ArticulatedNamed(identifier); still.character.torsoWidth=[variant[1] doubleValue]; still.character.torsoHeight=[variant[2] doubleValue]; still.character.headScale=[variant[3] doubleValue];
         [still animateAtTime:100 anchor:(BuddiePoint){0,0}];
         if(!SaveView(still,[path stringByAppendingPathComponent:[variant[0] stringByAppendingString:@".png"]])) return 1;
     }
@@ -336,12 +338,16 @@ static int ExportPuppet(NSString *path) {
     NSArray *names=@[@"Rose",@"Moss",@"Lilac"];
     NSColor *(^color)(unsigned int)=^NSColor *(unsigned int n) { return [NSColor colorWithSRGBRed:((n>>16)&255)/255. green:((n>>8)&255)/255. blue:(n&255)/255. alpha:1]; };
     for(int i=0;i<3;i++) {
-        still.character=ArticulatedPip(); still.character.materialColors=@{@"coat":color(coats[i]),@"boots":color(boots[i])}; [still.character prepareAppearance];
+        still.character=ArticulatedNamed(identifier);
+        NSMutableDictionary *colors=[still.character.materialColors mutableCopy];
+        colors[still.character.materials[0][@"id"]]=color(coats[i]);
+        if(!pixel) colors[still.character.materials[1][@"id"]]=color(boots[i]);
+        still.character.materialColors=colors; [still.character prepareAppearance];
         [still animateAtTime:100 anchor:(BuddiePoint){0,0}];
         if(!SaveView(still,[path stringByAppendingPathComponent:[names[i] stringByAppendingString:@".png"]])) return 1;
     }
     for(int i=0;i<8;i++) {
-        still.character=ArticulatedPip(); still.character.torsoWidth=i&1 ? 1.22:.85; still.character.torsoHeight=i&2 ? 1.18:.85; still.character.headScale=i&4 ? 1.15:.85;
+        still.character=ArticulatedNamed(identifier); still.character.torsoWidth=i&1 ? 1.22:.85; still.character.torsoHeight=i&2 ? 1.18:.85; still.character.headScale=i&4 ? 1.15:.85;
         [still animateAtTime:100 anchor:(BuddiePoint){0,0}];
         if(!SaveView(still,[path stringByAppendingPathComponent:[NSString stringWithFormat:@"limit-%d.png",i]])) return 1;
     }
@@ -349,7 +355,7 @@ static int ExportPuppet(NSString *path) {
 }
 
 static void TestPuppet(BuddieView *view) {
-    BuddieCharacter *pip=ArticulatedPip(); NSCAssert(pip,@"Bundled articulated Pip loads");
+    BuddieCharacter *pip=ArticulatedNamed(@"pip-articulated"); NSCAssert(pip,@"Bundled articulated Pip loads");
     for(int height=32;height<=96;height+=32) for(int zoom=1;zoom<=2;zoom++) {
         view.character=[pip copy]; view.character.spriteHeight=height; view.characterScale=zoom; view.reduceMotion=NO;
         double scale=view.drawingScale,unit=scale*height/pip.spriteCanvas.height;
@@ -375,6 +381,24 @@ static void TestPuppet(BuddieView *view) {
     [view press:YES atTime:402]; [view animateAtTime:402.1 anchor:(BuddiePoint){30,0}];
     NSCAssert(NSEqualPoints(hotspot,view.hotspot),@"Proportions and clicks never change the native hotspot");
     puts("PASS: articulated Cocoa rendering; live proportions; Reduced Motion; six size/zoom combinations preserve planted contacts; exact hotspot");
+    view.character=ArticulatedNamed(@"bit"); view.reduceMotion=NO;
+    NSCAssert(view.character.pixelArt && view.character.clips[@"headTurn"].frames.count==5,@"Bit has crisp pixels and an authored turn");
+    [view animateAtTime:500 anchor:(BuddiePoint){0,0}];
+    if(!NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion) {
+        for(int i=1;i<=7;i++) [view animateAtTime:500+i/60. anchor:(BuddiePoint){-i,0}];
+        NSCAssert(view.facingProgress>0 && view.facingProgress<1,@"A turn passes through intermediate authored heads");
+        double previous=view.facingProgress; BOOL reversed=NO;
+        for(int i=8;i<=23;i++) {
+            [view animateAtTime:500+i/60. anchor:(BuddiePoint){-7+(i-7)*2,0}];
+            NSCAssert(fabs(view.facingProgress-previous)<.08,@"Interrupted turn cannot snap or restart");
+            if(view.facingProgress<previous) reversed=YES;
+            previous=view.facingProgress;
+        }
+        NSCAssert(reversed && view.facingProgress==0,@"Direction reversal returns through the same turn sequence");
+    }
+    view.reduceMotion=YES; [view animateAtTime:501 anchor:(BuddiePoint){50,0}]; NSData *bitStill=snapshot();
+    [view animateAtTime:502 anchor:(BuddiePoint){100,0}]; NSCAssert([bitStill isEqual:snapshot()],@"Pixel Reduced Motion stays still");
+    puts("PASS: pixel bot rendering; authored turn traversal and reversal without restart; Reduced Motion");
 }
 
 static int SelfTest(void) {
@@ -440,7 +464,7 @@ int main(int argc,const char **argv) {
         if(argc>1 && strcmp(argv[1],"--self-test")==0) return SelfTest();
         if(argc>2 && strcmp(argv[1],"--export-frames")==0) return ExportFrames([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:nil);
         if(argc>2 && strcmp(argv[1],"--export-palettes")==0) return ExportPalettes([NSString stringWithUTF8String:argv[2]]);
-        if(argc>2 && strcmp(argv[1],"--export-puppet")==0) return ExportPuppet([NSString stringWithUTF8String:argv[2]]);
+        if(argc>2 && strcmp(argv[1],"--export-puppet")==0) return ExportPuppet([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"pip-articulated");
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         Delegate *delegate=[Delegate new]; NSApp.delegate=delegate; [NSApp run];
     }

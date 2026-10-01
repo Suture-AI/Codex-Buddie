@@ -1,0 +1,142 @@
+{
+  "source": "artwork/bit/concept-source.png",
+  "source_sha256": "b77621fca9925b5c8acfc2cfd6b43d15572f6a77a854bd6f79b4d5d5f7b911da",
+  "requested_model": "GPT Image 2.5 if available",
+  "verified_model": null,
+  "processing": "scripts/build-bit.py: 64px nearest sampling; 16-color palette; reviewed cutout rectangles; pixel blink edits. Walking sheets were rejected and are not used.",
+  "source_bounds": [
+    1787,
+    181,
+    2074,
+    501
+  ],
+  "part_rectangles": {
+    "head": [
+      0,
+      0,
+      64,
+      43
+    ],
+    "body": [
+      27,
+      42,
+      41,
+      53
+    ],
+    "pawNear": [
+      20,
+      43,
+      28,
+      53
+    ],
+    "pawFar": [
+      40,
+      44,
+      47,
+      53
+    ],
+    "legNear": [
+      26,
+      51,
+      33,
+      56
+    ],
+    "legFar": [
+      34,
+      51,
+      40,
+      56
+    ],
+    "bootNear": [
+      24,
+      55,
+      33,
+      60
+    ],
+    "bootFar": [
+      34,
+      55,
+      44,
+      60
+    ],
+    "tail": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "eye_boxes": {
+    "head": [
+      [
+        28,
+        26,
+        35,
+        31
+      ],
+      [
+        39,
+        26,
+        45,
+        30
+      ]
+    ],
+    "headLeft": [
+      [
+        29,
+        25,
+        36,
+        30
+      ],
+      [
+        19,
+        25,
+        26,
+        29
+      ]
+    ]
+  },
+  "turn_source": "artwork/bit/turn-source.png",
+  "turn_source_sha256": "fcda93f0080ea58312da8255af502306a7012cf6c19b5d165afea0f8417cf079",
+  "turn_geometry": {
+    "source_boxes": [
+      [
+        97,
+        185,
+        390,
+        501
+      ],
+      [
+        529,
+        188,
+        818,
+        501
+      ],
+      [
+        926,
+        187,
+        1236,
+        501
+      ],
+      [
+        1338,
+        186,
+        1643,
+        501
+      ],
+      [
+        1787,
+        181,
+        2074,
+        501
+      ]
+    ],
+    "shared_scale": 0.125,
+    "source_baseline": 501,
+    "target_neck": [
+      32,
+      43
+    ]
+  },
+  "status": "Original retro-bot motion study with authored head turn; user approval, body turn and final animation polish pending."
+}

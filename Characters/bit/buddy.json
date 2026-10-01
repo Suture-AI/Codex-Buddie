@@ -1,0 +1,319 @@
+{
+  "version": 3,
+  "id": "bit",
+  "name": "Bit \u00b7 Pixel bot",
+  "rig": {
+    "stride": 8,
+    "footSpacing": 5,
+    "footLift": 2
+  },
+  "puppet": {
+    "canvas": [
+      80,
+      80
+    ],
+    "hotspot": [
+      42,
+      24
+    ],
+    "height": 64,
+    "motionScale": 1,
+    "mirrorWalk": true,
+    "pixelArt": true,
+    "proportions": {
+      "torsoWidth": 1,
+      "torsoHeight": 1,
+      "headScale": 1
+    },
+    "materials": [
+      {
+        "id": "shell",
+        "name": "Shell",
+        "channel": 0,
+        "base": "#8095F2"
+      },
+      {
+        "id": "face",
+        "name": "Screen lights",
+        "channel": 1,
+        "base": "#81F8CA"
+      },
+      {
+        "id": "signal",
+        "name": "Antenna",
+        "channel": 2,
+        "base": "#FFD84B"
+      }
+    ],
+    "parts": {
+      "head": {
+        "pivot": [
+          32,
+          42
+        ],
+        "anchor": [
+          40,
+          50
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "head.png",
+            "duration": 2.3,
+            "mask": "head-mask.png"
+          },
+          {
+            "image": "head-half.png",
+            "duration": 0.05,
+            "mask": "head-half-mask.png"
+          },
+          {
+            "image": "head-closed.png",
+            "duration": 0.085,
+            "mask": "head-closed-mask.png"
+          },
+          {
+            "image": "head-half.png",
+            "duration": 0.05,
+            "mask": "head-half-mask.png"
+          },
+          {
+            "image": "head.png",
+            "duration": 1.1,
+            "mask": "head-mask.png"
+          }
+        ]
+      },
+      "body": {
+        "pivot": [
+          34,
+          51
+        ],
+        "anchor": [
+          42,
+          59
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "body.png",
+            "duration": 1,
+            "mask": "body-mask.png"
+          }
+        ]
+      },
+      "pawNear": {
+        "pivot": [
+          26,
+          44
+        ],
+        "anchor": [
+          34,
+          52
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "pawNear.png",
+            "duration": 1,
+            "mask": "pawNear-mask.png"
+          }
+        ]
+      },
+      "pawFar": {
+        "pivot": [
+          41,
+          45
+        ],
+        "anchor": [
+          49,
+          53
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "pawFar.png",
+            "duration": 1,
+            "mask": "pawFar-mask.png"
+          }
+        ]
+      },
+      "legNear": {
+        "pivot": [
+          29,
+          51
+        ],
+        "anchor": [
+          37,
+          59
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "legNear.png",
+            "duration": 1,
+            "mask": "legNear-mask.png"
+          }
+        ],
+        "cuff": [
+          0,
+          -4
+        ],
+        "span": 4
+      },
+      "legFar": {
+        "pivot": [
+          37,
+          51
+        ],
+        "anchor": [
+          45,
+          59
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "legFar.png",
+            "duration": 1,
+            "mask": "legFar-mask.png"
+          }
+        ],
+        "cuff": [
+          0,
+          -4
+        ],
+        "span": 4
+      },
+      "bootNear": {
+        "pivot": [
+          28,
+          59
+        ],
+        "anchor": [
+          42,
+          67
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "bootNear.png",
+            "duration": 1,
+            "mask": "bootNear-mask.png"
+          }
+        ]
+      },
+      "bootFar": {
+        "pivot": [
+          38,
+          59
+        ],
+        "anchor": [
+          42,
+          67
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "bootFar.png",
+            "duration": 1,
+            "mask": "bootFar-mask.png"
+          }
+        ]
+      },
+      "tail": {
+        "pivot": [
+          0,
+          0
+        ],
+        "anchor": [
+          42,
+          59
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "tail.png",
+            "duration": 1,
+            "mask": "tail-mask.png"
+          }
+        ]
+      },
+      "headLeft": {
+        "pivot": [
+          32,
+          42
+        ],
+        "anchor": [
+          40,
+          50
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "headLeft.png",
+            "duration": 2.3,
+            "mask": "headLeft-mask.png"
+          },
+          {
+            "image": "headLeft-half.png",
+            "duration": 0.05,
+            "mask": "headLeft-half-mask.png"
+          },
+          {
+            "image": "headLeft-closed.png",
+            "duration": 0.085,
+            "mask": "headLeft-closed-mask.png"
+          },
+          {
+            "image": "headLeft-half.png",
+            "duration": 0.05,
+            "mask": "headLeft-half-mask.png"
+          },
+          {
+            "image": "headLeft.png",
+            "duration": 1.1,
+            "mask": "headLeft-mask.png"
+          }
+        ]
+      },
+      "headTurn": {
+        "pivot": [
+          32,
+          42
+        ],
+        "anchor": [
+          40,
+          50
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "turn-0.png",
+            "duration": 0.045,
+            "mask": "turn-0-mask.png"
+          },
+          {
+            "image": "turn-1.png",
+            "duration": 0.045,
+            "mask": "turn-1-mask.png"
+          },
+          {
+            "image": "turn-2.png",
+            "duration": 0.045,
+            "mask": "turn-2-mask.png"
+          },
+          {
+            "image": "turn-3.png",
+            "duration": 0.045,
+            "mask": "turn-3-mask.png"
+          },
+          {
+            "image": "turn-4.png",
+            "duration": 0.045,
+            "mask": "turn-4-mask.png"
+          }
+        ]
+      }
+    }
+  }
+}

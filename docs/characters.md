@@ -2,7 +2,7 @@
 
 A buddy is a local directory containing `buddy.json` and optional transparent
 PNG artwork. No executable code, remote URLs, or credentials are needed. The
-studio bundles Pip's articulated and complete-pose studies, three earlier generated rig
+studio opens with Bit's pixel rig and also bundles Pip's articulated and complete-pose studies, three earlier generated rig
 fixtures and three procedural alternatives.
 
 ## Version 3: articulated character parts
@@ -10,8 +10,8 @@ fixtures and three procedural alternatives.
 [`Characters/pip-articulated/buddy.json`](../Characters/pip-articulated/buddy.json)
 is a working example. This format separates generated artwork into nine named
 parts: `head`, `body`, `tail`, `pawNear`, `pawFar`, `legNear`, `legFar`,
-`bootNear`, `bootFar`. It currently describes a biped with a tail. It is not yet
-a universal rig for arbitrary anatomy.
+`bootNear`, `bootFar`. The nine required slots describe a biped; Bit supplies transparent tail art.
+This is not yet a universal rig for arbitrary anatomy.
 
 Use a `puppet` object instead of `sprites`. It shares version 2's `canvas`,
 `hotspot`, `height`, `mirrorWalk` and optional `materials`. `parts` replaces
@@ -32,13 +32,29 @@ The head and arm attachment positions follow the torso's proportions.
 `headScale` (0.85–1.15), each defaulting to 1. Studio exposes these alongside
 size, stride, step height and material colors. Save/import preserves the
 original part pixels, masks, blink timings, attachments and selected values.
+Optional `headTurn` and `headLeft` parts use the same pivot/anchor/frame format.
+The turn sequence runs from right through front to left. The renderer moves
+through its duration in either direction; a mid-turn reversal retraces the
+current progress. Head placement crosses its attachment offset gradually.
+The left head can carry its own blink frames. These authored heads are not
+mirrored again, while the torso/paws still use mirrored travel. This is an
+intermediate head-turn solution, not a complete authored body turnaround.
+
+Set `pixelArt: true` in `puppet` (or version 2's `sprites`) for nearest-neighbor
+sampling. Pixel parts snap their local attachments to canvas pixels, avoid
+arbitrary head/body rotation and use small stepped paw motion. Raster contact
+can therefore quantize by one logical pixel; the pointer hotspot never snaps.
+Bit's 80 px canvas displays at a preferred 64 points, leaving the visible
+character about 45 points tall before preview zoom. Studio limits its stride
+slider to 8–16 motion units, where tiny limbs remain readable.
+
 Version 1 and 2 packs remain supported. Reduced Motion holds the first textures
 with neutral feet. The generated eye patches change only the eyelids.
 
 Review [Cocoa customization](media/pip-studio-customization.png),
 [walking](media/pip-studio-walk.gif), [fast travel](media/pip-studio-fast-travel.gif)
 and [verification evidence](evidence/articulated-studio.json). The renderer is
-working in the lab; authored turns, more natural joints, final pixel-bot art,
+working in the lab; authored turns, more natural joints, final pixel-bot refinement,
 production sizing and live native integration remain unfinished.
 
 ## Version 2: complete character poses
@@ -73,8 +89,9 @@ subject to the native view's available space. The hotspot lies inside the
 canvas. Pip's `(128,48)` lies within its hood in every supplied frame; it maps
 exactly to the native view's click coordinate. Mirroring uses this same pivot.
 
-`idle` is required. Optional clips are `idleLeft`, `walkRight`, `walkLeft`, `press` and
-`release`. Each clip is an array of PNG filenames and frame durations in seconds
+`idle` is required. Optional clips are `idleLeft`, `walkRight`, `walkLeft`, `turn`, `press` and
+`release`. An optional `turn` follows the same right-to-left/retrace contract as
+the articulated head turn, using complete poses. Each clip is an array of PNG filenames and frame durations in seconds
 (1/120–30). At most 64 frames and 64 MB of decoded pixel artwork are accepted.
 Duplicate filenames share the loaded image. Files remain local and data-only.
 
@@ -106,6 +123,7 @@ the enlarged studio does not prove that production sizing is solved.
 
 ### Outfit colors
 
+Bit exposes **Shell**, **Screen lights** and **Antenna** color wells.
 Pip exposes independent **Raincoat** and **Boots** color wells in the studio.
 Colors retain the generated shading and highlights; the face and limbs still
 come from the original poses. Reset restores the original palette. A saved copy
@@ -170,9 +188,9 @@ the pack colors; a generated body's colors remain in its PNG.
 | eyeSpacing | 8–20 | 13 |
 | eyeSize | 3–7 | 5 |
 | faceY | −7–7 | 0 |
-| footSpacing | 6–14 | 10 |
+| footSpacing | 4–14 | 10 |
 | footSize | 5–11 | 8 |
-| stride | 16–40 | 28 |
+| stride | 8–40 | 28 |
 | footLift | 2–8 | 5 |
 
 Values are logical drawing units. The renderer scales artwork to available
