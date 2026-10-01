@@ -21,5 +21,25 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PLIST
-codesign --force --sign - "$APP"
-printf 'Built %s (local ad-hoc signature; not notarized)\n' "$APP"
+# A certificate keeps the designated requirement stable across rebuilds, so
+# macOS can associate updated code with an existing privacy permission grant.
+SIGN_IDENTITY="${BUDDIE_SIGN_IDENTITY:-}"
+if [[ -z "$SIGN_IDENTITY" ]]; then
+  identities=()
+  while IFS= read -r identity; do
+    [[ -n "$identity" ]] && identities+=("$identity")
+  done < <(security find-identity -v -p codesigning 2>/dev/null | awk '/"Apple Development:/ {print $2}' || true)
+  if [[ ${#identities[@]} -eq 1 ]]; then
+    SIGN_IDENTITY="${identities[0]}"
+  else
+    SIGN_IDENTITY="-"
+    printf 'No unique Apple Development identity. Set BUDDIE_SIGN_IDENTITY to select a certificate.\n' >&2
+  fi
+fi
+codesign --force --sign "$SIGN_IDENTITY" "$APP"
+codesign --verify --strict "$APP"
+if [[ "$SIGN_IDENTITY" == "-" ]]; then
+  printf 'Built %s (ad-hoc signed; updates may require granting screen access again; not notarized)\n' "$APP"
+else
+  printf 'Built %s (certificate signed; not notarized)\n' "$APP"
+fi

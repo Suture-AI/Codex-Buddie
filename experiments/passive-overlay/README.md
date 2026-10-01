@@ -65,7 +65,20 @@ conversations, or make network requests.
 
 For a source installation into `~/Applications`, run `bash scripts/install.sh`. That script builds and opens the app and refuses to overwrite an existing installation. Quit the app and remove its `.app` bundle to uninstall. There is no background service or login item.
 
-The local build uses an ad-hoc signature. A downloadable release for ordinary users still needs Developer ID signing, notarization, and clean-machine testing. Do not disable Gatekeeper to distribute it.
+The build automatically uses an Apple Development certificate when exactly one
+is available. You can select an installed certificate explicitly with
+`BUDDIE_SIGN_IDENTITY="Apple Development: …" bash scripts/build.sh`. This keeps the
+app’s signing identity stable across updates. No certificate is included in the repo.
+
+Without a unique certificate, the build falls back to ad-hoc signing and warns
+that rebuilt code may require a new screen-access grant. To force this mode, use
+`BUDDIE_SIGN_IDENTITY=-`. Moving from an ad-hoc build to a certificate-signed build
+may require removing the previous Codex Buddie entry in Screen Recording settings
+and adding the newly signed copy once. An enabled switch for the old build does
+not necessarily authorize the new code.
+
+A downloadable release for ordinary users still needs Developer ID signing,
+notarization, and clean-machine testing. Do not disable Gatekeeper to distribute it.
 
 ## Development
 
