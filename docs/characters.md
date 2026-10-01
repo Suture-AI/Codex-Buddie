@@ -140,6 +140,15 @@ Malformed settings are ignored. An unreadable manifest is left untouched, with
 a visible session-only warning; a missing pack's entry is retained for recovery.
 Failed installs roll back without replacing the previous library record.
 
+The isolated native renderer subscribes to this same library. Saved selection,
+colors, dimensions, gait and Reduced Motion apply to existing and later cursor
+views. Only the selected pack is decoded, on a background queue. An edit to the
+same installed design keeps the current gait, turn, blink and press state;
+reimporting a new artwork revision resets its animation. Invalid files preserve
+the last good appearance. The native reader never writes the collection.
+See [implementation and verification scope](cursor-library.md). Actual native
+cursor actions remain unverified.
+
 Miso uses the same format with 80 frames, a curled tail with endpoint flex,
 five authored head/torso/tail perspectives, ten arm views, and separate
 `shell`, `suit` and `face` materials.

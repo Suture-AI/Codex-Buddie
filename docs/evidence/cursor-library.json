@@ -1,0 +1,76 @@
+{
+  "scope": "Saved Studio preferences into native renderer; Cocoa subscription tests and actual isolated service startup. Native cursor actions unverified.",
+  "cursor_subscription_check": {
+    "observed_at_utc": "2026-10-01T06:01:34Z",
+    "command": ".build/test-cursor-library",
+    "exit_code": 0,
+    "stdout": "PASS: native saved selection, palette/anatomy equality, motion continuity, first-save/atomic/directory replacement, imports, two views, corruption recovery, latest-result wins, stop/restart/teardown; 9 background loads, zero main-thread loads\n",
+    "stderr": "[Buddie] Saved cursor appearance prepared.\n[Buddie] Saved cursor appearance prepared.\n[Buddie] Saved cursor appearance prepared.\n[Buddie] Saved selection unavailable; keeping the current character.\n[Buddie] Saved cursor appearance prepared.\n[Buddie] Saved cursor appearance prepared.\n[Buddie] Saved selection unavailable; keeping the current character.\n[Buddie] Saved cursor appearance prepared.\n[Buddie] Saved cursor appearance prepared.\n[Buddie] Saved cursor appearance prepared.\n[Buddie] Saved cursor appearance prepared.\n",
+    "reproduce": "bash scripts/test-cursor-library.sh rebuilds the dylib and test before running it"
+  },
+  "existing_checks": {
+    "build": "pass, no compiler warnings",
+    "scripts/test-animation.sh": "pass: motion, character packs and library",
+    "Cocoa --self-test": "pass: full existing replacement, motion, artwork, anatomy and Studio checks"
+  },
+  "actual_native_probe": {
+    "status": "pass",
+    "observed_at_utc": "2026-10-01T05:59:43Z",
+    "scope": "Official CUA initialization and read-only native app inventory; no UI actions or permission approvals.",
+    "startup_grace_seconds": 2.0,
+    "tool_error": false,
+    "nativeAppCount": 33,
+    "errors": [],
+    "team_not_found_in_log": false,
+    "renderer_loaded": true,
+    "saved_appearance_prepared": true
+  },
+  "original_service_sha256": "d4b1775138342c0df8e9451df3c23dda3fdef44c4ade50a2de382c188cf61b54",
+  "original_service_unchanged": true,
+  "original_client_files_unchanged": true,
+  "permission_grants": 0,
+  "native_ui_inputs": 0,
+  "source_sha256": {
+    "Sources/BuddieCursorLibrary.h": "cf0496e4e70f7e35efeaef88be44bde84767f483eaffcc942d79d4f6b4e4ad43",
+    "Sources/BuddieCursorLibrary.m": "f471e364502285092b0d61f506c81ee8ec3962005eb00239b048690f9dec957c",
+    "Sources/BuddieLibrary.h": "2604a4aa65bab3f4bfc058a2a06d4d91a08584756af2d91e735a2025b9f4e6c4",
+    "Sources/BuddieLibrary.m": "fe022ac9a4064bb36ae297c17e1ace8dd2de1b91c5ada0e4dc1d25f37d620ca4",
+    "Sources/BuddieCharacter.h": "4653097452f2966a832d90c53dbac5b41d9338fee0dd2009292b42ef06923b68",
+    "Sources/BuddieCharacter.m": "7b351cfe6d035a6ca659fc6527edbfa758fe54dba00f1f0bfc82c67feaec1eb1",
+    "Sources/BuddieView.h": "97b7b7e7c005e09822f72aba09a90b7a4934577a6e66e858cbe110671884c627",
+    "Sources/BuddieView.m": "9fbd693c5a9eedfa1f79bec621320cac20c13a0b8c40ffb1b063c341c2f2bdd2",
+    "Sources/Inject.m": "d49fd61f23c2d5e52196c7d6bc5990ec0a8cca944251918a566902687b99199f",
+    "Sources/BuddiePuppet.m": "49fd12c02236e80c3aa5358ec6b88b5ade3a4eafeb68b4bdebe74defa542af6c",
+    "Sources/BuddieMotion.c": "c7cf84d642960df7b3a5dda50970c502028227fab71b6d1d9a30cd30bc694506",
+    "Sources/Preview.m": "05454a9f359bd7ff4872480c3a90693d65e6d9e96f3c9e02865156dcf9ee96d0",
+    "tests/test_cursor_library.m": "93f2de63dcb40b3adcc96a05cb9830ad2cda4e75ebd240ab7e9f2e6aa94bd446",
+    "scripts/build.sh": "4794f30a45ef22b1390563e7b6e81750dd24040503cbcba5412af7d1e6a03399",
+    "scripts/test-cursor-library.sh": "43ae21f20b854e05f8c9ce21d78c2bd2c45a25a8c84b088fc816d359b79a37ee",
+    "scripts/probe-native.py": "95743c5225f1781bc3b7574af5a9260aea9103f9db1d7f8e8f28f1def841bcdb",
+    "scripts/prepare.py": "126cd24f46c9e71b9db83ddaa15b372143120637c9812ee307240d0b6d26f6b0"
+  },
+  "artwork_trees": {
+    "bit": {
+      "files": 118,
+      "sha256": "6324b4096d93391dea3517b014a6ad6a0117ca005fa6221bd58e82db2d58fe33"
+    },
+    "miso": {
+      "files": 118,
+      "sha256": "723f8eb445f44c85ae2712d5a76f6cfaf677f0d5acbcbc903425b576956cbd4a"
+    }
+  },
+  "artwork_tree_hash_format": "UTF-8 sorted repo-relative path + TAB + file SHA-256 + LF, then SHA-256 of concatenation",
+  "local_input_sha256": {
+    ".build/native-library/cursor-library-check.json": "1652c6bd8248fb58db79aed466a7fae994bd6760d1dff0d9a2752d30b87f764c",
+    ".build/native-library/probe.json": "f028e983cb305d5d6d843957ee5948834fdf79d88f4e353a2ac9e3a424fcaf89",
+    ".build/native-library/probe.log": "3c9aa5705bf5ed8f48d3a76c1ee03df0b4e9759e72f18948e90eb4249bd6de44",
+    ".build/native-library/preparation.json": "9c5cb0f3c1080bc65795e50793115cfbe403f79e18cb2c0b587727ca0de093f7",
+    ".build/native-library/Codex Buddie Runtime.app/Contents/Frameworks/libBuddie.dylib": "adc71a52acdfc822f37c67b5c3fd00a4e666a7799fea84da11da8c01f983bb40"
+  },
+  "limits": [
+    "Automated views prove snapshot application and motion-state continuity; they are not real native cursor actions.",
+    "Native startup proves the dylib and saved appearance preparation run inside the service, not which pixels it displays during an action.",
+    "No CPU/battery, multiple-monitor, native geometry, screenshot-exclusion, native pointer-event or distribution-install verification.",
+    "User response to the official app-access request is still pending."
+  ]
+}

@@ -86,6 +86,15 @@ failed-write rollback. Live restart verification is still pending because CUA
 currently returns `cgWindowNotFound` for the already running Studio.
 See the [source-pinned library checks](evidence/studio-library.json).
 
+The saved Studio appearance now reaches the native renderer through a read-only
+subscription. Selected artwork is decoded/recolored on a serial worker; atomic
+saves update registered cursor views without resetting the same design's running
+motion. Imports, Reduced Motion, invalid-save recovery, first-save folder races,
+rapid changes and teardown pass automated checks. The isolated service loaded
+this bridge, prepared saved artwork, and passed a 33-app official-client inventory.
+This is not yet a recording of live cursor replacement. See
+[the bridge review and evidence](cursor-library.md).
+
 Arm length, leg length, boot width and stance are now editable, portable and
 persistent. Body/Limbs/Gait sections organize the controls without obscuring
 colors; numeric readouts show current values. Pixel calves now fold around a

@@ -1,4 +1,5 @@
 #import "BuddieView.h"
+#import "BuddieCursorLibrary.h"
 #import <objc/runtime.h>
 
 @interface NSWindow (Buddie)
@@ -28,5 +29,7 @@ __attribute__((constructor)) static void LoadBuddie(void) {
         method_exchangeImplementations(class_getInstanceMethod(NSWindow.class, @selector(orderWindow:relativeTo:)),
                                        class_getInstanceMethod(NSWindow.class, @selector(buddie_orderWindow:relativeTo:)));
         fprintf(stderr, "[Buddie] Native cursor renderer shim loaded.\n");
+        // Warm saved artwork before the first cursor is requested.
+        dispatch_async(dispatch_get_main_queue(), ^{ BuddieStartNativeLibrary(); });
     }
 }

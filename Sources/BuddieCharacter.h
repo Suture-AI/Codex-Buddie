@@ -52,6 +52,7 @@
 + (NSArray<BuddieCharacter *> *)presets;
 + (NSDictionary<NSString *,NSArray<NSNumber *> *> *)puppetProportionRanges;
 + (instancetype)bundledDefault;
++ (instancetype)bundledCharacterWithIdentifier:(NSString *)identifier;
 + (instancetype)loadPack:(NSURL *)folder error:(NSError **)error;
 - (BOOL)savePack:(NSURL *)folder error:(NSError **)error;
 @end

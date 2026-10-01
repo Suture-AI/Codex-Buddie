@@ -96,6 +96,7 @@ def probe(launcher, output, startup_grace=0):
             if kind == 'err' and line: logs.append(line)
         report['team_not_found_in_log'] = any('teamNotFound' in line for line in logs)
         report['renderer_loaded'] = any('Native cursor renderer shim loaded' in line for line in logs)
+        report['saved_appearance_prepared'] = any('Saved cursor appearance prepared' in line for line in logs)
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(report, indent=2) + '\n')
         output.with_suffix('.log').write_text(''.join(logs))

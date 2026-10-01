@@ -16,6 +16,8 @@
 @property(readonly) double facingProgress;
 - (void)animateAtTime:(double)time anchor:(BuddiePoint)anchor;
 - (void)press:(BOOL)down atTime:(double)time;
+// A settings-only edit keeps the running gait, turn, blink and press state.
+- (void)applySavedCharacter:(BuddieCharacter *)character preservingMotion:(BOOL)preserve;
 @end
 
 BOOL BuddieIsCursorWindow(NSWindow *window);

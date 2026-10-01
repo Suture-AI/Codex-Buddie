@@ -1,5 +1,6 @@
 #import "BuddieView.h"
 #import "BuddiePuppet.h"
+#import "BuddieCursorLibrary.h"
 #import <objc/runtime.h>
 
 static void Oval(NSRect r, NSColor *c) { [c setFill]; [[NSBezierPath bezierPathWithOvalInRect:r] fill]; }
@@ -39,6 +40,10 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
     self.spriteClipName=@"idle"; self.spriteFrame=0; self.needsDisplay=YES;
 }
 - (void)setManualAnimation:(BOOL)value { _manualAnimation=value; [self configureTimer]; }
+- (void)applySavedCharacter:(BuddieCharacter *)character preservingMotion:(BOOL)preserve {
+    if(!preserve || ![character.identifier isEqual:self.character.identifier]) { self.character=character; return; }
+    _character=character; [_character prepareAppearance]; self.needsDisplay=YES;
+}
 - (void)viewDidMoveToWindow { [super viewDidMoveToWindow]; [self configureTimer]; }
 - (void)configureTimer {
     [self.animationTimer invalidate]; self.animationTimer=nil;
@@ -222,6 +227,7 @@ BOOL BuddieReplaceContent(NSWindow *window, NSView *original) {
     }
     BuddieView *replacement = [[BuddieView alloc] initWithFrame:original.frame];
     replacement.softwareStyle = software;
+    BuddieAttachNativeLibrary(replacement);
     replacement.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
     [replacement setAccessibilityElement:NO];
     // Keep the original view alive: native Style retains/queries it for geometry.

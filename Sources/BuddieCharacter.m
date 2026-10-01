@@ -176,14 +176,23 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
     static BuddieCharacter *preset;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        NSURL *resources=NSBundle.mainBundle.resourceURL;
-        for(NSString *folder in @[@"BuddieCharacters",@"Characters"]) {
-            NSURL *pack=[[resources URLByAppendingPathComponent:folder] URLByAppendingPathComponent:@"bit"];
-            preset=[self loadPack:pack error:nil]; if(preset) break;
-        }
+        preset=[self bundledCharacterWithIdentifier:@"bit"];
         if(!preset) preset=[self new];
     });
     return [preset copy];
+}
++ (instancetype)bundledCharacterWithIdentifier:(NSString *)identifier {
+    if([@[@"pip",@"pip-articulated",@"bit",@"miso",@"sprout",@"mochi",@"orbit"] containsObject:identifier]) {
+        for(NSString *folder in @[@"BuddieCharacters",@"Characters"]) {
+            NSURL *pack=[[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:folder] URLByAppendingPathComponent:identifier];
+            BuddieCharacter *character=[self loadPack:pack error:nil]; if(character) return character;
+        }
+    }
+    for(BuddieCharacter *character in self.presets) {
+        character.identifier=[@"classic-" stringByAppendingString:character.identifier];
+        if([character.identifier isEqual:identifier]) { character.name=[character.name stringByAppendingString:@" · Classic"]; return character; }
+    }
+    return nil;
 }
 - (BOOL)savePack:(NSURL *)folder error:(NSError **)error {
     NSFileManager *fm=NSFileManager.defaultManager;

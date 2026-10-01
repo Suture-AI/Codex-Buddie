@@ -23,6 +23,65 @@ static NSColor *Color(id value) {
     return [NSColor colorWithSRGBRed:((rgb>>16)&255)/255. green:((rgb>>8)&255)/255. blue:(rgb&255)/255. alpha:1];
 }
 
+static NSDictionary *ReadManifest(NSURL *root,NSError **error) {
+    NSURL *file=[root URLByAppendingPathComponent:@"library.json"];
+    if(![NSFileManager.defaultManager fileExistsAtPath:file.path]) return nil;
+    NSNumber *size=nil; [file getResourceValue:&size forKey:NSURLFileSizeKey error:nil];
+    // Bound the read too: an atomic rewrite can race the size query.
+    NSFileHandle *handle=size && size.unsignedLongLongValue<=1024*1024 ? [NSFileHandle fileHandleForReadingFromURL:file error:nil]:nil;
+    NSData *data=[handle readDataUpToLength:1024*1024+1 error:nil]; [handle closeAndReturnError:nil];
+    if(data.length>1024*1024) data=nil;
+    id json=data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil]:nil;
+    BOOL valid=[json isKindOfClass:NSDictionary.class] && [json[@"version"] isEqual:@1] &&
+        CFGetTypeID((__bridge CFTypeRef)json[@"version"])!=CFBooleanGetTypeID() &&
+        [json[@"installed"] isKindOfClass:NSArray.class] && [json[@"installed"] count]<=256 &&
+        [json[@"settings"] isKindOfClass:NSDictionary.class] && [json[@"settings"] count]<=512 &&
+        Identifier(json[@"selected"]) && [json[@"reducedMotion"] isKindOfClass:NSNumber.class] &&
+        CFGetTypeID((__bridge CFTypeRef)json[@"reducedMotion"])==CFBooleanGetTypeID();
+    NSMutableSet *ids=[NSMutableSet new],*folders=[NSMutableSet new];
+    if(valid) for(id entry in json[@"installed"]) {
+        if(![entry isKindOfClass:NSDictionary.class] || !Identifier(entry[@"id"]) ||
+           ![entry[@"folder"] isKindOfClass:NSString.class] || ![[NSUUID alloc] initWithUUIDString:entry[@"folder"]] ||
+           [ids containsObject:entry[@"id"]] || [folders containsObject:entry[@"folder"]]) { valid=NO; break; }
+        [ids addObject:entry[@"id"]]; [folders addObject:entry[@"folder"]];
+    }
+    if(valid) for(id key in json[@"settings"]) {
+        if(!Identifier(key) || ![json[@"settings"][key] isKindOfClass:NSDictionary.class]) { valid=NO; break; }
+    }
+    if(!valid) {
+        if(error) *error=LibraryError(@"The saved collection could not be read. It has been left untouched; changes will stay in this session.");
+        return nil;
+    }
+    return json;
+}
+
+static void ApplySettings(BuddieCharacter *c,NSDictionary *settings) {
+    NSDictionary *ranges=SettingRanges();
+    for(NSString *key in ranges) {
+        id value=settings[key]; NSArray *range=ranges[key];
+        if(![value isKindOfClass:NSNumber.class] || CFGetTypeID((__bridge CFTypeRef)value)==CFBooleanGetTypeID() ||
+           !isfinite([value doubleValue]) || [value doubleValue]<[range[0] doubleValue] || [value doubleValue]>[range[1] doubleValue]) continue;
+        if([key isEqual:@"width"]) c.bodySize=NSMakeSize([value doubleValue],c.bodySize.height);
+        else if([key isEqual:@"height"]) c.bodySize=NSMakeSize(c.bodySize.width,[value doubleValue]);
+        else [c setValue:value forKey:key];
+    }
+    id colors=settings[@"materials"];
+    if([colors isKindOfClass:NSDictionary.class]) {
+        NSMutableDictionary *palette=[c.materialColors mutableCopy];
+        for(NSString *key in palette.allKeys) { NSColor *color=Color(colors[key]); if(color) palette[key]=color; }
+        c.materialColors=palette;
+    }
+    [c prepareAppearance];
+}
+
+static BuddieCharacter *InstalledCharacter(NSURL *root,NSDictionary *entry) {
+    NSURL *folder=[[root URLByAppendingPathComponent:@"Packs"] URLByAppendingPathComponent:entry[@"folder"]];
+    // Only packs installed beneath this library may be loaded, including after edits to the manifest.
+    NSString *parent=folder.URLByResolvingSymlinksInPath.URLByDeletingLastPathComponent.path;
+    NSString *expected=[root URLByAppendingPathComponent:@"Packs"].URLByResolvingSymlinksInPath.path;
+    return [parent isEqual:expected] ? [BuddieCharacter loadPack:folder error:nil]:nil;
+}
+
 @interface BuddieLibrary ()
 @property NSURL *root;
 @property NSMutableArray<BuddieCharacter *> *originals;
@@ -42,39 +101,12 @@ static NSColor *Color(id value) {
     _root=root; _originals=[NSMutableArray new]; _settings=[NSMutableDictionary new]; _installed=[NSMutableArray new];
     for(BuddieCharacter *character in bundled) [_originals addObject:[character copy]];
     _selectedIdentifier=@"bit";
-    NSURL *file=[root URLByAppendingPathComponent:@"library.json"];
-    if(![NSFileManager.defaultManager fileExistsAtPath:file.path]) return self;
-    NSNumber *size=nil; [file getResourceValue:&size forKey:NSURLFileSizeKey error:nil];
-    NSData *data=size && size.unsignedLongLongValue<=1024*1024 ? [NSData dataWithContentsOfURL:file]:nil;
-    id json=data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil]:nil;
-    BOOL valid=[json isKindOfClass:NSDictionary.class] && [json[@"version"] isEqual:@1] &&
-        CFGetTypeID((__bridge CFTypeRef)json[@"version"])!=CFBooleanGetTypeID() &&
-        [json[@"installed"] isKindOfClass:NSArray.class] && [json[@"installed"] count]<=256 &&
-        [json[@"settings"] isKindOfClass:NSDictionary.class] && [json[@"settings"] count]<=512 &&
-        Identifier(json[@"selected"]) && [json[@"reducedMotion"] isKindOfClass:NSNumber.class] &&
-        CFGetTypeID((__bridge CFTypeRef)json[@"reducedMotion"])==CFBooleanGetTypeID();
-    NSMutableSet *ids=[NSMutableSet new],*folders=[NSMutableSet new];
-    if(valid) for(id entry in json[@"installed"]) {
-        if(![entry isKindOfClass:NSDictionary.class] || !Identifier(entry[@"id"]) ||
-           ![entry[@"folder"] isKindOfClass:NSString.class] || ![[NSUUID alloc] initWithUUIDString:entry[@"folder"]] ||
-           [ids containsObject:entry[@"id"]] || [folders containsObject:entry[@"folder"]]) { valid=NO; break; }
-        [ids addObject:entry[@"id"]]; [folders addObject:entry[@"folder"]];
-    }
-    if(valid) for(id key in json[@"settings"]) {
-        if(!Identifier(key) || ![json[@"settings"][key] isKindOfClass:NSDictionary.class]) { valid=NO; break; }
-    }
-    if(!valid) {
-        _loadError=LibraryError(@"The saved collection could not be read. It has been left untouched; changes will stay in this session.");
-        _readOnly=YES; return self;
-    }
+    NSError *error=nil; NSDictionary *json=ReadManifest(root,&error);
+    if(!json) { _loadError=error; _readOnly=error!=nil; return self; }
     _settings=[json[@"settings"] mutableCopy]; _installed=[json[@"installed"] mutableCopy];
     _selectedIdentifier=json[@"selected"]; _reducedMotion=[json[@"reducedMotion"] boolValue];
     for(NSDictionary *entry in _installed) {
-        NSURL *folder=[[root URLByAppendingPathComponent:@"Packs"] URLByAppendingPathComponent:entry[@"folder"]];
-        // Only packs installed beneath this library may be loaded, including after edits to the manifest.
-        NSString *parent=folder.URLByResolvingSymlinksInPath.URLByDeletingLastPathComponent.path;
-        NSString *expected=[root URLByAppendingPathComponent:@"Packs"].URLByResolvingSymlinksInPath.path;
-        BuddieCharacter *character=[parent isEqual:expected] ? [BuddieCharacter loadPack:folder error:nil]:nil;
+        BuddieCharacter *character=InstalledCharacter(root,entry);
         if(!character || ![character.identifier isEqual:entry[@"id"]]) {
             _loadError=LibraryError(@"One saved buddy could not be opened. Its library entry has been kept so it can be restored."); continue;
         }
@@ -83,6 +115,26 @@ static NSColor *Color(id value) {
     }
     return self;
 }
+// The cursor reads only the selected pack. A large Studio collection must not
+// make the native process decode every imported buddy at launch or on each edit.
++ (NSDictionary *)cursorSelectionAtURL:(NSURL *)root error:(NSError **)error {
+    NSError *failure=nil; NSDictionary *json=ReadManifest(root,&failure);
+    if(failure) { if(error) *error=failure; return nil; }
+    NSString *identifier=json[@"selected"] ?: @"bit";
+    NSDictionary *installed=nil;
+    for(NSDictionary *entry in json[@"installed"]) if([entry[@"id"] isEqual:identifier]) { installed=entry; break; }
+    return @{@"id":identifier,@"settings":json[@"settings"][identifier] ?: @{},
+        @"installed":installed ?: @{},@"reducedMotion":json[@"reducedMotion"] ?: @NO};
+}
++ (BuddieCharacter *)cursorCharacterForSelection:(NSDictionary *)selection atURL:(NSURL *)root
+    bundledLoader:(BuddieBundledLoader)loader error:(NSError **)error {
+    NSString *identifier=selection[@"id"]; NSDictionary *installed=selection[@"installed"];
+    BuddieCharacter *character=installed.count ? InstalledCharacter(root,installed):loader(identifier);
+    if(!character || ![character.identifier isEqual:identifier]) {
+        if(error) *error=LibraryError(@"The selected buddy could not be opened. The current cursor has been kept."); return nil;
+    }
+    ApplySettings(character,selection[@"settings"]); return character;
+}
 - (NSUInteger)indexForIdentifier:(NSString *)identifier {
     return [self.originals indexOfObjectPassingTest:^BOOL(BuddieCharacter *c,NSUInteger i,BOOL *stop) { (void)i; (void)stop; return [c.identifier isEqual:identifier]; }];
 }
@@ -90,22 +142,7 @@ static NSColor *Color(id value) {
 - (BuddieCharacter *)characterForIdentifier:(NSString *)identifier {
     NSUInteger index=[self indexForIdentifier:identifier]; if(index==NSNotFound) return nil;
     BuddieCharacter *c=[self.originals[index] copy]; NSDictionary *settings=self.settings[identifier];
-    NSDictionary *ranges=SettingRanges();
-    for(NSString *key in ranges) {
-        id value=settings[key]; NSArray *range=ranges[key];
-        if(![value isKindOfClass:NSNumber.class] || CFGetTypeID((__bridge CFTypeRef)value)==CFBooleanGetTypeID() ||
-           !isfinite([value doubleValue]) || [value doubleValue]<[range[0] doubleValue] || [value doubleValue]>[range[1] doubleValue]) continue;
-        if([key isEqual:@"width"]) c.bodySize=NSMakeSize([value doubleValue],c.bodySize.height);
-        else if([key isEqual:@"height"]) c.bodySize=NSMakeSize(c.bodySize.width,[value doubleValue]);
-        else [c setValue:value forKey:key];
-    }
-    id colors=settings[@"materials"];
-    if([colors isKindOfClass:NSDictionary.class]) {
-        NSMutableDictionary *palette=[c.materialColors mutableCopy];
-        for(NSString *key in palette.allKeys) { NSColor *color=Color(colors[key]); if(color) palette[key]=color; }
-        c.materialColors=palette;
-    }
-    [c prepareAppearance]; return c;
+    ApplySettings(c,settings); return c;
 }
 - (void)rememberCharacter:(BuddieCharacter *)character {
     if(!character || [self indexForIdentifier:character.identifier]==NSNotFound) return;

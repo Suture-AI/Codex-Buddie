@@ -11,6 +11,11 @@ Bit renderer reached the official app-access prompt for Codex Buddie Lab; native
 observation and clicks remain pending that prompt. See
 [the new evidence](evidence/native-ipc.json).
 
+A follow-up at `2026-10-01T05:59:43Z` also passed the 33-app probe with the
+Studio-library subscription included. Its log confirms the saved appearance was
+prepared in the service process. [That evidence](evidence/cursor-library.json)
+covers startup and preference loading, not native cursor rendering or clicks.
+
 ## What changed
 
 Both inventory probes used the same isolated service copy, development signature,

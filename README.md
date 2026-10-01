@@ -9,7 +9,8 @@ coordinate; your own mouse stays independent.
 modified copy of the native service boots with the renderer library loaded.
 **The official client now connects to a development-signed service copy:**
 a read-only probe listed 33 native apps. Real cursor actions remain unverified;
-the current Bit build reached the normal app-access prompt. This is a renderer
+the current service also prepares the saved Studio appearance. The native UI
+test reached the normal app-access prompt. This is a renderer
 prototype and research experiment, not a working Codex cursor skin or an official
 plugin. See [the connection evidence](docs/development-signing.md).
 
@@ -97,6 +98,13 @@ away and back restores your edits; reopening the Studio restores the selected
 buddy and Reduced Motion preference. **Reset character** restores the original
 design. **Save a copy…** exports a portable buddy folder and adds it to the
 collection; **Import buddy…** installs a local copy of its artwork.
+The isolated native renderer now reads the same saved selection, colors,
+anatomy and Reduced Motion preference. It updates after Studio saves without
+restarting the service. Imported packs work through the same library; malformed
+saves keep the last good appearance. This bridge has automated renderer checks
+and an isolated service startup check; live cursor actions are still pending.
+See [saved cursor settings](docs/cursor-library.md).
+
 **Native size** compares the small software-cursor layout with the enlarged
 studio view. **Reduced motion** removes autonomous animation and jumps directly
 to targets. The system accessibility preference is also respected.
@@ -197,6 +205,8 @@ all generated copies are under `.build/`.
 | Load library inside copied native service; private socket starts | Passed |
 | Initialise official REPL through generated launcher | Passed |
 | Native app inventory through the modified service | **Passed: 33 apps, original official client** |
+| Prepare saved Studio appearance in the modified service | Passed; live cursor display still unverified |
+| Saved settings/imports reach registered cursor views | Passed in automated Cocoa checks |
 | Observe Studio through the current Bit service | **App-access prompt reached; pending** |
 | Character replaces cursor during real native CUA actions | **Not reached** |
 | Native hotspot accuracy, drag, multiple monitors, cancellation | **Not verified** |
@@ -206,6 +216,7 @@ Run checks with:
 ```sh
 python3 -m unittest discover -s tests -v
 bash scripts/test-animation.sh
+bash scripts/test-cursor-library.sh
 ./scripts/build.sh
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --self-test
 ```
