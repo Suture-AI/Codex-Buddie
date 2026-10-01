@@ -30,8 +30,12 @@ pixel rig, independent limbs, preserved-alpha screen blinks, editable shape and
 three colors, and five authored head directions with reversible turn progress.
 The generated walk sheets were rejected after anatomy review. See
 [Bit's review](evidence/bit-studio.json) and [source notes](../artwork/bit/README.md).
-Next improve the whole-body turn, pixel joints and fast-travel landing, then
-obtain user feedback on this smaller robot direction. Native integration and
+The user approved Bit's appearance and asked for a shorter neck. The generated
+head strip's long neck is now a one-row collar, registered at the head pivot
+through all five directions and tested with the user's smaller-head proportions.
+Next verify live color-well updates: one native screenshot showed a red Shell
+well while the robot remained blue, despite passing recoloring/export checks.
+Then improve the whole-body turn, pixel joints and fast-travel landing. Native integration and
 production cursor size remain separate unresolved gates.
 
 The root Studio also includes **Pip · Articulated**, a version-3 pack with nine
@@ -46,8 +50,10 @@ and [validation evidence](evidence/articulated-studio.json).
 
 The earlier full-pose Pip pack remains compatible. Authored turns, final joint
 quality, production sizing and real interaction events remain open. Native CUA
-UI observation still returns `cgWindowNotFound`; the automated Cocoa harness
-passes, but manual exercise of the new controls is pending. The user's latest
+UI observation recovered and the Studio's proportion/size controls have been
+exercised directly. An isolated development-signed runtime still returns
+`Sky Computer Use native pipe startup failed` while the original CUA runtime
+can observe and control the Studio; see the development-signing evidence. The user's latest
 feedback does not approve Pip as the final character.
 
 The studio also retains three earlier ChatGPT-generated body packs, independent

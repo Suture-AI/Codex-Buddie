@@ -1,0 +1,24 @@
+{
+  "change": "Compact one-row collar across all five generated head directions; user approved Bit and requested the original concept proportions.",
+  "before_revision": "44a1679acc0ab84e895f5a96fedc9bb48d47ccd9",
+  "comparison": "Actual Cocoa --export-puppet output. Each before/after pair uses identical proportions. Default 1/1/1; small-head 1.22/1.18/0.85 for torso width/height/head scale.",
+  "validation": [
+    "Build and motion/pack regressions pass",
+    "Cocoa self-test passes",
+    "660 deterministic motion frames exported; eight proportion corners fit",
+    "Official CUA set and read back size 69.575, torso width 1.22, torso height 1.18, head scale 0.85 in the updated Studio",
+    "Native application menu Quit successfully terminated Studio; background CUA Command-Q remained inconclusive"
+  ],
+  "ui_note": "A later native screenshot showed a red Shell color well while the rendered robot remained blue. Color-well-to-render synchronization needs direct UI verification; automated recoloring/export checks pass.",
+  "limitations": [
+    "Studio evidence only; native runtime pipe remains blocked",
+    "Body turns, pixel joints and fast landing still need polish"
+  ],
+  "sha256": {
+    "docs/media/bit-neck-comparison.png": "dd9f654741d5862209133c1ad072b0e4ff52f0ff13ecf53072c248d4fa988a14",
+    "Characters/bit/buddy.json": "bc56d3a0b4d93b7c99e79933555a7ca889a2ddc4e6c34364d156851b137dbbb7",
+    "Characters/bit/provenance.json": "01f9817512fda2c97fc6ecee7067e4bf9b4f45c8a9a5533a4135f37d398268dc",
+    "scripts/build-bit.py": "87e1a1b640740bbeb87202fb9396f42a7880ab3381499c638fb6129a9aa3b896",
+    "Sources/Preview.m": "65056be37853e07dd7079c252a9bbdb9e3ad77649ac83e5ca22635b0f903d853"
+  }
+}

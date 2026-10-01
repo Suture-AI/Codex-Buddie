@@ -20,8 +20,8 @@ PACK = ROOT / "Characters/bit"
 def main():
     PACK.mkdir(parents=True, exist_ok=True)
     source = Image.open(ART / "concept-source.png").convert("RGBA")
-    box = source.getchannel("A").point(lambda a: 255 if a >= 128 else 0).getbbox()
-    crop = source.crop(box)
+    source_box = source.getchannel("A").point(lambda a: 255 if a >= 128 else 0).getbbox()
+    crop = source.crop(source_box)
     crop.thumbnail((52, 56), Image.Resampling.NEAREST)
     base = Image.new("RGBA", (64, 64))
     base.alpha_composite(crop, ((64-crop.width)//2, 60-crop.height))
@@ -61,6 +61,11 @@ def main():
         boxes.append((box[0]+left, box[1], box[2]+left, box[3]))
     scale = 40/max(b[3]-b[1] for b in boxes)
     baseline = max(b[3] for b in boxes)
+    # The generated turnaround added a 4–5 px neck absent from the concept.
+    # Reviewed collar starts in the registered 64 px heads. Keep one collar
+    # row and seat it at the common pivot, so head-size changes do not stretch
+    # the neck and the chin no longer rises/falls through the turn.
+    collar_starts = [40, 39, 39, 39, 38]
     for i, box in enumerate(boxes):
         # Register the neck, not the head's asymmetric silhouette center.
         neck = [(x,y) for y in range(box[3]-max(2,round((box[3]-box[1])*.07)),box[3])
@@ -72,7 +77,11 @@ def main():
         part = part.convert("RGB").quantize(palette=palette,dither=Image.Dither.NONE).convert("RGBA"); part.putalpha(alpha)
         out = Image.new("RGBA",(64,64))
         out.alpha_composite(part,(round(32+(box[0]-origin)*scale),round(43+(box[1]-baseline)*scale)))
-        images[f"turn-{i}"] = out
+        collar = collar_starts[i]
+        assert out.getchannel("A").crop((0,collar,64,collar+1)).getbbox(), "Missing reviewed collar."
+        compact = Image.new("RGBA", (64,64))
+        compact.alpha_composite(out.crop((0,0,64,collar+1)), (0,42-collar))
+        images[f"turn-{i}"] = compact
     images["head"] = images["turn-0"].copy()
     images["headLeft"] = images["turn-4"].copy()
     eye_boxes = {}
@@ -132,10 +141,10 @@ def main():
     (PACK / "buddy.json").write_text(json.dumps(manifest, indent=2)+"\n")
     provenance = {"source": "artwork/bit/concept-source.png", "source_sha256": hashlib.sha256((ART / "concept-source.png").read_bytes()).hexdigest(),
                   "requested_model": "GPT Image 2.5 if available", "verified_model": None, "processing": "scripts/build-bit.py: 64px nearest sampling; 16-color palette; reviewed cutout rectangles; pixel blink edits. Walking sheets were rejected and are not used.",
-                  "source_bounds": box, "part_rectangles": {k:v[0] for k,v in definitions.items()}, "eye_boxes": eye_boxes,
+                  "source_bounds": source_box, "part_rectangles": {k:v[0] for k,v in definitions.items()}, "eye_boxes": eye_boxes,
                   "turn_source": "artwork/bit/turn-source.png", "turn_source_sha256": hashlib.sha256((ART / "turn-source.png").read_bytes()).hexdigest(),
-                  "turn_geometry": {"source_boxes":boxes,"shared_scale":scale,"source_baseline":baseline,"target_neck":[32,43]},
-                  "status": "Original retro-bot motion study with authored head turn; user approval, body turn and final animation polish pending."}
+                  "turn_geometry": {"source_boxes":boxes,"shared_scale":scale,"source_baseline":baseline,"target_neck":[32,42],"source_collar_rows":collar_starts,"retained_collar_rows":1},
+                  "status": "User approved Bit's visual direction and requested a shorter neck. One-row collar restores the compact concept; body turn and final animation polish remain pending."}
     (PACK / "provenance.json").write_text(json.dumps(provenance, indent=2)+"\n")
     print(json.dumps({"eyes":eye_boxes,"colors":len(set(base.getpixel((x,y))[:3] for y in range(64) for x in range(64) if base.getpixel((x,y))[3]))}))
 

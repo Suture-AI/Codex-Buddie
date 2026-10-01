@@ -15,6 +15,21 @@ static NSButton *Button(NSString *s, id target, SEL action, NSRect frame) {
     NSButton *b=[NSButton buttonWithTitle:s target:target action:action];
     b.frame=frame; b.bezelStyle=NSBezelStyleRounded; return b;
 }
+static void InstallMenus(void) {
+    NSMenu *bar=[NSMenu new];
+    NSMenuItem *appItem=[NSMenuItem new]; [bar addItem:appItem];
+    NSMenu *appMenu=[[NSMenu alloc] initWithTitle:@"Codex Buddie Lab"]; appItem.submenu=appMenu;
+    [appMenu addItemWithTitle:@"Hide Codex Buddie Lab" action:@selector(hide:) keyEquivalent:@"h"];
+    [appMenu addItem:NSMenuItem.separatorItem];
+    [appMenu addItemWithTitle:@"Quit Codex Buddie Lab" action:@selector(terminate:) keyEquivalent:@"q"];
+    NSMenuItem *editItem=[NSMenuItem new]; [bar addItem:editItem];
+    NSMenu *editMenu=[[NSMenu alloc] initWithTitle:@"Edit"]; editItem.submenu=editMenu;
+    [editMenu addItemWithTitle:@"Cut" action:@selector(cut:) keyEquivalent:@"x"];
+    [editMenu addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"];
+    [editMenu addItemWithTitle:@"Paste" action:@selector(paste:) keyEquivalent:@"v"];
+    [editMenu addItemWithTitle:@"Select All" action:@selector(selectAll:) keyEquivalent:@"a"];
+    NSApp.mainMenu=bar;
+}
 static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     NSMutableArray *all=[NSMutableArray new];
     NSURL *root=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Characters"];
@@ -466,6 +481,7 @@ int main(int argc,const char **argv) {
         if(argc>2 && strcmp(argv[1],"--export-palettes")==0) return ExportPalettes([NSString stringWithUTF8String:argv[2]]);
         if(argc>2 && strcmp(argv[1],"--export-puppet")==0) return ExportPuppet([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"pip-articulated");
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+        InstallMenus();
         Delegate *delegate=[Delegate new]; NSApp.delegate=delegate; [NSApp run];
     }
 }

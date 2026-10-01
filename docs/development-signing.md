@@ -18,6 +18,13 @@ authentication check passed. The precise connection rejection remains unknown.
 No native cursor replacement, permissions, app observations or clicks were reached.
 See [the redacted evidence](evidence/development-signing.json).
 
+A later probe at `2026-10-01T03:42:38Z` returned the same startup error after
+native observation recovered in the original CUA runtime. That original runtime
+could inspect and operate the Studio while the isolated copy still listed zero
+native apps. This separates the copied runtime's connection failure from the
+earlier general desktop-observation outage; it does not identify the precise
+IPC rejection or test the newest Bit artwork in the native service.
+
 The service was version `26.924.1001281`, SHA-256
 `d4b1775138342c0df8e9451df3c23dda3fdef44c4ade50a2de382c188cf61b54`.
 Its original deep/strict signature passed. Known cursor class/style markers are

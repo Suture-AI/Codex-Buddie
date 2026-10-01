@@ -3,7 +3,8 @@
 The user supplied a compact blue Codex pet as the visual reference and asked
 for a smaller retro 8-bit bot with much better animation. Bit follows that
 direction with a blue screen-faced robot, simple mint eyes, short limbs and an
-amber antenna. This is a candidate; user approval is pending.
+amber antenna. The user approved this visual direction and asked for a shorter
+neck, closer to the original generated concept.
 
 ![Actual Studio output](../../docs/media/bit-studio-customization.png)
 
@@ -39,7 +40,12 @@ core; attachment coordinates snap to logical pixels. Fast travel uses its
 bounded airborne gait. Paws move in opposing one-pixel steps. The renderer
 preserves the input hotspot rather than moving the cursor to accommodate art.
 
-Turn heads share one scale and neck registration. Each orientation keeps its
+Turn heads share one scale and collar registration. The generated head strip
+introduced a 4–5 pixel neck; the builder retains one collar row and registers
+it at the head pivot. This keeps the chin close to the torso at every head size
+and aligns the collar through all five orientations. See the
+[before/after Cocoa comparison](../../docs/media/bit-neck-comparison.png).
+Each orientation keeps its
 authored perspective; it is not flipped again. Reversing partway retraces the
 turn progress. Right and left blink variants alter only localized screen-eye
 pixels, with identical alpha and unchanged surrounding head art.
@@ -47,8 +53,9 @@ pixels, with identical alpha and unchanged surrounding head art.
 This remains a motion study. The body still mirrors beneath the authored head
 turn, lighting/antenna perspective is imperfect, pixel joints need cleanup,
 and fast-travel entry/landing needs further visual refinement. Native UI
-observation was unavailable, so these are automated Cocoa exports rather than
-a manually exercised UI or live CUA task.
+observation has recovered, and the Studio's size/proportion controls have now
+been exercised through official CUA. These exports still demonstrate the
+Studio renderer, not live cursor replacement.
 
 ## Reproduce
 

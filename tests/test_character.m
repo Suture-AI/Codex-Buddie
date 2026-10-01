@@ -65,7 +65,7 @@ static void ArticulatedPack(NSURL *root) {
             NSUInteger a[4],b[4]; [open getPixel:a atX:x y:y]; [closed getPixel:b atX:x y:y];
             NSCAssert(a[3]==b[3],@"A blink cannot change the head silhouette");
             if(a[0]!=b[0] || a[1]!=b[1] || a[2]!=b[2]) {
-                NSCAssert(x>=18 && x<=45 && y>=24 && y<=31,@"Blink changes remain inside the reviewed screen-eye area");
+                NSCAssert(x>=18 && x<=45 && y>=26 && y<=35,@"Blink changes remain inside the reviewed screen-eye area");
                 changed++;
             }
         }

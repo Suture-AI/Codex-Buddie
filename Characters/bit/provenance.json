@@ -5,10 +5,10 @@
   "verified_model": null,
   "processing": "scripts/build-bit.py: 64px nearest sampling; 16-color palette; reviewed cutout rectangles; pixel blink edits. Walking sheets were rejected and are not used.",
   "source_bounds": [
-    1787,
-    181,
-    2074,
-    501
+    353,
+    210,
+    906,
+    1090
   ],
   "part_rectangles": {
     "head": [
@@ -69,30 +69,30 @@
   "eye_boxes": {
     "head": [
       [
+        39,
         28,
-        26,
-        35,
-        31
+        45,
+        32
       ],
       [
-        39,
-        26,
-        45,
-        30
+        28,
+        28,
+        35,
+        33
       ]
     ],
     "headLeft": [
       [
+        19,
         29,
-        25,
-        36,
-        30
+        26,
+        33
       ],
       [
-        19,
-        25,
-        26,
-        29
+        29,
+        29,
+        36,
+        34
       ]
     ]
   },
@@ -135,8 +135,16 @@
     "source_baseline": 501,
     "target_neck": [
       32,
-      43
-    ]
+      42
+    ],
+    "source_collar_rows": [
+      40,
+      39,
+      39,
+      39,
+      38
+    ],
+    "retained_collar_rows": 1
   },
-  "status": "Original retro-bot motion study with authored head turn; user approval, body turn and final animation polish pending."
+  "status": "User approved Bit's visual direction and requested a shorter neck. One-row collar restores the compact concept; body turn and final animation polish remain pending."
 }

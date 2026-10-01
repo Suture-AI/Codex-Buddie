@@ -27,5 +27,19 @@
     "No native app inventory or cursor replacement was reached.",
     "Detailed IPC rejection reason remains unavailable.",
     "This isolated probe used the pre-refinement renderer from the start of this turn; its purpose was IPC validation."
-  ]
+  ],
+  "probe_with_original_desktop_available": {
+    "status": "blocked",
+    "observed_at_utc": "2026-10-01T03:42:38Z",
+    "scope": "Official CUA initialization and read-only native app inventory; no UI actions or permission approvals.",
+    "startup_grace_seconds": 8.0,
+    "tool_error": false,
+    "nativeAppCount": 0,
+    "errors": [
+      "Error: Sky Computer Use native pipe startup failed"
+    ],
+    "team_not_found_in_log": false,
+    "renderer_loaded": true
+  },
+  "original_runtime_observation": "Official CUA could inspect and operate Character Studio while the isolated development-signed runtime still failed native pipe startup."
 }

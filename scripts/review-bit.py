@@ -43,10 +43,10 @@ def main():
         subprocess.run(["/opt/homebrew/bin/ffmpeg","-y","-loglevel","error","-framerate","60","-i",str(directory/pattern),"-filter_complex","fps=30,split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=none","-loop","0",str(output/name)],check=True)
     paths=[*ROOT.glob("Sources/Buddie*.*"),ROOT/"Sources/Preview.m",ROOT/"scripts/build-bit.py",ROOT/"scripts/review-bit.py",*ROOT.glob("Characters/bit/*.png"),ROOT/"Characters/bit/buddy.json"]
     paths += [output/name for name in ["bit-studio-customization.png","bit-studio-walk.gif","bit-studio-fast-travel.gif"]]
-    report={"status":"Original retro-bot study, responding to the user's supplied Codex pet reference; not final approval or live CUA integration.",
+    report={"status":"User approved Bit's visual direction and requested a shorter neck. Updated one-row collar; animation polish and live CUA integration remain unfinished.",
             "source_fps":60,"gif_fps":30,"slow_frames":420,"fast_frames":240,"proportion_corner_bounds":bounds,
             "checks":["v1/v2/v3 regression tests","Bit portable pixel/turn metadata","Localized blink edits with unchanged alpha","Five authored head directions; reversal retraces the current turn","Independent feet from the motion core; generated walk sheets rejected","Reduced Motion and fixed hotspot","Eight proportion corners fit the review view"],
-            "limitations":["Body still mirrors beneath authored head turns","Pixel joints and fast-travel landing need further visual polish","Native UI observation returned cgWindowNotFound; new controls not manually exercised","Native service IPC and true cursor-size legibility remain unresolved","Image model identifier not exposed by ChatGPT"],
+            "limitations":["Body still mirrors beneath authored head turns","Pixel joints and fast-travel landing need further visual polish","Native service IPC and true cursor-size legibility remain unresolved","Image model identifier not exposed by ChatGPT"],
             "sha256":{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(paths)}}
     (ROOT/"docs/evidence/bit-studio.json").write_text(json.dumps(report,indent=2)+"\n")
     print("Saved Bit's actual Cocoa motion, customization and geometry review.")
