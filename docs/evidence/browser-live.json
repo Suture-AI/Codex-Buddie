@@ -1,0 +1,96 @@
+{
+  "scope": "Installed Brave companion: visible replacement during real official browser actions and page reload; no simulated cursor.",
+  "recorded_at_utc": "2026-10-01T16:20:58.959022+00:00",
+  "tested_source_commit": "3cb4a2786d25bcb1e84ba882b80f0261b63c8acf",
+  "installation": {
+    "approval": "User explicitly approved installation",
+    "performed_by": "User manually loaded the unpacked extension",
+    "agent_installation": "Blocked by browser URL policy; no alternate installation surface used"
+  },
+  "browser": "Brave Browser, Personal profile, official extension provider",
+  "chatgpt_extension_version": "1.26.901.11451",
+  "test_page": "http://127.0.0.1:8765/preview/live.html",
+  "page_draws_cursor": false,
+  "page_loads_buddy_code": false,
+  "input_route": "Official CUA REPL agent.browsers tab.playwright.getByRole(...).click()",
+  "capture_route": "Official CUA native Brave app getScreenshot / getAXStateAndScreenshot",
+  "results": [
+    {
+      "action": "First target",
+      "counter": 1,
+      "visual": "Page screenshot omitted cursor; no visual replacement claim for this capture",
+      "capture": ".build/browser-live/page-capture.jpg"
+    },
+    {
+      "action": "Second target",
+      "counter": 2,
+      "visual": "Bit visible, gray arrow absent",
+      "capture": ".build/browser-live/second-target.jpg"
+    },
+    {
+      "action": "Third target",
+      "counter": 3,
+      "visual": "Bit visible, gray arrow absent",
+      "capture": ".build/browser-live/third-target.jpg"
+    },
+    {
+      "action": "Return to first target",
+      "counter": 4,
+      "visual": "Bit visible at left target, click expression, gray arrow absent",
+      "capture": ".build/browser-live/reverse-target.jpg"
+    },
+    {
+      "action": "Reload page, then second target",
+      "counter": 1,
+      "visual": "Bit reattached and visible, gray arrow absent",
+      "capture": ".build/browser-live/after-reload.jpg"
+    }
+  ],
+  "cross_extension_replacement_verified": true,
+  "page_reload_reconnection_verified": true,
+  "vendor_files_unchanged": true,
+  "prior_fixture_evidence": "docs/evidence/browser-companion.json",
+  "source_sha256": {
+    "browser-extension/manifest.json": "314d4322d37c221105262881e4950eb2d5e24e3752c92cfb7146881bc068b058",
+    "browser-extension/adapter.js": "a72c923f0de96d4aa43c47ff8c389b59a9138b0b9a4088a7780f0609d1f39e99",
+    "browser-extension/content.js": "571a2a960b534a142a94661954dcb92e9d03b9bcc78b8e65a47d218ec3cc1060",
+    "browser-extension/assets/atlas.js": "1e21c6d27161f52e85611a39d79fca2eb7a4276cd19a09e49c23bb1122e18832",
+    "browser-extension/assets/bit-atlas.json": "37c568da750b29950a131cc8993aa2fe88f29899173fa79b27b6792b83c87188",
+    "browser-extension/assets/bit-atlas.png": "fc5ed59e146cdb128d63e27dab77f9a8d0552c1503bc7a54a3ee1c9ac02ea0a3",
+    "browser-extension/preview/live.html": "a3c4c73ea0fced90807154b4fa7c5a8b05b6e152f08e07edd43293f95b0b96ae",
+    "README.md": "633452d0a2e52676b55b72b04654137ce963d0beb5d0d6a8483c36d82a6bbcc5",
+    "browser-extension/README.md": "64289d2fee01890801a3e4ff1826a44f8355b9d6fdcdab61b0d03e4cdd85a199",
+    "docs/browser-companion.md": "8d405d888194fbba0df3587fbabdf53475259aa86bf5fd3117b173f7b8c7543f"
+  },
+  "published_artifacts_sha256": {
+    "docs/media/browser-companion-live.jpg": "7b2dbd9fd4cf8754cbd6673720485ae42d8207cf149402f58d8720d21017190b"
+  },
+  "published_crop": {
+    "source": ".build/browser-live/after-reload.jpg",
+    "x": 310,
+    "y": 420,
+    "width": 2150,
+    "height": 1350,
+    "changes": "Crop and JPEG re-encoding only; no compositing or cursor additions"
+  },
+  "local_input_sha256": {
+    ".build/browser-live/after-reload.jpg": "64a8bd2f2e36387982f365cd665bbe7e56c478ca8854c96d72f0723da90cc2ce",
+    ".build/browser-live/after-reload.txt": "9e877085063aafe03ce314e2cd1e2659bcaddcae98249a4758afb031dfa898fe",
+    ".build/browser-live/page-capture.jpg": "17ffb449713a5d8d62c63afc835cf9de0244cd44b65e807e08971db826d34fad",
+    ".build/browser-live/page-capture.txt": "935bec2690290e5d2dff31b4cd73fdee3c3d6cfe0032c939aaff0c7d44a68620",
+    ".build/browser-live/reverse-target.jpg": "0511ee982de376b1d3f8be73fbd96084d53c51ac2389224eebb6e3d7b6b32056",
+    ".build/browser-live/reverse-target.txt": "22618d20dbaaab1f2b2d90a547cbd45d0f33b8dd8f6b7aba8191c3da256bc1a2",
+    ".build/browser-live/second-target.jpg": "71bd548d1f6d807028b0dc5ac6c0bfe248c18a15620942e3f3e80bc46af4077b",
+    ".build/browser-live/second-target.txt": "dbe3eaa1be406bba007e874f7326d812bf9685ea98624574e044efc53d1ec51c",
+    ".build/browser-live/third-target.jpg": "eba4d4f7e7434782022e9cfc6cb2f29f6eb4bdd4b790a5ad6650b4544183e467",
+    ".build/browser-live/third-target.txt": "d4fa014394a684d09b2d0b24d3dfd2b1ecd060853ea6e419e53f8dd5b4fe7620",
+    ".build/browser-companion/inspected-files.json": "1d496ea24f22c2bc62c3a53e7b8e586431f0acdd3de1abc285a93bc516259544"
+  },
+  "limits": [
+    "Endpoint captures do not measure continuous travel or animation quality.",
+    "No exact hotspot-error, arrival-message-latency or performance measurement.",
+    "Extension disable/uninstall recovery not tested; manager access remains blocked to agent.",
+    "No cross-site, zoom, iframe, other-browser-version or PDF coverage.",
+    "Default Bit only; no Studio settings synchronization."
+  ]
+}

@@ -11,9 +11,12 @@ position and visibility, hides only the arrow image after its own art is ready,
 and renders Bit at the same anchor. It leaves the official movement engine,
 arrival acknowledgement and input dispatch in charge.
 
-**Status:** 12 local browser-fixture checks and 30/60/120 Hz motion checks pass.
-Installation beside the actual ChatGPT extension and real browser-action
-verification are still pending. The native desktop replacement is independent.
+**Status:** Installed and verified alongside ChatGPT in Brave. Five real browser
+clicks passed across three targets and a page reload; Bit replaced the visible
+arrow. The test page itself draws no cursor and loads no buddy scripts. See the
+[live evidence and limits](../docs/browser-companion.md#live-brave-verification).
+The earlier 12 fixture checks and 30/60/120 Hz motion checks also pass. The native
+desktop replacement is independent.
 
 ## Load for a local test
 
@@ -32,8 +35,8 @@ The manifest grants no history, cookies, tab management or native messaging APIs
 Disable/remove the companion to restore the stock artwork. It checks for an
 invalidated extension context once per second and restores the original
 visibility; reloading the tab also clears it. Unknown cursor layouts and failed
-asset loads keep the original visible. Lifecycle behavior still needs real
-extension testing.
+asset loads keep the original visible in fixture checks. Reconnection after a
+page reload passed live; disable/remove recovery still needs live testing.
 
 ## Current limits
 

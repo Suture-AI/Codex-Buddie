@@ -45,13 +45,13 @@ expressions. Pose changes follow observed distance/time. Reduced Motion suppress
 autonomous gait/blinks while retaining direct press feedback. Actual page input
 is never intercepted; the canvas is pointer-transparent and accessibility-hidden.
 
-**Verdict: pass the local compatibility prototype; block live integration
-signoff pending installation and real browser actions.** Twelve fixture checks
+**Initial prototype verdict: passed local compatibility; live integration was
+pending at that stage.** Twelve fixture checks
 passed in Brave through official CUA, including three fractional anchors under
 rotation/stretch, hide/show, unknown artwork, image failure and restoration.
 Motion checks passed at 30/60/120 Hz. The fixture explicitly uses a simulated
 closed-root cursor and is not a test of cross-extension access or real arrival
-timing. Native walking is represented by pose frames rather than the full
+timing. The live test below now verifies the installed replacement. Native walking is represented by pose frames rather than the full
 continuous rig; landing quality, frame costs and live click attribution need
 review after installation.
 
@@ -60,6 +60,37 @@ review after installation.
 The companion currently uses default Bit. It does not yet synchronize Studio
 settings or cover browser chrome, internal pages, embedded browser surfaces,
 PDF viewers or non-Chromium providers. See [installation and scope](../browser-extension/README.md)
-and [the evidence record](evidence/browser-companion.json). Installation in the
-user's Brave profile requires the computer-use tool's action-time confirmation;
-that request has been presented and remains pending.
+and [the initial fixture evidence](evidence/browser-companion.json).
+
+## Live Brave verification
+
+On October 1, 2026, the user approved installation and manually loaded the
+companion into Brave. The computer-use browser policy blocked navigation to the
+extension manager, so the agent did not install it through an alternate surface.
+The companion source remained at commit `3cb4a27` throughout the following test.
+
+Official CUA browser Playwright locator clicks exercised the real ChatGPT
+extension on `preview/live.html`. This page contains only three buttons and a
+click counter: no simulated cursor, imported adapter or buddy artwork.
+
+| Check | Observed result |
+| --- | --- |
+| First, second and third targets | Counter advanced to 1, 2 and 3. Native screenshots at the second and third targets showed Bit and no gray arrow. |
+| Return to the first target | Counter reached 4; Bit appeared at the left target with the click expression. |
+| Reload, then click the second target | Counter reset and reached 1; Bit reattached without reloading either extension. |
+
+![Bit replacing the actual browser agent cursor after a page reload](media/browser-companion-live.jpg)
+
+This is a crop of an official CUA native Brave-window screenshot, preserving the
+page heading, all targets and result counter while excluding browser chrome.
+The initial browser-page screenshot omitted the cursor; native window captures
+provided the visual evidence. No drawing was injected through evaluation, and
+the inspected official extension and browser-service files retain their original
+hashes. See [the live evidence record](evidence/browser-live.json).
+
+**Verdict: pass the installed Brave replacement and page-reload integration.**
+The captures establish visible replacement, successful input and reconnection.
+They do not measure the whole travel animation, frame costs, exact hotspot error,
+arrival-message latency or continuous motion quality. Disable/uninstall recovery,
+other sites and browser versions remain unverified. The extension stays enabled
+for ordinary browser-use sessions; refresh tabs opened before installation.

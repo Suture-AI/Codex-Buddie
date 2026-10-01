@@ -177,9 +177,11 @@ blanket statement that browser DOM actions never show a cursor was incorrect.
 A [companion extension prototype](browser-extension/README.md) now replaces that
 in-page arrow's artwork with Bit while following the existing position and
 visibility. It has 305 poses from the native renderer and passes 12 local browser
-fixture checks. Installation beside the actual ChatGPT extension and real browser
-actions are still pending; this is not yet a live browser-integration claim.
-The current prototype uses default Bit without syncing Studio settings.
+fixture checks. After installation alongside ChatGPT in Brave, five real browser
+clicks verified replacement at three targets, return travel and reconnection
+after a page reload. See the [live result and limits](docs/browser-companion.md#live-brave-verification).
+The current prototype uses default Bit without syncing Studio settings; extension
+disable recovery and animation performance still need live verification.
 
 ## Prepare an isolated native experiment
 
