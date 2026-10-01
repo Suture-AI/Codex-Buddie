@@ -82,8 +82,9 @@ artwork survive relaunch. Imports copy their art once; subsequent edits write
 only a small atomic settings file. Reset uses the original installed design;
 reimport updates it. Regression checks cover controller selection/quit/reset,
 duplicate names, deleted source folders, malformed settings, missing packs and
-failed-write rollback. Live restart verification is still pending because CUA
-currently returns `cgWindowNotFound` for the already running Studio.
+failed-write rollback. At that milestone CUA returned `cgWindowNotFound`;
+subsequent authorized native testing relaunched and observed the Studio.
+A complete persistence restart exercise remains separate.
 See the [source-pinned library checks](evidence/studio-library.json).
 
 The saved Studio appearance now reaches the native renderer through a read-only
@@ -92,8 +93,9 @@ saves update registered cursor views without resetting the same design's running
 motion. Imports, Reduced Motion, invalid-save recovery, first-save folder races,
 rapid changes and teardown pass automated checks. The isolated service loaded
 this bridge, prepared saved artwork, and passed a 33-app official-client inventory.
-This is not yet a recording of live cursor replacement. See
-[the bridge review and evidence](cursor-library.md).
+That initial probe covered startup only. The subsequent authorized native test
+displayed Bit during real clicks after fixing lazy SwiftUI sizing. See
+[the bridge review](cursor-library.md) and [the live integration review](native-layout.md).
 
 Arm length, leg length, boot width and stance are now editable, portable and
 persistent. Body/Limbs/Gait sections organize the controls without obscuring
@@ -150,9 +152,10 @@ The earlier full-pose Pip pack remains compatible. Authored turns, final joint
 quality, production sizing and real interaction events remain open. Native CUA
 UI observation recovered and the Studio's proportion/size controls have been
 exercised directly. The unmodified official client now connects to the development-signed isolated
-service and lists native apps. The current Bit build reached its normal
-app-access prompt; native observation/clicks remain pending. See the
-[connection evidence](development-signing.md). The user's latest
+service and lists native apps. Session-only Lab access was then authorized; native observation, target clicks
+and a slider drag succeeded. Bit visibly replaced the fog cursor. Continuous
+travel and actual click-event reactions remain unresolved. See the
+[native review](native-layout.md) and [connection evidence](development-signing.md). The user's latest
 feedback does not approve Pip as the final character.
 
 The studio also retains three earlier ChatGPT-generated body packs, independent
@@ -161,13 +164,14 @@ live proportions/face/gait controls, and pack import/export. `BuddieMotion.c` is
 plain C; `BuddieCharacter.m` owns pack validation and `BuddieView.m` renders poses.
 Run `bash scripts/test-animation.sh`. Review `docs/media/buddies-walking.gif` and
 [the pack specification](characters.md). These components are independent of the
-unverified live cursor integration and can be reused by a supported integration.
+remaining native path/event integration and can be reused by a supported integration.
 
 The root native renderer substitutes cursor content in a lab and stages an
 isolated service copy. The original official client passed native inventory with
 the development-signed copy; a re-signed client failed sender authentication.
 See [the probe evidence](development-signing.md). Preserve the original service
-and its authentication requirements. Verify real actions after app access.
+and its authentication requirements. Continue from the authorized Lab result: resolve native path/event transfer,
+then test the remaining surfaces and installation lifecycle.
 
 The independent passive experiment under `experiments/passive-overlay/` adds:
 

@@ -41,8 +41,10 @@ cursor views, including views created after the initial load. The renderer also
 continues to respect the system preference.
 
 **Decision: approve this settings bridge within the checked scope; block final
-live-integration signoff.** Native cursor visibility, path transfer, tiny-window
-legibility, input events and screenshot exclusion remain unverified.
+live-integration signoff.** At this review, native cursor visibility, path transfer,
+tiny-window legibility, input events and screenshot exclusion were unverified.
+The later [native layout review](native-layout.md) establishes visibility in
+the authorized Lab session and records the remaining motion gaps.
 
 ## Evidence and reproduction
 
@@ -63,5 +65,6 @@ the original official client and logged `Saved cursor appearance prepared.`
 No app permission was granted and no native UI input was performed. All probe
 processes were stopped afterward. See [the source-pinned result](evidence/cursor-library.json).
 
-The earlier app-access request remains pending. Use the normal official CUA
-permission flow before proceeding to real movement and click testing.
+A later user-authorized session displayed Bit during real native clicks and
+exposed a separate lazy-layout bug, now fixed. See [that scoped review](native-layout.md).
+The evidence above remains the earlier startup/subscription result.

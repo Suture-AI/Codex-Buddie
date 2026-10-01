@@ -5,14 +5,14 @@ A little character **in place of Codex's computer-use cursor**.
 The intended character uses the agent's cursor window and keeps its click
 coordinate; your own mouse stays independent.
 
-**Experimental macOS prototype.** The renderer works in the included lab. A
-modified copy of the native service boots with the renderer library loaded.
-**The official client now connects to a development-signed service copy:**
-a read-only probe listed 33 native apps. Real cursor actions remain unverified;
-the current service also prepares the saved Studio appearance. The native UI
-test reached the normal app-access prompt. This is a renderer
-prototype and research experiment, not a working Codex cursor skin or an official
-plugin. See [the connection evidence](docs/development-signing.md).
+**Experimental macOS prototype.** Bit now replaces the native fog cursor during
+real official CUA actions in an isolated, development-signed service copy.
+The small bot on “Over here” in [this live screenshot](docs/media/native-cursor-live.jpg)
+is the replacement; the larger bot is the Studio preview.
+A SwiftUI sizing fix makes the replacement visible. Observation, target clicks
+and a slider drag worked in the authorized Lab test session. Smooth native travel,
+click reactions and an installer remain unfinished. This is an independent
+research experiment, not an official plugin. See [the native review](docs/native-layout.md).
 
 The intended experience is a buddy that **walks along the agent's curved cursor
 path**, stops at the exact hotspot, and animates the click, with no gray arrow or
@@ -102,7 +102,8 @@ The isolated native renderer now reads the same saved selection, colors,
 anatomy and Reduced Motion preference. It updates after Studio saves without
 restarting the service. Imported packs work through the same library; malformed
 saves keep the last good appearance. This bridge has automated renderer checks
-and an isolated service startup check; live cursor actions are still pending.
+and an isolated service startup check. A later native test displayed Bit and
+exercised a saved size edit; see [the live review](docs/native-layout.md).
 See [saved cursor settings](docs/cursor-library.md).
 
 **Native size** compares the small software-cursor layout with the enlarged
@@ -138,7 +139,8 @@ interfaces inspected. This experiment depends on private implementation details.
 our isolated service copy for a successful inventory probe with the unmodified
 official client. Re-signing the client failed authentication. Ad-hoc signing also
 failed. See [the working reproduction](docs/development-signing.md).
-Live cursor rendering and app permissions are still unverified.
+Native fog rendering and Lab app access passed the scoped test described in
+[the native review](docs/native-layout.md); other environments remain unverified.
 
 **Apple Silicon only.** Gated to the inspected service builds `26.913.1001067`
 and `26.924.1001281`, with exact executable SHA-256 entries in
@@ -205,11 +207,13 @@ all generated copies are under `.build/`.
 | Load library inside copied native service; private socket starts | Passed |
 | Initialise official REPL through generated launcher | Passed |
 | Native app inventory through the modified service | **Passed: 33 apps, original official client** |
-| Prepare saved Studio appearance in the modified service | Passed; live cursor display still unverified |
+| Prepare saved Studio appearance in the modified service | Passed; Bit displayed during real native input |
 | Saved settings/imports reach registered cursor views | Passed in automated Cocoa checks |
-| Observe Studio through the current Bit service | **App-access prompt reached; pending** |
-| Character replaces cursor during real native CUA actions | **Not reached** |
-| Native hotspot accuracy, drag, multiple monitors, cancellation | **Not verified** |
+| Observe Studio through the current Bit service | Passed with explicit session-only app authorization |
+| Character replaces cursor during real native CUA actions | **Passed for the fog style in the Lab** |
+| Lazy SwiftUI cursor layout | Passed: real zero-frame hosting view resolves to 126 × 126 |
+| Native slider drag | Reached slider; changed size and restored it to 64 |
+| Smooth native path, click reactions, exact hotspot accuracy, multiple monitors, cancellation | **Not verified** |
 
 Run checks with:
 
@@ -219,6 +223,7 @@ bash scripts/test-animation.sh
 bash scripts/test-cursor-library.sh
 ./scripts/build.sh
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --self-test
+bash scripts/test-native-layout.sh
 ```
 
 Animation checks cover frame-rate-independent gait, planted contact, the fixed
@@ -232,9 +237,8 @@ See [the animation validation notes](docs/animation-validation.md).
 
 ## Next milestone
 
-Complete the normal app-access flow, then verify real native CUA actions,
-actual cursor view assignment, hotspot
-placement, dragging, multiple displays, and teardown. Only after those checks
+Resolve continuous native travel and click-event animation, then verify exact
+hotspot placement, both cursor styles, multiple displays, cancellation and teardown. Only after those checks
 should this become an installer for non-developers. Windows and Linux are not implemented.
 
 ## References

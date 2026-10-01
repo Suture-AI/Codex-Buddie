@@ -1,0 +1,180 @@
+{
+  "scope": "Native fog-cursor visibility in user-authorized Lab session; not complete native motion or distribution validation.",
+  "recorded_at_utc": "2026-10-01T15:15:28.265334+00:00",
+  "base_commit": "b2c6df622f3458f216312479b2b24dda52ca7940",
+  "authorization": {
+    "source": "User: Allow for this test session",
+    "app": "ai.suture.codex-buddie.preview",
+    "persistence": "session",
+    "permanent_grant": false,
+    "official_form_elicitation": true
+  },
+  "runtime": {
+    "service_version": "26.924.1001281",
+    "original_service_sha256": "d4b1775138342c0df8e9451df3c23dda3fdef44c4ade50a2de382c188cf61b54",
+    "original_strict_deep_signature": "pass",
+    "original_client_files_unchanged": 7,
+    "installed_files_or_policy_modified": false
+  },
+  "checks": {
+    "build": "pass, no compiler warnings",
+    "real_swiftui_layout": "pass: lazy zero-frame NSHostingView -> 126x126; detached original, center hotspot, positive drawingScale",
+    "Cocoa_self_test": "pass: existing renderer, anatomy, rig, motion, artwork and Studio tests",
+    "final_diagnostics_disabled": true,
+    "native_slider_after_drag": 52.88421052631579,
+    "native_slider_restored": 64,
+    "final_real_click_screenshot": "docs/media/native-cursor-live.jpg",
+    "final_signed_dylib_sections_match_built_dylib": 32
+  },
+  "runs": {
+    "native-live": {
+      "samples": 480,
+      "pngs": 0,
+      "frame_tree_sha256": "9132bfd95dd43dedc95b6ca0be8e36bab45d3a2ad17240f15fb789ae4c13153b",
+      "sizes": [
+        [
+          0,
+          0
+        ]
+      ],
+      "unique_anchors": 1,
+      "max_walk_weight": 0,
+      "all_content_is_buddie": true,
+      "scope": "Failure before layout resolution: zero window and no PNGs."
+    },
+    "native-layout": {
+      "samples": 5,
+      "pngs": 5,
+      "frame_tree_sha256": "20d704f464245fc8a064abd94419f4aa98de4573f99e1133d7e239af2ac17924",
+      "sizes": [
+        [
+          126,
+          126
+        ]
+      ],
+      "unique_anchors": 1,
+      "max_walk_weight": 0,
+      "all_content_is_buddie": true,
+      "scope": "Diagnostic intrinsic/fitting queries forced native layout; first visible own-view capture."
+    },
+    "native-sized": {
+      "samples": 114,
+      "pngs": 114,
+      "frame_tree_sha256": "acabbec6d47cd2b06d08db9ad668d12193a3f80c34be6949b07be4ec084b8d51",
+      "sizes": [
+        [
+          126,
+          126
+        ]
+      ],
+      "unique_anchors": 5,
+      "max_walk_weight": 0.7507431847028946,
+      "all_content_is_buddie": true,
+      "scope": "Explicit intrinsic/layout resolution, diagnostics no longer query intrinsic/fitting sizes; three native clicks, slider drag and restore."
+    },
+    "native-layout-fixed": {
+      "samples": 0,
+      "pngs": 0,
+      "frame_tree_sha256": null,
+      "sizes": [],
+      "unique_anchors": 0,
+      "max_walk_weight": null,
+      "all_content_is_buddie": null,
+      "scope": "Final intrinsic AND fitting resolution; real SwiftUI regression passed; native click screenshot with diagnostics disabled."
+    }
+  },
+  "frame_tree_hash_format": "SHA-256 of sorted filename + TAB + file SHA-256 + LF; includes JSON and PNG files.",
+  "source_sha256": {
+    "Sources/BuddieCharacter.h": "4653097452f2966a832d90c53dbac5b41d9338fee0dd2009292b42ef06923b68",
+    "Sources/BuddieCharacter.m": "7b351cfe6d035a6ca659fc6527edbfa758fe54dba00f1f0bfc82c67feaec1eb1",
+    "Sources/BuddieCursorLibrary.h": "cf0496e4e70f7e35efeaef88be44bde84767f483eaffcc942d79d4f6b4e4ad43",
+    "Sources/BuddieCursorLibrary.m": "f471e364502285092b0d61f506c81ee8ec3962005eb00239b048690f9dec957c",
+    "Sources/BuddieDiagnostics.h": "6db971b5ea94d7a47cc251531ac3d31c4ca5e2150c610213014b5cad797924c9",
+    "Sources/BuddieDiagnostics.m": "940802ccfad7e4b6c15d2ed204520a40284e517e5ba78065d4cb776395839d1a",
+    "Sources/BuddieLibrary.h": "2604a4aa65bab3f4bfc058a2a06d4d91a08584756af2d91e735a2025b9f4e6c4",
+    "Sources/BuddieLibrary.m": "fe022ac9a4064bb36ae297c17e1ace8dd2de1b91c5ada0e4dc1d25f37d620ca4",
+    "Sources/BuddieMotion.c": "c7cf84d642960df7b3a5dda50970c502028227fab71b6d1d9a30cd30bc694506",
+    "Sources/BuddieMotion.h": "054f3f1d091cfce9625d4462fbc4fd8598462c9caa7d980598401bd6cc0950d7",
+    "Sources/BuddiePuppet.h": "0f2218442b267e6e61e94c5b26fa777985241e62dcafe7036c5902ae62b157ac",
+    "Sources/BuddiePuppet.m": "49fd12c02236e80c3aa5358ec6b88b5ade3a4eafeb68b4bdebe74defa542af6c",
+    "Sources/BuddieView.h": "16f58da4c22aa9641ed224f68ad6723bd678505428e37e3c3092f4739e65efb9",
+    "Sources/BuddieView.m": "511d7ede30964866123e53fa7886b1211e180756216c3b20845a70af4c005705",
+    "Sources/Inject.m": "d49fd61f23c2d5e52196c7d6bc5990ec0a8cca944251918a566902687b99199f",
+    "Sources/Preview.m": "05454a9f359bd7ff4872480c3a90693d65e6d9e96f3c9e02865156dcf9ee96d0",
+    "scripts/build.sh": "c5e9fa01cf219bcf1f343c7ba03a9f06997d7e5132c95a2ef81beaa7e951b25d",
+    "scripts/test-native-layout.sh": "6d4d97cb0b473973919dc6dc21977318f94d573ff77d1ab58cf7e2ae3b5d7ac0",
+    "tests/test_native_layout.swift": "acb52814db888baae6fe8dd1e46660ab9a78d8efd758985fea4cb81419f36856"
+  },
+  "local_input_sha256": {
+    ".build/native-live/session.json": "6abbf7319dc8a9a6b2c4aa8b131ca8e7912f97c7cea78cb17139d4559c8e81ad",
+    ".build/native-live/session.log": "b1d748ddaaed5e316558d8b82f0dd441e25cc86f5c8d551d59d6542471432e41",
+    ".build/native-live/session.py": "2d02c150da5a2b72e01899db574041ac101082f0e67f623174c3040dd35c5cb4",
+    ".build/native-live/preparation.json": "956112d4f658611d2ab648ffe9656927bc1c6aba777c0db0031bb1ec8c94c510",
+    ".build/native-live/Codex Buddie Runtime.app/Contents/Frameworks/libBuddie.dylib": "15f995cacbb0b45488cb7737761f1b1bda697d05ffe69860e6980e3467ac757f",
+    ".build/native-live/capture-3-1.jpg": "1455cb4e9706c83d6a23dff763e7306e3b73a37621b2f3d79066c8bed29632ca",
+    ".build/native-layout/session.json": "108f658c0d380d8600914c6216db5a9d9d70faff723c37e66c2aa12a9c549986",
+    ".build/native-layout/session.log": "1ea22002f290e08dfffa44a965513fb1977c9d7910cfe9b785ab5e4d48bd06d8",
+    ".build/native-layout/session.py": "2d02c150da5a2b72e01899db574041ac101082f0e67f623174c3040dd35c5cb4",
+    ".build/native-layout/preparation.json": "3a85e7305f9222ef6e3caac9c29627ed6cd794e1c7a32012454656157990710a",
+    ".build/native-layout/Codex Buddie Runtime.app/Contents/Frameworks/libBuddie.dylib": "88fc5c0a92aac6b3a8b7129933b8b19e84a970dee6b43b20b97c6e1ae88859bf",
+    ".build/native-sized/session.json": "d1531dd84562ccb1aafb45bf3d860b955c9a187ccf3f197094bb65cc3af913ce",
+    ".build/native-sized/session.log": "d421b18e54957e53340c2766c552b1ac08990fe59e161764df9583d0164d73d8",
+    ".build/native-sized/session.py": "2d02c150da5a2b72e01899db574041ac101082f0e67f623174c3040dd35c5cb4",
+    ".build/native-sized/preparation.json": "f9982f5505a89a2aa2915a104add0f1146ace7e17b54361ba29a574e2e627c63",
+    ".build/native-sized/Codex Buddie Runtime.app/Contents/Frameworks/libBuddie.dylib": "addae32c84dde6ec4e01d9ae76fb61cb0ffb32275a34ead76fdd7eaae29d4553",
+    ".build/native-sized/capture-4-1.jpg": "f8af32523a61a992acc8b7f5aadb7a9ee10c66627605b3021dda20bf6493c0d9",
+    ".build/native-sized/capture-8-1.jpg": "f4a6e22028b41321e3d6be72485ec00dd47c90e53bc5518e4f555884b79404ea",
+    ".build/native-layout-fixed/session.json": "1498259a82ad035aa9b66bfbebf42f54b9c494cf8200f552a88db9d42f70379f",
+    ".build/native-layout-fixed/session.log": "544f22f9186d11ac243b387f533bd2ade31976caeafa3007017ff7405704d454",
+    ".build/native-layout-fixed/session.py": "089e74161e4dc599735c6777ad853ea667a382daf7a692771cfb75dee23a0038",
+    ".build/native-layout-fixed/preparation.json": "6a60b2ac754f10d7f84e06c0ff8530cfe61bb4e7b717ecadd1041d07f29f095c",
+    ".build/native-layout-fixed/Codex Buddie Runtime.app/Contents/Frameworks/libBuddie.dylib": "3381adafc22e593517d9f0b73610f160421156964f150446c7cd0a59eca0919e",
+    ".build/native-layout-fixed/capture-2-1.jpg": "48484dbed099b1e878729ecbe00a005c68b7276c6294539c416489c8ea7f49fd"
+  },
+  "published_sha256": {
+    "docs/media/native-cursor-live.jpg": "48484dbed099b1e878729ecbe00a005c68b7276c6294539c416489c8ea7f49fd"
+  },
+  "limits": [
+    "The native screenshot contains the replacement: cursor exclusion is not established for this path.",
+    "Sampled clicks jumped between endpoints; continuous curved travel not established.",
+    "The drag triggered a short gait response, not a complete movement quality signoff.",
+    "Native button events do not yet drive press/release reactions.",
+    "No exact hotspot error measurement, real software-style result, all-transition no-gray proof, multi-monitor/cancellation/performance/distribution certification.",
+    "Diagnostic capture caches own-view bitmaps and adds overhead; not a performance benchmark.",
+    "Raw local transcripts and vendor service copies are not published. All isolated test processes were stopped."
+  ],
+  "final_dylib_section_sha256": {
+    "__TEXT,__text": "d97a91319e48b8c80ffa7b5a29917d9527b85a602e43bd692d4ecb4d1bb6d55c",
+    "__TEXT,__stubs": "53d15acd65bbfa0696ea47682e816d7e71a4a80bc573d44a71df9d3f51e9309c",
+    "__TEXT,__objc_stubs": "4de3cf4527741c61bda4840fc319fef90b8a4b2455c922605ceafbff258e2317",
+    "__TEXT,__init_offsets": "dbaa42a336579af55196f6fab09e1254f5d30c239527f832ad0abde4076c9733",
+    "__TEXT,__objc_methlist": "4028ed21d6c3680947b737ef7ddd990ca8199064c36536f326c671f80a45fa4c",
+    "__TEXT,__gcc_except_tab": "ec2bfc4088edd884ec44f42e83e7410ea7b2f01de2afb12953dc2a3271615d26",
+    "__TEXT,__objc_methname": "567b0405c093ec5e5437a7698435a082b08967fb1fcfd6ce1c53526e3ca8e9a7",
+    "__TEXT,__cstring": "e32914ba8483d7690ea53bb0c302e72b84cc0a8845766504762a048d80994567",
+    "__TEXT,__objc_classname": "9e11c5cb4700d25fac9bd8ba183d51e776e574e4e25e03df084bd7141daf8251",
+    "__TEXT,__objc_methtype": "d8575156fef6d4ce108e47d2c2de4bbe0d18ac88d95b0b6048d43b59885dae6b",
+    "__TEXT,__const": "eeb211a7b1ed0c4fa1c13987c14af4a696165df407ba66af9080d4d36642514b",
+    "__TEXT,__ustring": "26452416bcc21d5b51a8ee4041560ecf3b965ca3c4c5c231cc766d47798cf52f",
+    "__TEXT,__unwind_info": "1207567ba5362d54f851da8db1ba3fb61483717922a58fed52038da8a5a45ae7",
+    "__DATA_CONST,__got": "c6801c9262da8ac473a4cd5bc6edaf511e613c7e619f736a038d4424bf421508",
+    "__DATA_CONST,__const": "762505ff155423b685677dee68acc8bbcd66d42c18719fb36c756b673f6fc14c",
+    "__DATA_CONST,__cfstring": "22686300e85d198ee79b16af2631af458c34979fe6456377f5942bf11364d1b8",
+    "__DATA_CONST,__objc_classlist": "5761baa239e04c81b0fab5a56c518115c59f37da8bf900c7184f00ec2b5d6fda",
+    "__DATA_CONST,__objc_catlist": "280b32cfef1216d5004d971fd728e7cf0f7a94f54ecd2fc49390adf63ede5526",
+    "__DATA_CONST,__objc_protolist": "41eea17a021a65969f8612d549cd2db5b15395b99cd032b5f6d25da7857f8ab0",
+    "__DATA_CONST,__objc_imageinfo": "94039884329d3732c577860f40d0dfdf883ff89dac332f87216e692c08892fa2",
+    "__DATA_CONST,__objc_arraydata": "ab98ac4db5709f4083c2c5479306ac887ada3f13947518eb5800768d6dc5fc33",
+    "__DATA_CONST,__objc_arrayobj": "90633ee1a8dbb3e71b1b6341a3b31b13aeb4bc4dee5e5c2950d718d2015152b0",
+    "__DATA_CONST,__objc_doubleobj": "4a44703c464616338bac52d88d8e1e4e2c4464a5aba72e44af486a46727de84c",
+    "__DATA_CONST,__objc_dictobj": "ccd00af2baceff3a3a16dce57dfd0215b1af6f28f3699539016b0ebd5f3a723e",
+    "__DATA_CONST,__objc_intobj": "1b4a5cc1245dd26b9911d43cd1a8fb6c9225dc63dee272aa900e004e551f27cc",
+    "__DATA,__objc_const": "a375daff95132ba85de8671efdd72b69290181127dfbf47785409128025dfdbd",
+    "__DATA,__objc_selrefs": "99ff9565bbbc7b255f590e4d12c607264e672f11e728bf47e8e652c1829b655c",
+    "__DATA,__objc_classrefs": "23e271acd4d346b826acb905e9f9cec2928f885c114fdc08c6f5a72cc82e72b2",
+    "__DATA,__objc_superrefs": "6b277afb7c0df395c489f367167d6fc1204e27ef43d83ab041bceb8bbfd59857",
+    "__DATA,__objc_ivar": "8eddc3d49eecd159259355cbdb407e7410d87ba73e34e81084648acf0c725ab8",
+    "__DATA,__objc_data": "eca25254489bbcac9c22f797a57ebcd166f997bca2d7d25c101e5870192aea4e",
+    "__DATA,__data": "b557c810e4fa08d86ddd836425343d74d3f3f7cb965d4dd33a49de2d21b16f65"
+  }
+}

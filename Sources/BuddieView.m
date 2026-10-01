@@ -1,6 +1,7 @@
 #import "BuddieView.h"
 #import "BuddiePuppet.h"
 #import "BuddieCursorLibrary.h"
+#import "BuddieDiagnostics.h"
 #import <objc/runtime.h>
 
 static void Oval(NSRect r, NSColor *c) { [c setFill]; [[NSBezierPath bezierPathWithOvalInRect:r] fill]; }
@@ -54,6 +55,7 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
         NSPoint anchor=[s.window convertPointToScreen:[s convertPoint:s.hotspot toView:nil]];
         CGFloat scale=s.drawingScale;
         if(scale>0) [s animateAtTime:NSProcessInfo.processInfo.systemUptime anchor:(BuddiePoint){anchor.x/scale,-anchor.y/scale}];
+        BuddieCaptureCursor(s);
     }];
     [NSRunLoop.mainRunLoop addTimer:self.animationTimer forMode:NSRunLoopCommonModes];
 }
@@ -225,8 +227,21 @@ BOOL BuddieReplaceContent(NSWindow *window, NSView *original) {
         fprintf(stderr, "[Buddie] Unsupported cursor content; leaving original renderer intact.\n");
         return NO;
     }
+    // NSHostingView starts at zero until SwiftUI resolves its intrinsic size.
+    // Resolve it while still attached: detaching first strands the native
+    // window at 0 x 0. Let the original host establish its own dimensions.
+    if (fog) {
+        (void)original.intrinsicContentSize;
+        (void)original.fittingSize;
+        [original layoutSubtreeIfNeeded];
+    }
+    if (NSWidth(original.frame)<=0 || NSHeight(original.frame)<=0) {
+        fprintf(stderr,"[Buddie] Cursor layout is not ready; keeping native content.\n");
+        return NO; // The orderWindow hook can retry after layout completes.
+    }
     BuddieView *replacement = [[BuddieView alloc] initWithFrame:original.frame];
     replacement.softwareStyle = software;
+    replacement.nativeLayoutSource = original;
     BuddieAttachNativeLibrary(replacement);
     replacement.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
     [replacement setAccessibilityElement:NO];

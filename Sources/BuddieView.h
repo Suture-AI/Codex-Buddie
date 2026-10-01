@@ -9,6 +9,7 @@
 @property(nonatomic) BOOL manualAnimation;
 @property BOOL reduceMotion;
 @property CGFloat characterScale;
+@property(weak) NSView *nativeLayoutSource;
 @property(readonly) NSPoint hotspot;
 @property(readonly) CGFloat drawingScale;
 // Read-only geometry for renderer diagnostics, in motion units.

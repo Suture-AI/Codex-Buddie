@@ -5,11 +5,12 @@ It listed 33 native apps with the Buddie renderer loaded. The earlier experiment
 that re-signed both client and service failed: scoped macOS logs now identify
 `Sender process is not authenticated` as its rejection.
 
-This clears the connection blocker for the tested combination. It does not yet
-prove cursor replacement during a real task. A fresh copy containing the current
-Bit renderer reached the official app-access prompt for Codex Buddie Lab; native
-observation and clicks remain pending that prompt. See
-[the new evidence](evidence/native-ipc.json).
+The user subsequently granted session-only Lab access. Real native observation,
+clicks and a slider drag succeeded through the unchanged official client. Bit's
+replacement initially stayed invisible because SwiftUI had not resolved the
+original view's size. The layout fix, live screenshot and limits are documented
+in [the native review](native-layout.md). [The earlier IPC evidence](evidence/native-ipc.json)
+remains a record of the original inventory/prompt milestone.
 
 A follow-up at `2026-10-01T05:59:43Z` also passed the 33-app probe with the
 Studio-library subscription included. Its log confirms the saved appearance was
@@ -76,4 +77,4 @@ Do not synthesize approval or infer an app permission from inventory success.
 
 No installed OpenAI files, authentication checks, MCP configuration, TCC database
 or system security settings are edited. Normal macOS permissions may still be
-needed for the isolated service; this experiment has not tested that stage.
+needed on another machine. The authorized Lab session worked on this host.
