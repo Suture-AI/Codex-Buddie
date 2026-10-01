@@ -50,13 +50,13 @@ def prepare(service, destination, signing_identity="-"):
     frameworks = destination / "Contents/Frameworks"
     frameworks.mkdir(exist_ok=True)
     shutil.copy2(library, frameworks / "libBuddie.dylib")
-    # Keep our complete-pose artwork with the shim in the isolated copy.
+    # Keep our character packs with the shim in the isolated copy.
     characters=ROOT / "Characters"
     if characters.is_dir():
         shutil.copytree(characters, destination / "Contents/Resources/BuddieCharacters")
     # The isolated copy never claims OpenAI's identity, app groups or grants.
-    # A development signature allows testing the existing same-team IPC rule
-    # with an equally signed local client; it does not remove that rule.
+    # Keep authentication intact. The unmodified official client connected to
+    # a development-signed copy in our local probe; re-signing the client failed.
     options="0" if signing_identity=="-" else "runtime"
     if signing_identity!="-":
         subprocess.run(["codesign", "--force", "--sign", signing_identity, "--options", options, "--timestamp=none", str(frameworks / "libBuddie.dylib")], check=True)
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     p = sub.add_parser("prepare")
     p.add_argument("--service", required=True, type=Path)
     p.add_argument("--destination", type=Path, default=ROOT / ".build/native/Codex Buddie Runtime.app")
-    p.add_argument("--signing-identity", default="-", help="Optional local development identity; requires a client signed by the same team. Default: ad-hoc.")
+    p.add_argument("--signing-identity", default="-", help="Optional existing local development identity. Use the unmodified official client. Default: ad-hoc (native IPC not verified).")
     p = sub.add_parser("launcher")
     p.add_argument("--runtime", required=True, type=Path)
     p.add_argument("--service", type=Path, default=ROOT / ".build/native/Codex Buddie Runtime.app")

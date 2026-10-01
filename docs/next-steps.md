@@ -140,9 +140,10 @@ and [validation evidence](evidence/articulated-studio.json).
 The earlier full-pose Pip pack remains compatible. Authored turns, final joint
 quality, production sizing and real interaction events remain open. Native CUA
 UI observation recovered and the Studio's proportion/size controls have been
-exercised directly. An isolated development-signed runtime still returns
-`Sky Computer Use native pipe startup failed` while the original CUA runtime
-can observe and control the Studio; see the development-signing evidence. The user's latest
+exercised directly. The unmodified official client now connects to the development-signed isolated
+service and lists native apps. The current Bit build reached its normal
+app-access prompt; native observation/clicks remain pending. See the
+[connection evidence](development-signing.md). The user's latest
 feedback does not approve Pip as the final character.
 
 The studio also retains three earlier ChatGPT-generated body packs, independent
@@ -151,9 +152,13 @@ live proportions/face/gait controls, and pack import/export. `BuddieMotion.c` is
 plain C; `BuddieCharacter.m` owns pack validation and `BuddieView.m` renders poses.
 Run `bash scripts/test-animation.sh`. Review `docs/media/buddies-walking.gif` and
 [the pack specification](characters.md). These components are independent of the
-blocked live service connection and can be reused by a supported integration.
+unverified live cursor integration and can be reused by a supported integration.
 
-The repository root contains the native renderer experiment already pushed by a collaborator: it substitutes the cursor content view in a lab and stages an isolated service copy. Its documented live blocker is `SkyIPCRequirement.Error.teamNotFound` during native IPC signing validation. A matching-team Apple development signature was also tested; native inventory still fails. See [the probe evidence](development-signing.md). Preserve the original service and its authentication requirements.
+The root native renderer substitutes cursor content in a lab and stages an
+isolated service copy. The original official client passed native inventory with
+the development-signed copy; a re-signed client failed sender authentication.
+See [the probe evidence](development-signing.md). Preserve the original service
+and its authentication requirements. Verify real actions after app access.
 
 The independent passive experiment under `experiments/passive-overlay/` adds:
 

@@ -1,0 +1,84 @@
+{
+  "scope": "Native IPC inventory and app-access boundary; not a live cursor replacement test.",
+  "service_version": "26.924.1001281",
+  "source_sha256": "d4b1775138342c0df8e9451df3c23dda3fdef44c4ade50a2de382c188cf61b54",
+  "original_service_unchanged": true,
+  "original_service_signature_verified": true,
+  "official_runtime_files_unchanged": {
+    "bin/node": "585821f92da83ee4ac9eb5557fee03ce286130b61d93efbcc9ca0de2cb1a9e77",
+    "bin/node_repl": "1d3a0c09f8ec0ef3a5346b48c3b2b869a42a546337ffba3782f537b479f96d6d",
+    "lib/node_modules/@img/sharp-darwin-arm64/lib/sharp-darwin-arm64-0.35.4.node": "2e4e5ddbe951d3a10220d875be806f069258540d73c6744a37a5c6573037027e",
+    "lib/node_modules/@oai/cua/dist/lib/js/oai_js_browser/dist/skill/node_modules/classic-level/prebuilds/darwin-x64+arm64/classic-level.node": "255081c27422885b6e642f1dbcf2d674b39df1c19dd5ed3fa0c38ba49af0c723",
+    "lib/node_modules/classic-level/prebuilds/darwin-x64+arm64/classic-level.node": "b02707b91e22748613140dff41cdee170d34c2159cd91f2ac34cd764bc71edac",
+    "lib/node_modules/fsevents/fsevents.node": "40136f0efba828d7fc39da1cf723665e208e3eb2909a23cf69922176cc2635dd",
+    "lib/node_modules/@img/sharp-libvips-darwin-arm64/lib/libvips-cpp.8.18.6.dylib": "5cd3e84180a8217cf513abeec7eb65a356e9ccc73fa2d0d3ff2d2e59de11ba32"
+  },
+  "authentication_code_changes": false,
+  "macos_permission_changes": false,
+  "paired_inventory_probes": {
+    "same_service_copy": true,
+    "same_embedded_renderer": true,
+    "resigned_client": {
+      "status": "blocked",
+      "observed_at_utc": "2026-10-01T05:40:59Z",
+      "scope": "Official CUA initialization and read-only native app inventory; no UI actions or permission approvals.",
+      "startup_grace_seconds": 2.0,
+      "tool_error": false,
+      "nativeAppCount": 0,
+      "errors": [
+        "Error: Sky Computer Use native pipe startup failed"
+      ],
+      "team_not_found_in_log": false,
+      "renderer_loaded": true
+    },
+    "original_official_client": {
+      "status": "pass",
+      "observed_at_utc": "2026-10-01T05:42:05Z",
+      "scope": "Official CUA initialization and read-only native app inventory; no UI actions or permission approvals.",
+      "startup_grace_seconds": 2.0,
+      "tool_error": false,
+      "nativeAppCount": 33,
+      "errors": [],
+      "team_not_found_in_log": false,
+      "renderer_loaded": true
+    },
+    "sender_authentication_rejections": {
+      "probe-diagnostic": 42,
+      "probe-official-client": 0
+    },
+    "renderer_sha256": "881c4a36d10aeb5d39383c8077f92c4431cef172a309d27daa57583bb221349b"
+  },
+  "current_bit_copy": {
+    "signature_verified": true,
+    "default_character": "bit",
+    "renderer_sha256": "42b426c5cb07aa8019f95c116252ea1dfc09f537084981deb7fb5de0a0439ace",
+    "state": "official app-access prompt reached; pending user response",
+    "app_bundle_id": "ai.suture.codex-buddie.preview",
+    "prompt": "Allow Computer Use to use \"Codex Buddie Lab\"?",
+    "native_ui_actions": 0
+  },
+  "validation": [
+    "Build passed",
+    "9 Python preparation/Mach-O checks passed",
+    "Cocoa --self-test passed, including Bit default and full existing rig/integration harness checks"
+  ],
+  "limits": [
+    "Successful inventory does not prove app observation, input permissions, native cursor replacement or hotspot geometry.",
+    "No real cursor movement, click, screenshot exclusion, native motion transfer, multi-display or release-install validation.",
+    "The passing inventory used the earlier renderer. The current Bit copy separately reached app authorization.",
+    "Results apply only to the inspected local service/runtime combination."
+  ],
+  "input_sha256": {
+    "scripts/prepare.py": "126cd24f46c9e71b9db83ddaa15b372143120637c9812ee307240d0b6d26f6b0",
+    "scripts/probe-native.py": "65719015334a4371d772e8455189a1c714c8a93aa5e064ec0aae1aad22d1b1db",
+    "Sources/BuddieCharacter.m": "fd4839a5601e8baed3e90c694a03b58c5dc4bc189581ea1138b46c28af1a59cf",
+    "Sources/Preview.m": "05454a9f359bd7ff4872480c3a90693d65e6d9e96f3c9e02865156dcf9ee96d0",
+    "Characters/bit/buddy.json": "1d892420aa520d4a9c561dd9c992b39661b132d81d923779a6a3c9557355b92e",
+    ".build/native-development/probe-diagnostic.json": "a88f6864a72fe4efcef82b3b5459aec353d6341c0b9e6c6bd2d18bc57c1c6fe8",
+    ".build/native-development/probe-diagnostic.redacted.json": "49d5d8de408807f61020621eac923001956f143823b1923356e6d144446a6f19",
+    ".build/native-development/probe-official-client.json": "0d3a763e197d0de74436f15427860b39bdc2c71f42aa89a0a263b9c693f8e76c",
+    ".build/native-development/probe-official-client.redacted.json": "93c80ce8689b6dcddc7c5384f63ffe874c4c2aa56cd88d332b22502d75827625",
+    ".build/native-current/preparation.json": "94aa39b21fa6570b2a4d90082474b5391427f178fad571d4bc62e4e63bfd9f51",
+    ".build/native-current/Codex Buddie Runtime.app/Contents/Frameworks/libBuddie.dylib": "42b426c5cb07aa8019f95c116252ea1dfc09f537084981deb7fb5de0a0439ace"
+  }
+}

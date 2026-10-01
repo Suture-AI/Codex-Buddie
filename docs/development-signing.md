@@ -1,72 +1,74 @@
-# Matching-team native IPC experiment
+# Native IPC signing experiments
 
-The ad-hoc service copy had reported `SkyIPCRequirement.Error.teamNotFound`.
-Read-only inspection found `SkyIPCRequirement.isFromSameTeam`, and this Mac had
-an existing Apple Development identity. This justified testing properly signed
-isolated copies without changing authentication code or macOS permissions.
+**The unmodified official client connected to the development-signed service copy.**
+It listed 33 native apps with the Buddie renderer loaded. The earlier experiment
+that re-signed both client and service failed: scoped macOS logs now identify
+`Sender process is not authenticated` as its rejection.
 
-## Result
+This clears the connection blocker for the tested combination. It does not yet
+prove cursor replacement during a real task. A fresh copy containing the current
+Bit renderer reached the official app-access prompt for Codex Buddie Lab; native
+observation and clicks remain pending that prompt. See
+[the new evidence](evidence/native-ipc.json).
 
-**Still blocked.** The copied service boots and loads the Buddie dylib. MCP
-initialization succeeds. Service, Node and node_repl signatures have the same
-nonempty team identifier. The official CUA native app inventory nevertheless
-returns zero apps with `Sky Computer Use native pipe startup failed`.
+## What changed
 
-Repeating with eight seconds of startup grace did not resolve it. The captured
-stderr no longer contains `teamNotFound`, but that absence does not prove an
-authentication check passed. The precise connection rejection remains unknown.
-No native cursor replacement, permissions, app observations or clicks were reached.
-See [the redacted evidence](evidence/development-signing.json).
+Both inventory probes used the same isolated service copy, development signature,
+renderer and two-second startup grace. Only the client runtime changed:
 
-A later probe at `2026-10-01T03:42:38Z` returned the same startup error after
-native observation recovered in the original CUA runtime. That original runtime
-could inspect and operate the Studio while the isolated copy still listed zero
-native apps. This separates the copied runtime's connection failure from the
-earlier general desktop-observation outage; it does not identify the precise
-IPC rejection or test the newest Bit artwork in the native service.
+| Client | Native inventory | Authentication diagnostics |
+| --- | --- | --- |
+| Copied and re-signed Node/node_repl | Failed, zero apps | 42 sender-authentication rejection events |
+| Unmodified official Node/node_repl | Passed, 33 apps | No sender-authentication rejection in the scoped log |
+
+The successful inventory is the positive connection evidence; absence of a log
+message alone would not establish success. This does not establish the complete
+private authentication rule or compatibility with other runtime versions.
+
+The earlier ad-hoc service reported `SkyIPCRequirement.Error.teamNotFound`.
+Giving both sides matching development-team metadata removed that stderr string,
+but did not establish successful authentication. Historical results remain in
+[the original evidence](evidence/development-signing.json).
 
 The service was version `26.924.1001281`, SHA-256
 `d4b1775138342c0df8e9451df3c23dda3fdef44c4ade50a2de382c188cf61b54`.
-Its original deep/strict signature passed. Known cursor class/style markers are
-present. The dylib load command fits zero-filled header padding, changes 53 bytes
-ending at offset 9997, and leaves executable code beginning at 10176 in place.
-This is an inspected research entry, not a compatibility certification or a
-verification of this version's cursor geometry.
+Its original deep/strict signature passed. The dylib load command fits verified
+header padding without moving executable code. This remains an inspected
+research build, not a compatibility certification or native geometry validation.
 
-## Reproduce locally
+## Reproduce the successful inventory probe
 
-Use an existing local Apple development signing identity. Nothing here creates
-or exports a key. Vendor runtime copies stay local and are not repository assets.
+Use an existing local Apple development signing identity and the **unmodified**
+official runtime. Nothing here creates or exports a key. Vendor code stays local.
 
 ```sh
 ./scripts/build.sh
-python3 scripts/development-runtime.py \
-  --runtime '/path/to/official/cua_node' \
-  --destination '.build/native-development/runtime' \
-  --signing-identity "$BUDDIE_SIGNING_IDENTITY"
 python3 scripts/prepare.py prepare \
   --service '/path/to/Codex Computer Use.app' \
-  --destination '.build/native-development/Codex Buddie Runtime.app' \
+  --destination '.build/native-current/Codex Buddie Runtime.app' \
   --signing-identity "$BUDDIE_SIGNING_IDENTITY"
 python3 scripts/prepare.py launcher \
-  --runtime '.build/native-development/runtime' \
-  --service '.build/native-development/Codex Buddie Runtime.app' \
-  --output '.build/native-development/codex-buddie-cua'
+  --runtime '/path/to/official/cua_node' \
+  --service '.build/native-current/Codex Buddie Runtime.app' \
+  --output '.build/native-current/codex-buddie-cua'
 python3 scripts/probe-native.py \
-  --launcher '.build/native-development/codex-buddie-cua' \
-  --report '.build/native-development/probe.json' --startup-grace 8
+  --launcher '.build/native-current/codex-buddie-cua' \
+  --report '.build/native-current/probe.json' --startup-grace 2
 ```
 
-Destinations must be new. The runtime uses an APFS copy-on-write clone, then signs
-its local Node/node_repl and Darwin native libraries with hardened runtime.
-OpenAI-specific team, app-group and keychain entitlements are omitted from these
-new identities. Original executable hashes are checked after preparation.
-The service copy includes our character assets; its replacement factory loads
-bundled Pip before any studio selection override. The IPC evidence above used
-the earlier renderer built at the start of the experiment, before that packaging
-follow-up; the probe records its dylib digest.
+Destinations must be new. Only the service copy and our embedded library are
+signed. The copy uses its own bundle identifier, without claiming vendor
+app-group/keychain grants. The factory now loads bundled Bit, matching the
+Studio's initial choice. The 33-app result used the older renderer retained in
+`.build/native-development`; the separate current-Bit attempt reached the app
+access prompt. These are distinct evidence scopes.
 
-The probe uses the official initialized CUA REPL, saves only counts/errors rather
-than an application inventory, refuses interactive permission requests, and stops
-the isolated process group. No installed OpenAI files, authentication instructions,
-MCP configuration, TCC database or system security settings are edited.
+The probe uses the official initialized CUA REPL, saves counts/errors rather than
+an application inventory, refuses interactive permission requests, and stops its
+isolated process group. To continue into UI testing, use an MCP client that
+supports form elicitation and presents the runtime's ordinary app-access prompt.
+Do not synthesize approval or infer an app permission from inventory success.
+
+No installed OpenAI files, authentication checks, MCP configuration, TCC database
+or system security settings are edited. Normal macOS permissions may still be
+needed for the isolated service; this experiment has not tested that stage.

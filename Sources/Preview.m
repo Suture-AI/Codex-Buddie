@@ -1015,7 +1015,7 @@ static int SelfTest(void) {
     NSWindow *cursor=[[cursorClass alloc] initWithContentRect:r styleMask:0 backing:NSBackingStoreBuffered defer:NO];
     NSImageView *image=[[NSImageView alloc] initWithFrame:r]; cursor.contentView=image;
     NSCAssert([NSStringFromClass(cursor.contentView.class) isEqual:@"BuddieView"],@"Native image must be replaced");
-    NSCAssert([((BuddieView *)cursor.contentView).character.identifier isEqual:@"pip"],@"Replacement factory loads the bundled character before studio overrides");
+    NSCAssert([((BuddieView *)cursor.contentView).character.identifier isEqual:@"bit"],@"Replacement factory loads Bit before studio overrides");
     NSCAssert(NSEqualSizes(cursor.contentView.frame.size,r.size),@"Native dimensions must stay intact");
     NSCAssert(image.superview==nil,@"Original artwork must be detached");
     NSImageView *refresh=[[NSImageView alloc] initWithFrame:r]; cursor.contentView=refresh;

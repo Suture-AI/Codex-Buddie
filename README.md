@@ -7,10 +7,11 @@ coordinate; your own mouse stays independent.
 
 **Experimental macOS prototype.** The renderer works in the included lab. A
 modified copy of the native service boots with the renderer library loaded.
-**Live integration is currently blocked by native IPC startup.** The ad-hoc
-experiment reported `SkyIPCRequirement.Error.teamNotFound`; a matching-team
-Apple development signing experiment also failed to connect. This is a renderer prototype and
-research experiment, not a working Codex cursor skin or an official plugin.
+**The official client now connects to a development-signed service copy:**
+a read-only probe listed 33 native apps. Real cursor actions remain unverified;
+the current Bit build reached the normal app-access prompt. This is a renderer
+prototype and research experiment, not a working Codex cursor skin or an official
+plugin. See [the connection evidence](docs/development-signing.md).
 
 The intended experience is a buddy that **walks along the agent's curved cursor
 path**, stops at the exact hotspot, and animates the click, with no gray arrow or
@@ -48,8 +49,8 @@ while hands swing; arm length and torso proportions remain editable. See
 
 **Still a motion study.** Bit's visual direction was approved and his neck
 shortened; Miso is a new candidate. Head/antenna perspective, non-pixel knee articulation,
-production cursor sizing and the native service
-connection remain unfinished. These exports do not show a live Codex task.
+production cursor sizing and real native cursor
+interaction remain unfinished. These exports do not show a live Codex task.
 
 Pip remains available as an articulated customization study and an earlier
 complete-pose pack. Sprout/Mochi/Orbit remain rejected art-direction fixtures.
@@ -125,13 +126,11 @@ interfaces inspected. This experiment depends on private implementation details.
 
 ## Prepare an isolated native experiment
 
-**Research only: the current ad-hoc signed copy cannot accept native action
-connections.** The service starts and the library loads, but the read-only
-`cua.getApp(...)` health check fails with `Sky Computer Use native pipe startup
-failed`; service logs report `SkyIPCRequirement.Error.teamNotFound`.
-Normal app permission grants alone have not been shown to resolve this.
-The [development-signing follow-up](docs/development-signing.md) records the
-matching-team attempt and its failed native inventory probe.
+**Research only.** An existing Apple development identity was sufficient to sign
+our isolated service copy for a successful inventory probe with the unmodified
+official client. Re-signing the client failed authentication. Ad-hoc signing also
+failed. See [the working reproduction](docs/development-signing.md).
+Live cursor rendering and app permissions are still unverified.
 
 **Apple Silicon only.** Gated to the inspected service builds `26.913.1001067`
 and `26.924.1001281`, with exact executable SHA-256 entries in
@@ -143,17 +142,20 @@ does not download or redistribute OpenAI's application or libraries.
 
 ```sh
 ./scripts/build.sh
-python3 scripts/prepare.py prepare --service '/path/to/Codex Computer Use.app'
+python3 scripts/prepare.py prepare --service '/path/to/Codex Computer Use.app' \
+  --signing-identity "$BUDDIE_SIGNING_IDENTITY"
 python3 scripts/prepare.py launcher --runtime '/path/to/cua_node'
 ```
 
 `--runtime` is the directory containing `bin/node`, `bin/node_repl`, and
-`lib/node_modules/@oai/cua-repl`. The `prepare` command:
+`lib/node_modules/@oai/cua-repl`. Leave that official runtime unmodified.
+`BUDDIE_SIGNING_IDENTITY` names an existing local development identity; omitting
+it selects ad-hoc signing, which failed the native probe. The `prepare` command:
 
 1. Verifies the original executable hash and app signature.
 2. Copies the app into `.build/native/Codex Buddie Runtime.app`.
 3. Adds a dylib dependency in verified unused Mach-O header padding.
-4. Gives the copy its own bundle identifier and an ad-hoc local signature.
+4. Gives the copy its own bundle identifier and the selected local signature.
 5. Verifies the new signature and that the original binary did not change.
 
 The launcher starts the copy on a fresh private Unix socket and runs the
@@ -167,15 +169,15 @@ by `launcher`:
 
 ```sh
 codex \
-  -c 'mcp_servers.native_cua_repl.command="/absolute/path/Codex-Buddie/.build/codex-buddie-cua"' \
-  -c 'mcp_servers.native_cua_repl.args=[]'
+  -c 'mcp_servers.cua.command="/absolute/path/Codex-Buddie/.build/codex-buddie-cua"' \
+  -c 'mcp_servers.cua.args=[]'
 ```
 
-Ask that session to use `native_cua_repl`, beginning with `await cua.getState();`.
-Then try a harmless action in the Renderer Lab. The copied app has a different
-identity, so existing macOS permissions do not transfer. Native client authentication currently rejects the
-ad-hoc signed copy; this command is provided to reproduce that blocker. **Do not disable SIP, Gatekeeper, TCC, or other security checks.** A rejection
-is a compatibility blocker to investigate, not a reason to weaken the machine.
+Ask that session to use `cua`, beginning with `await cua.getState();`.
+Then try a harmless action in the Renderer Lab through the normal app-access
+prompt. The copied app has a different identity, so existing macOS permissions
+do not transfer. The successful inventory probe does not establish permission
+for app observation or input. Preserve all normal security checks.
 
 Quit that Codex session to stop the experiment. Starting Codex normally uses
 your original configuration. The original application and runtime are untouched;
@@ -194,7 +196,8 @@ all generated copies are under `.build/`.
 | Stage and verify signed copy; original stays unchanged | Passed |
 | Load library inside copied native service; private socket starts | Passed |
 | Initialise official REPL through generated launcher | Passed |
-| Native app observation through the modified service | **Blocked: native IPC startup** |
+| Native app inventory through the modified service | **Passed: 33 apps, original official client** |
+| Observe Studio through the current Bit service | **App-access prompt reached; pending** |
 | Character replaces cursor during real native CUA actions | **Not reached** |
 | Native hotspot accuracy, drag, multiple monitors, cancellation | **Not verified** |
 
@@ -218,9 +221,8 @@ See [the animation validation notes](docs/animation-validation.md).
 
 ## Next milestone
 
-Resolve the native IPC compatibility issue through a supported development or
-customization mechanism. This repository does not patch authentication checks.
-Then verify real native CUA actions, actual cursor view assignment, hotspot
+Complete the normal app-access flow, then verify real native CUA actions,
+actual cursor view assignment, hotspot
 placement, dragging, multiple displays, and teardown. Only after those checks
 should this become an installer for non-developers. Windows and Linux are not implemented.
 

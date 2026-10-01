@@ -178,7 +178,7 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
     dispatch_once(&once, ^{
         NSURL *resources=NSBundle.mainBundle.resourceURL;
         for(NSString *folder in @[@"BuddieCharacters",@"Characters"]) {
-            NSURL *pack=[[resources URLByAppendingPathComponent:folder] URLByAppendingPathComponent:@"pip"];
+            NSURL *pack=[[resources URLByAppendingPathComponent:folder] URLByAppendingPathComponent:@"bit"];
             preset=[self loadPack:pack error:nil]; if(preset) break;
         }
         if(!preset) preset=[self new];
