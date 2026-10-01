@@ -81,6 +81,14 @@ void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double 
     BOOL turning=c.clips[@"headTurn"] && inTurn;
     BOOL leftHead=c.clips[@"headTurn"] ? turnProgress>=.5:facingLeft;
     NSString *head=turning ? @"headTurn":leftHead && c.clips[@"headLeft"] ? @"headLeft":@"head";
+    NSString *expression=p.face==BuddieFacePress ? @"headPress":p.face==BuddieFaceRelease ? @"headRelease":p.face==BuddieFaceFocus ? @"headFocus":nil;
+    if(!expression && !reduced) {
+        NSUInteger blink=[c.clips[@"head"] frameIndexAtTime:elapsed loop:YES];
+        if(blink==1 || blink==3) expression=@"headHalf";
+        else if(blink==2) expression=@"headClosed";
+    }
+    BOOL expressionHead=expression && c.clips[expression];
+    if(expressionHead) head=expression;
     NSPoint neck=attach(head);
     if(c.clips[@"headTurn"]) {
         double worldX=c.spriteHotspot.x+(neck.x-c.spriteHotspot.x)*(1-2*turnProgress);
@@ -93,7 +101,10 @@ void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double 
         NSAffineTransform *counter=[NSAffineTransform transform];
         [counter translateXBy:neck.x yBy:0]; [counter scaleXBy:facing yBy:1]; [counter translateXBy:-neck.x yBy:0]; [counter concat];
     }
-    Part(c,head,neck,lean*.6,c.headScale,c.headScale,turning ? turnProgress*c.clips[@"headTurn"].duration:elapsed,reduced);
+    // Clamp the normalized endpoint below duration: Part loops ordinary clips,
+    // but the last left-facing pose must never wrap to the right-facing pose.
+    double headTime=turning || expressionHead ? MIN(1-1e-9,turnProgress)*c.clips[head].duration:elapsed;
+    Part(c,head,neck,lean*.6,c.headScale,c.headScale,headTime,expressionHead ? NO:reduced);
     [NSGraphicsContext restoreGraphicsState];
     [NSGraphicsContext restoreGraphicsState];
 }

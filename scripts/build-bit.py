@@ -87,7 +87,7 @@ def main():
     images["head"] = images["turn-0"].copy()
     images["headLeft"] = images["turn-4"].copy()
     eye_boxes = {}
-    for role in ("head","headLeft"):
+    for role in ("head","headLeft",*(f"turn-{i}" for i in range(5))):
         head = images[role]
         eye_pixels = {(x,y) for y in range(20,40) for x in range(12,52)
                       if head.getpixel((x,y))[3] and head.getpixel((x,y))[1]>180 and head.getpixel((x,y))[1]>head.getpixel((x,y))[2]*1.08}
@@ -102,16 +102,32 @@ def main():
                         if p in remaining: remaining.remove(p); queue.append(p)
             groups.append(group)
         assert len(groups)==2, (role,groups)
-        boxes_for_eyes = [(min(x for x,y in g),min(y for x,y in g),max(x for x,y in g)+1,max(y for x,y in g)+1) for g in groups]
+        boxes_for_eyes = sorted((min(x for x,y in g),min(y for x,y in g),max(x for x,y in g)+1,max(y for x,y in g)+1) for g in groups)
         eye_boxes[role] = boxes_for_eyes
         screen = Counter(head.getpixel((x,y)) for y in range(22,38) for x in range(23,43) if head.getpixel((x,y))[3] and max(head.getpixel((x,y))[:3])<80).most_common(1)[0][0]
         mint = Counter(head.getpixel(p) for p in eye_pixels).most_common(1)[0][0]
-        for state in ("half","closed"):
+        states=("half","closed","focus","press","release") if role.startswith("turn-") else ("half","closed")
+        for state in states:
             image = head.copy(); draw = ImageDraw.Draw(image)
             for p in eye_pixels: image.putpixel(p,screen)
-            for x0,y0,x1,y1 in boxes_for_eyes:
-                y=y1-2; draw.line((x0+1,y,x1-2,y),fill=mint)
-                if state=="half": image.putpixel((x0,y+1),mint); image.putpixel((x1-1,y+1),mint)
+            for eye,(x0,y0,x1,y1) in enumerate(boxes_for_eyes):
+                cx=(x0+x1-1)//2; cy=(y0+y1-1)//2
+                if state in ("half","closed"):
+                    y=y1-2; draw.line((x0+1,y,x1-2,y),fill=mint)
+                    if state=="half": image.putpixel((x0,y+1),mint); image.putpixel((x1-1,y+1),mint)
+                elif state=="focus":
+                    # Small attentive pupils instead of the idle happy arcs.
+                    draw.rectangle((cx,cy-1,cx+1,cy+1),fill=mint)
+                elif state=="press":
+                    # Friendly inward squint, entirely inside the original eye.
+                    outer=x0+1 if eye==0 else x1-2; inner=outer+(2 if eye==0 else -2)
+                    draw.line((outer,y0+1,inner,cy+1,outer,y1-1),fill=mint,width=1)
+                else:
+                    # A short bright diamond-eye reaction on release.
+                    draw.line((cx,y0,cx,y1-1),fill=mint)
+                    draw.line((x0+1,cy,x1-2,cy),fill=mint)
+                    image.putpixel((cx+1,cy), (176,255,224,255))
+            assert image.getchannel("A").tobytes()==head.getchannel("A").tobytes()
             images[role+"-"+state]=image
     def frame(name, duration=1):
         return {"image": name+".png", "duration": duration, "mask": name+"-mask.png"}
@@ -125,6 +141,8 @@ def main():
         parts[role]["frames"] = [frame(role,2.3),frame(role+"-half",.05),frame(role+"-closed",.085),frame(role+"-half",.05),frame(role,1.1)]
     parts["headTurn"] = dict(parts["head"])
     parts["headTurn"]["frames"] = [frame(f"turn-{i}",.045) for i in range(5)]
+    for state in ("half","closed","focus","press","release"):
+        parts["head"+state.title()] = dict(parts["head"],frames=[frame(f"turn-{i}-{state}",.045) for i in range(5)])
     torsos = Image.open(ART / "body-turn-source.png").convert("RGBA")
     body_boxes = []
     for i in range(5):
@@ -162,7 +180,7 @@ def main():
                            "materials": [{"id":"shell","name":"Shell","channel":0,"base":"#8095F2"}, {"id":"face","name":"Screen lights","channel":1,"base":"#81F8CA"}, {"id":"signal","name":"Antenna","channel":2,"base":"#FFD84B"}], "parts": parts}}
     (PACK / "buddy.json").write_text(json.dumps(manifest, indent=2)+"\n")
     provenance = {"source": "artwork/bit/concept-source.png", "source_sha256": hashlib.sha256((ART / "concept-source.png").read_bytes()).hexdigest(),
-                  "requested_model": "GPT Image 2.5 if available", "verified_model": None, "processing": "scripts/build-bit.py: 64px nearest sampling; 16-color palette; reviewed cutout rectangles; pixel blink edits. Walking sheets were rejected and are not used.",
+                  "requested_model": "GPT Image 2.5 if available", "verified_model": None, "processing": "scripts/build-bit.py: 64px nearest sampling; 16-color palette; reviewed cutout rectangles; localized blink/focus/squint/release eye edits across five generated head perspectives. Walking sheets were rejected and are not used.",
                   "source_bounds": source_box, "part_rectangles": {k:v[0] for k,v in definitions.items()}, "eye_boxes": eye_boxes,
                   "turn_source": "artwork/bit/turn-source.png", "turn_source_sha256": hashlib.sha256((ART / "turn-source.png").read_bytes()).hexdigest(),
                   "turn_geometry": {"source_boxes":boxes,"shared_scale":scale,"source_baseline":baseline,"target_neck":[32,42],"source_collar_rows":collar_starts,"retained_collar_rows":1},

@@ -3,7 +3,7 @@
   "source_sha256": "b77621fca9925b5c8acfc2cfd6b43d15572f6a77a854bd6f79b4d5d5f7b911da",
   "requested_model": "GPT Image 2.5 if available",
   "verified_model": null,
-  "processing": "scripts/build-bit.py: 64px nearest sampling; 16-color palette; reviewed cutout rectangles; pixel blink edits. Walking sheets were rejected and are not used.",
+  "processing": "scripts/build-bit.py: 64px nearest sampling; 16-color palette; reviewed cutout rectangles; localized blink/focus/squint/release eye edits across five generated head perspectives. Walking sheets were rejected and are not used.",
   "source_bounds": [
     353,
     210,
@@ -69,19 +69,89 @@
   "eye_boxes": {
     "head": [
       [
+        28,
+        28,
+        35,
+        33
+      ],
+      [
         39,
         28,
         45,
         32
+      ]
+    ],
+    "headLeft": [
+      [
+        19,
+        29,
+        26,
+        33
       ],
+      [
+        29,
+        29,
+        36,
+        34
+      ]
+    ],
+    "turn-0": [
       [
         28,
         28,
         35,
         33
+      ],
+      [
+        39,
+        28,
+        45,
+        32
       ]
     ],
-    "headLeft": [
+    "turn-1": [
+      [
+        28,
+        29,
+        35,
+        33
+      ],
+      [
+        38,
+        28,
+        45,
+        33
+      ]
+    ],
+    "turn-2": [
+      [
+        23,
+        28,
+        30,
+        33
+      ],
+      [
+        34,
+        28,
+        41,
+        33
+      ]
+    ],
+    "turn-3": [
+      [
+        19,
+        28,
+        26,
+        33
+      ],
+      [
+        29,
+        29,
+        36,
+        33
+      ]
+    ],
+    "turn-4": [
       [
         19,
         29,

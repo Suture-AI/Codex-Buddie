@@ -6,10 +6,12 @@ typedef struct { double x, y; } BuddiePoint;
 typedef struct {
     double stride, footSpacing, footLift;
 } BuddieRig;
+typedef enum { BuddieFaceIdle, BuddieFaceFocus, BuddieFacePress, BuddieFaceRelease } BuddieFace;
 typedef struct {
     BuddiePoint feet[2];
     double footLift[2], phase, walkWeight;
     double bodyY, lean, squash, eyeOpen, gazeX, gazeY, smile, tap;
+    BuddieFace face;
 } BuddiePose;
 typedef struct {
     bool initialized, pressed, moving, airborne, stance[2];

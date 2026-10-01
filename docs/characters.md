@@ -41,6 +41,28 @@ through its duration in either direction; a mid-turn reversal retraces the
 current progress. Head placement crosses its attachment offset gradually.
 The left head can carry its own blink frames. Authored heads are not mirrored again.
 
+Optional expression heads use the same right-to-left directional sequence as
+`headTurn`:
+
+| Part | Trigger |
+| --- | --- |
+| `headFocus` | Fast airborne travel |
+| `headPress` | Button held; interrupts any previous reaction |
+| `headRelease` | First 0.38 seconds after release |
+| `headHalf` | Frames 1 and 3 of the neutral `head` blink timeline |
+| `headClosed` | Frame 2 of that timeline |
+
+These tracks require `headTurn` and `headLeft`. Each expression's pivot,
+anchor, scale, image size, frame count and per-frame durations must match
+`headTurn`; mismatches are rejected at import. Their frames represent
+perspectives, not a time-based emotion cycle. The renderer selects the
+current turn progress, including during a mid-turn reversal. Neutral blinking
+continues through turns. Missing expression tracks preserve the older renderer.
+Reduced Motion retains static press feedback and omits the travel, release
+and blink embellishments. Bit includes 54 frames across 18 parts, within the
+unchanged pack budget. See [the face animation](media/bit-face-reactions.gif),
+[poses](media/bit-face-sequence.png) and [live Studio evidence](evidence/bit-faces.json).
+
 Optional `bodyTurn` and `bodyLeft` must be supplied together. Their frames use
 the body's neutral pivot and attachment, with right/front/left ordering matching
 the head track. Both tracks share normalized progress; the head duration drives
@@ -74,8 +96,9 @@ lands first over 0.14 seconds, the other over 0.20 seconds, with a restrained
 body compression at first contact. The motion suite covers 63 moving/short-hop
 landings at 30, 60 and 120 Hz, including the final contact frame.
 
-Version 1 and 2 packs remain supported. Reduced Motion holds the first textures
-with neutral feet. The generated eye patches change only the eyelids.
+Version 1 and 2 packs remain supported. Reduced Motion holds neutral feet and
+the first idle textures, with direct press feedback when available. Bit's
+expression edits change only the screen eyes, preserving the generated shell.
 
 Review [Cocoa customization](media/pip-studio-customization.png),
 [walking](media/pip-studio-walk.gif), [fast travel](media/pip-studio-fast-travel.gif)

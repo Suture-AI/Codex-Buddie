@@ -378,13 +378,35 @@ static BOOL SaveView(NSView *view, NSString *path) {
     [view cacheDisplayInRect:view.bounds toBitmapImageRep:rep];
     return [[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:path atomically:YES];
 }
-static NSBitmapImageRep *PuppetImage(BuddieCharacter *character,BuddiePose pose,double progress,BOOL desiredLeft) {
+static NSBitmapImageRep *PuppetImageAtTime(BuddieCharacter *character,BuddiePose pose,double progress,BOOL desiredLeft,double elapsed,BOOL reduced) {
     NSImage *image=[NSImage imageWithSize:NSMakeSize(320,320) flipped:YES drawingHandler:^BOOL(NSRect rect) {
         NSGraphicsContext.currentContext.imageInterpolation=NSImageInterpolationNone;
         NSAffineTransform *scale=[NSAffineTransform transform]; [scale scaleBy:4]; [scale concat];
-        BuddieDrawPuppet(character,pose,desiredLeft,progress,0,NO); return YES;
+        BuddieDrawPuppet(character,pose,desiredLeft,progress,elapsed,reduced); return YES;
     }];
     return [NSBitmapImageRep imageRepWithData:image.TIFFRepresentation];
+}
+static NSBitmapImageRep *PuppetImage(BuddieCharacter *character,BuddiePose pose,double progress,BOOL desiredLeft) {
+    return PuppetImageAtTime(character,pose,progress,desiredLeft,0,NO);
+}
+static int ExportFaces(NSString *path) {
+    if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
+    BuddieView *view=[[BuddieView alloc] initWithFrame:NSMakeRect(0,0,240,240)];
+    view.manualAnimation=YES; view.character=ArticulatedNamed(@"bit");
+    double x=0;
+    for(int i=0;i<420;i++) {
+        double t=i/60.;
+        if(i==54 || i==78 || i==300) [view press:YES atTime:100+t];
+        if(i==71 || i==87 || i==321) [view press:NO atTime:100+t];
+        if(i>=132 && i<192) x+=80/60.;
+        if(i>=228 && i<276) x-=80/60.;
+        double unit=view.character.spriteHeight/view.character.spriteCanvas.height*view.character.puppetMotionScale;
+        [view animateAtTime:100+t anchor:(BuddiePoint){x*unit,0}];
+        NSBitmapImageRep *rep=PuppetImageAtTime(view.character,view.motionPose,view.facingProgress,i>=228,t,NO);
+        NSString *file=[path stringByAppendingPathComponent:[NSString stringWithFormat:@"face-%04d.png",i]];
+        if(![[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:file atomically:YES]) return 1;
+    }
+    puts("Exported actual Cocoa face reactions: click, interrupted release, travel, turn and blink."); return 0;
 }
 static NSBitmapImageRep *TurnImage(BuddieCharacter *character,double progress,BOOL desiredLeft) {
     BuddiePose pose={0}; pose.squash=1;
@@ -515,6 +537,28 @@ static void TestPuppet(BuddieView *view) {
     }
     NSCAssert(torsos.count==5,@"Torso visibly passes through five different authored perspectives");
     puts("PASS: five rendered torso directions; direction-independent intermediate poses; stable boot pixels through turns");
+    for(int direction=0;direction<5;direction++) {
+        BuddiePose neutral={0}; neutral.squash=1; neutral.feet[0].x=-5; neutral.feet[1].x=5;
+        NSBitmapImageRep *base=PuppetImage(bit,neutral,direction/4.,NO);
+        NSMutableSet *expressions=[NSMutableSet new];
+        for(int state=1;state<=5;state++) {
+            BuddiePose pose=neutral; pose.face=state<=3 ? state:BuddieFaceIdle;
+            double elapsed=state==4 ? 2.325:state==5 ? 2.40:0;
+            NSBitmapImageRep *a=PuppetImageAtTime(bit,pose,direction/4.,NO,elapsed,NO);
+            NSBitmapImageRep *b=PuppetImageAtTime(bit,pose,direction/4.,YES,elapsed,NO);
+            NSData *pixels=[a representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+            NSCAssert([pixels isEqual:[b representationUsingType:NSBitmapImageFileTypePNG properties:@{}]],@"Reversing a face mid-turn preserves perspective");
+            [expressions addObject:pixels]; NSUInteger changes=0;
+            for(int y=0;y<320;y++) for(int x=0;x<320;x++) {
+                NSUInteger p[4],q[4]; [base getPixel:p atX:x y:y]; [a getPixel:q atX:x y:y];
+                NSCAssert(p[3]==q[3],@"Face reactions preserve actual rendered silhouette and registration");
+                if(memcmp(p,q,sizeof(p))) { NSCAssert(x>=76 && x<240 && y>=140 && y<176,@"Only the rendered eyes change"); changes++; }
+            }
+            NSCAssert(changes>0,@"Each expression is visible in real Cocoa output");
+        }
+        NSCAssert(expressions.count==5,@"All five expressions remain distinct at every perspective");
+    }
+    puts("PASS: 25 Cocoa face poses preserve silhouette, body and feet; reverse without mirroring; left endpoints do not wrap");
     BuddieCharacter *legs=[bit copy];
     for(int foot=0;foot<2;foot++) {
     NSString *role=foot ? @"legFar":@"legNear"; legs.clips=@{role:bit.clips[role]};
@@ -628,6 +672,7 @@ int main(int argc,const char **argv) {
         if(argc>2 && strcmp(argv[1],"--export-puppet")==0) return ExportPuppet([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"pip-articulated");
         if(argc>2 && strcmp(argv[1],"--export-turn")==0) return ExportTurn([NSString stringWithUTF8String:argv[2]]);
         if(argc>2 && strcmp(argv[1],"--export-gait")==0) return ExportGait([NSString stringWithUTF8String:argv[2]]);
+        if(argc>2 && strcmp(argv[1],"--export-faces")==0) return ExportFaces([NSString stringWithUTF8String:argv[2]]);
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         InstallMenus();
         Delegate *delegate=[Delegate new]; NSApp.delegate=delegate; [NSApp run];

@@ -60,17 +60,21 @@ and aligns the collar through all five orientations. See the
 [before/after Cocoa comparison](../../docs/media/bit-neck-comparison.png).
 Each orientation keeps its
 authored perspective; it is not flipped again. Reversing partway retraces the
-turn progress. Right and left blink variants alter only localized screen-eye
-pixels, with identical alpha and unchanged surrounding head art.
+turn progress. All five directions now have localized half/closed blinks,
+attentive travel eyes, an inward press squint and a brief release sparkle.
+These are conventional pixel edits of the generated heads, with identical
+alpha and unchanged shell/collar pixels. The 0.38-second release can be
+interrupted by a new press. See [the face sequence](../../docs/media/bit-face-sequence.png),
+[animation](../../docs/media/bit-face-reactions.gif) and
+[live Studio capture](../../docs/media/bit-face-live.png).
 
 The torso now follows the head through five authored directions, while limbs
 keep their physical screen-side positions. See the [turn review](../../docs/media/bit-studio-turn.png).
-This remains a motion study: lighting/antenna perspective is imperfect, richer
-expressions, knee articulation and additional body types remain unfinished.
-The Studio's size/proportion controls were exercised through official CUA
-before this leg update. Native observation currently returns
-`cgWindowNotFound`; this pass uses the actual Cocoa renderer's offline exports
-and tests. Live cursor replacement remains unverified.
+This remains a motion study: lighting/antenna perspective is imperfect, and
+knee articulation and additional body types remain unfinished. Official CUA
+observation recovered for this expression pass. The updated Studio was opened,
+the saved Bit Ember entry restored, and travel/release faces observed with the
+red shell palette. Live Codex cursor replacement remains unverified.
 
 ## Reproduce
 
@@ -86,6 +90,8 @@ bash scripts/build.sh
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-turn .build/bit-turn
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-gait .build/bit-gait
 uv run --with pillow python scripts/review-bit.py .build/bit-review .build/bit-cocoa --turn .build/bit-turn --gait .build/bit-gait
+".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-faces .build/bit-face-review
+uv run --with pillow python scripts/review-bit-faces.py .build/bit-face-review
 ```
 
 The PNG frame directories are regenerable intermediates. The retained
@@ -95,4 +101,7 @@ customization sheet and [review measurements](../../docs/evidence/bit-studio.jso
 are the published outputs. The earlier Pip evidence pins revision
 `ad4b018`; it is historical evidence rather than a checksum of today's source.
 The neck comparison/record similarly describes revision `1baeb50`, before
-the coordinated torso-turn update.
+the coordinated torso-turn update. The leg/gait review pins `979fc86`, before
+the expression update; [bit-faces.json](../../docs/evidence/bit-faces.json)
+records the newer renderer and its separate tests. The retained live UI image
+is a CUA screenshot, not an offline render.

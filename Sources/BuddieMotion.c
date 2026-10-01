@@ -159,6 +159,11 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
     s->pose.phase=flight ? s->flightPhase:s->phase; s->pose.walkWeight=s->walkWeight;
     double cycle=2*pi*s->pose.phase;
     double releaseAge=time-s->releasedAt;
+    // A press always interrupts the previous reaction. Reduced Motion keeps
+    // the direct press feedback but omits travel and release embellishments.
+    s->pose.face=s->pressed ? BuddieFacePress:reduced ? BuddieFaceIdle:
+        releaseAge>=0 && releaseAge<.38 ? BuddieFaceRelease:
+        flight ? BuddieFaceFocus:BuddieFaceIdle;
     double tap=releaseAge>=0 && releaseAge<.5 ? exp(-releaseAge*12)*sin(releaseAge*22) : 0;
     double blinkClock=fmod(time,4.9);
     double blink=blinkClock<.15 ? pow(sin(pi*blinkClock/.15),2) : 0;

@@ -346,7 +346,7 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
         if(![definitions isKindOfClass:NSDictionary.class]) return Fail(error,@"Expected a clips or parts object.");
         if(puppet) {
             NSSet *keys=[NSSet setWithArray:definitions.allKeys];
-            if(sprites[@"clips"] || ![[NSSet setWithArray:roles] isSubsetOfSet:keys] || ![keys isSubsetOfSet:[NSSet setWithArray:[roles arrayByAddingObjectsFromArray:@[@"headTurn",@"headLeft",@"bodyTurn",@"bodyLeft"]]]]) return Fail(error,@"Articulated packs need nine body parts, with optional head/body turn and left artwork.");
+            if(sprites[@"clips"] || ![[NSSet setWithArray:roles] isSubsetOfSet:keys] || ![keys isSubsetOfSet:[NSSet setWithArray:[roles arrayByAddingObjectsFromArray:@[@"headTurn",@"headLeft",@"bodyTurn",@"bodyLeft",@"headFocus",@"headPress",@"headRelease",@"headHalf",@"headClosed"]]]]) return Fail(error,@"Articulated packs need nine body parts, with optional head/body directions and expression heads.");
             if((definitions[@"bodyTurn"]!=nil)!=(definitions[@"bodyLeft"]!=nil)) return Fail(error,@"Provide bodyTurn and bodyLeft together.");
             if(!NumberInRange(sprites[@"motionScale"],.25,8)) return Fail(error,@"motionScale must be between 0.25 and 8 canvas pixels per motion unit.");
             c.puppetMotionScale=[sprites[@"motionScale"] doubleValue];
@@ -400,6 +400,12 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
                 } else if(frame[@"mask"]) return Fail(error,@"Define materials before adding frame masks.");
             }
             BuddieSpriteClip *clip=[BuddieSpriteClip new]; clip.frames=images; clip.durations=durations; clip.masks=masks; clips[name]=clip;
+        }
+        for(NSString *name in @[@"headFocus",@"headPress",@"headRelease",@"headHalf",@"headClosed"]) if(clips[name]) {
+            BuddieSpriteClip *expression=clips[name],*turn=clips[@"headTurn"];
+            if(!turn || !clips[@"headLeft"] || ![expression.durations isEqual:turn.durations] ||
+               ![parts[name] isEqual:parts[@"headTurn"]] || !NSEqualSizes(expression.frames[0].size,turn.frames[0].size))
+                return Fail(error,@"Expression heads must match headTurn geometry and directional frame timings, with headLeft provided.");
         }
         c.clips=clips;
         c.puppetParts=parts;

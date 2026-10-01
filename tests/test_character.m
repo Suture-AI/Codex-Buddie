@@ -52,13 +52,27 @@ static void ArticulatedPack(NSURL *root) {
     bad=MutableJSON(json); bad[@"puppet"][@"parts"][@"head"][@"frames"][0][@"mask"]=@"body-00-mask.png"; Reject(saved,bad);
     puts("PASS: nine-part articulated pack; shared decode; proportions/geometry/colors round-trip; independent customization; missing roles, unsafe files, incompatible dimensions and invalid transforms rejected");
     BuddieCharacter *bit=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/bit"] error:&error];
-    NSCAssert(bit.pixelArt && bit.puppetParts.count==13 && bit.stride==8 && bit.footSpacing==5,@"Compact pixel rig with authored head and torso directions loads");
+    NSCAssert(bit.pixelArt && bit.puppetParts.count==18 && bit.stride==8 && bit.footSpacing==5,@"Compact pixel rig with authored directions and expression heads loads");
     NSCAssert(bit.clips[@"bodyTurn"].frames.count==5 && bit.clips[@"bodyLeft"].frames.count==1,@"Torso directions remain independently editable");
     NSCAssert(bit.clips[@"headTurn"].frames.count==5 && bit.clips[@"headLeft"].frames.count==5,@"Turning and left blink art are preserved");
     NSURL *pixelCopy=[root URLByAppendingPathComponent:@"bit.buddie"];
     NSCAssert([bit savePack:pixelCopy error:&error],@"Save pixel sampling and optional head tracks: %@",error);
     BuddieCharacter *bitCopy=[BuddieCharacter loadPack:pixelCopy error:&error];
     NSCAssert(bitCopy.pixelArt && [bitCopy.puppetParts isEqual:bit.puppetParts] && bitCopy.stride==8,@"Pixel/turn metadata round-trips");
+    for(NSString *role in @[@"headFocus",@"headPress",@"headRelease",@"headHalf",@"headClosed"]) {
+        NSCAssert(bitCopy.clips[role].frames.count==5,@"Each expression survives portable export in every direction");
+        for(int i=0;i<5;i++) {
+            NSBitmapImageRep *a=[NSBitmapImageRep imageRepWithData:bit.clips[@"headTurn"].frames[i].TIFFRepresentation];
+            NSBitmapImageRep *b=[NSBitmapImageRep imageRepWithData:bitCopy.clips[role].frames[i].TIFFRepresentation];
+            NSUInteger changes=0;
+            for(int y=0;y<64;y++) for(int x=0;x<64;x++) {
+                NSUInteger p[4],q[4]; [a getPixel:p atX:x y:y]; [b getPixel:q atX:x y:y];
+                NSCAssert(p[3]==q[3],@"Expressions preserve the complete generated silhouette");
+                if(memcmp(p,q,sizeof(p))) { NSCAssert(x>=19 && x<=44 && y>=28 && y<=33,@"Expression edits stay inside the eyes"); changes++; }
+            }
+            NSCAssert(changes>=8 && changes<=60,@"Expression visibly changes a small number of face pixels");
+        }
+    }
     for(NSString *role in @[@"head",@"headLeft"]) {
         NSBitmapImageRep *open=[NSBitmapImageRep imageRepWithData:bit.clips[role].frames[0].TIFFRepresentation];
         NSBitmapImageRep *closed=[NSBitmapImageRep imageRepWithData:bit.clips[role].frames[2].TIFFRepresentation]; NSUInteger changed=0;
@@ -76,6 +90,10 @@ static void ArticulatedPack(NSURL *root) {
     bad=MutableJSON(pixelJSON); bad[@"puppet"][@"pixelArt"]=@1; Reject(pixelCopy,bad);
     bad=MutableJSON(pixelJSON); bad[@"puppet"][@"parts"][@"headTurn"][@"pivot"]=@[@99,@99]; Reject(pixelCopy,bad);
     bad=MutableJSON(pixelJSON); [bad[@"puppet"][@"parts"] removeObjectForKey:@"bodyLeft"]; Reject(pixelCopy,bad);
+    bad=MutableJSON(pixelJSON); bad[@"puppet"][@"parts"][@"headPress"][@"anchor"]=@[@40,@49]; Reject(pixelCopy,bad);
+    bad=MutableJSON(pixelJSON); bad[@"puppet"][@"parts"][@"headPress"][@"frames"][0][@"duration"]=@.1; Reject(pixelCopy,bad);
+    bad=MutableJSON(pixelJSON); [bad[@"puppet"][@"parts"] removeObjectForKey:@"headLeft"]; Reject(pixelCopy,bad);
+    puts("PASS: 25 directional expression textures change only eyes; portable round-trip; mismatched registration/timing rejected");
     puts("PASS: pixel rig import/export, optional directional heads, compact stride, stable blink silhouettes and localized eye changes");
 }
 int main(void) {

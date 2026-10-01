@@ -314,6 +314,196 @@
           }
         ]
       },
+      "headHalf": {
+        "pivot": [
+          32,
+          42
+        ],
+        "anchor": [
+          40,
+          50
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "turn-0-half.png",
+            "duration": 0.045,
+            "mask": "turn-0-half-mask.png"
+          },
+          {
+            "image": "turn-1-half.png",
+            "duration": 0.045,
+            "mask": "turn-1-half-mask.png"
+          },
+          {
+            "image": "turn-2-half.png",
+            "duration": 0.045,
+            "mask": "turn-2-half-mask.png"
+          },
+          {
+            "image": "turn-3-half.png",
+            "duration": 0.045,
+            "mask": "turn-3-half-mask.png"
+          },
+          {
+            "image": "turn-4-half.png",
+            "duration": 0.045,
+            "mask": "turn-4-half-mask.png"
+          }
+        ]
+      },
+      "headClosed": {
+        "pivot": [
+          32,
+          42
+        ],
+        "anchor": [
+          40,
+          50
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "turn-0-closed.png",
+            "duration": 0.045,
+            "mask": "turn-0-closed-mask.png"
+          },
+          {
+            "image": "turn-1-closed.png",
+            "duration": 0.045,
+            "mask": "turn-1-closed-mask.png"
+          },
+          {
+            "image": "turn-2-closed.png",
+            "duration": 0.045,
+            "mask": "turn-2-closed-mask.png"
+          },
+          {
+            "image": "turn-3-closed.png",
+            "duration": 0.045,
+            "mask": "turn-3-closed-mask.png"
+          },
+          {
+            "image": "turn-4-closed.png",
+            "duration": 0.045,
+            "mask": "turn-4-closed-mask.png"
+          }
+        ]
+      },
+      "headFocus": {
+        "pivot": [
+          32,
+          42
+        ],
+        "anchor": [
+          40,
+          50
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "turn-0-focus.png",
+            "duration": 0.045,
+            "mask": "turn-0-focus-mask.png"
+          },
+          {
+            "image": "turn-1-focus.png",
+            "duration": 0.045,
+            "mask": "turn-1-focus-mask.png"
+          },
+          {
+            "image": "turn-2-focus.png",
+            "duration": 0.045,
+            "mask": "turn-2-focus-mask.png"
+          },
+          {
+            "image": "turn-3-focus.png",
+            "duration": 0.045,
+            "mask": "turn-3-focus-mask.png"
+          },
+          {
+            "image": "turn-4-focus.png",
+            "duration": 0.045,
+            "mask": "turn-4-focus-mask.png"
+          }
+        ]
+      },
+      "headPress": {
+        "pivot": [
+          32,
+          42
+        ],
+        "anchor": [
+          40,
+          50
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "turn-0-press.png",
+            "duration": 0.045,
+            "mask": "turn-0-press-mask.png"
+          },
+          {
+            "image": "turn-1-press.png",
+            "duration": 0.045,
+            "mask": "turn-1-press-mask.png"
+          },
+          {
+            "image": "turn-2-press.png",
+            "duration": 0.045,
+            "mask": "turn-2-press-mask.png"
+          },
+          {
+            "image": "turn-3-press.png",
+            "duration": 0.045,
+            "mask": "turn-3-press-mask.png"
+          },
+          {
+            "image": "turn-4-press.png",
+            "duration": 0.045,
+            "mask": "turn-4-press-mask.png"
+          }
+        ]
+      },
+      "headRelease": {
+        "pivot": [
+          32,
+          42
+        ],
+        "anchor": [
+          40,
+          50
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "turn-0-release.png",
+            "duration": 0.045,
+            "mask": "turn-0-release-mask.png"
+          },
+          {
+            "image": "turn-1-release.png",
+            "duration": 0.045,
+            "mask": "turn-1-release-mask.png"
+          },
+          {
+            "image": "turn-2-release.png",
+            "duration": 0.045,
+            "mask": "turn-2-release-mask.png"
+          },
+          {
+            "image": "turn-3-release.png",
+            "duration": 0.045,
+            "mask": "turn-3-release-mask.png"
+          },
+          {
+            "image": "turn-4-release.png",
+            "duration": 0.045,
+            "mask": "turn-4-release-mask.png"
+          }
+        ]
+      },
       "bodyLeft": {
         "pivot": [
           34,

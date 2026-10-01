@@ -48,12 +48,27 @@ actual raster connected at 60 tested extensions/lifts. Moving landings follow
 the hips until contact and descend without an extra hop; 63 landing scenarios
 also caught and fixed a one-frame contact slip at 30 Hz. See the
 [leg comparison](media/bit-leg-comparison.png) and [close-up gait](media/bit-gait-detail.gif).
-Native CUA observation again returned `cgWindowNotFound` after these changes;
-the Studio process is still running, so its current settings were left intact.
+Bit now has five directional expression tracks: attentive travel, held-button
+squint, a 0.38-second release sparkle, and half/closed blinks through turns.
+All 25 expression/perspective combinations preserve the generated shell,
+collar, alpha, body and feet in actual Cocoa output. Timing and interrupted
+clicks pass at 30/60/120 Hz. See [the animation](media/bit-face-reactions.gif)
+and [source-pinned evidence](evidence/bit-faces.json).
 
-Next add richer expressions and knee articulation, persist the installed
-collection/settings across launches, and expand the approved art collection. Native integration and
-production cursor size remain separate unresolved gates.
+Native CUA observation recovered. The current build is open with Bit selected,
+shell `#EB504D`, default proportions, the saved Bit Ember entry restored, and
+the walk paused. Travel/release faces were observed live; this is still the
+Studio, not the modified Codex helper.
+
+[Miso](../artwork/miso/README.md) is a new original cream/coral pixel cat-bot
+concept generated in ChatGPT through Brave. Its source PNG, exact prompt and
+provenance are retained. It needs a full rig, authored directions, material
+masks and movement review before collection integration; user approval is
+not claimed.
+
+Next rig Miso, refine knee articulation, and persist the installed
+collection/settings across launches. Native integration and production cursor
+size remain separate unresolved gates.
 
 The root Studio also includes **Pip · Articulated**, a version-3 pack with nine
 independent generated parts, stable blink textures, live torso width/height and

@@ -109,7 +109,27 @@ static void movingLanding(double fps,int offset,bool shortHop) {
     }
     assert(sawLanding && firstContact==expectedLead);
 }
+static void faceFeedback(double fps) {
+    BuddieMotion m; BuddieMotionInit(&m); BuddieRig rig={8,5,2}; double x=0,release=-1000;
+    bool pressed=false;
+    for(int i=0;i<fps*2;i++) {
+        double time=20+i/fps;
+        if(i==5 || i==13) { pressed=true; BuddieMotionPress(&m,true,time); }
+        if(i==10 || i==16) { pressed=false; release=time; BuddieMotionPress(&m,false,time); }
+        bool flight=i>fps && i<fps*1.5;
+        if(flight) x+=80/fps;
+        BuddieMotionUpdate(&m,(BuddiePoint){x,0},time,rig,false);
+        BuddieFace expected=pressed ? BuddieFacePress:time-release<.38 ? BuddieFaceRelease:flight ? BuddieFaceFocus:BuddieFaceIdle;
+        assert(m.pose.face==expected && m.point.x==x);
+    }
+    BuddieMotionPress(&m,true,23); BuddieMotionUpdate(&m,(BuddiePoint){x,0},23,rig,true);
+    assert(m.pose.face==BuddieFacePress);
+    BuddieMotionPress(&m,false,23.1); BuddieMotionUpdate(&m,(BuddiePoint){x+1,0},23.1,rig,true);
+    assert(m.pose.face==BuddieFaceIdle);
+}
 int main(void) {
+    for(int rate=30;rate<=120;rate*=2) faceFeedback(rate);
+    puts("PASS: immediate press, interrupted release, travel focus and Reduced Motion faces at 30/60/120 Hz");
     for(int rate=30;rate<=120;rate*=2) {
         movingLanding(rate,0,true);
         for(int phase=0;phase<20;phase++) movingLanding(rate,phase,false);
