@@ -34,6 +34,12 @@
 @property CGFloat spriteHeight;
 @property BOOL mirrorWalk;
 @property BOOL directionalIdle;
+// Version 3: independent artwork parts, using the same clips/material pipeline.
+@property(copy) NSDictionary<NSString *,NSDictionary *> *puppetParts;
+@property CGFloat puppetMotionScale;
+@property CGFloat torsoWidth;
+@property CGFloat torsoHeight;
+@property CGFloat headScale;
 @property(nonatomic,copy) NSArray<NSDictionary *> *materials;
 @property(nonatomic,copy) NSDictionary<NSString *,NSColor *> *materialColors;
 - (void)prepareAppearance;

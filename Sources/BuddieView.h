@@ -11,6 +11,8 @@
 @property CGFloat characterScale;
 @property(readonly) NSPoint hotspot;
 @property(readonly) CGFloat drawingScale;
+// Read-only geometry for renderer diagnostics, in motion units.
+@property(readonly) BuddiePose motionPose;
 - (void)animateAtTime:(double)time anchor:(BuddiePoint)anchor;
 - (void)press:(BOOL)down atTime:(double)time;
 @end

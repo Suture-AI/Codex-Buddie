@@ -16,31 +16,25 @@ The intended experience is a buddy that **walks along the agent's curved cursor
 path**, stops at the exact hotspot, and animates the click, with no gray arrow or
 glow showing. See the [next implementation brief](docs/next-steps.md).
 
-![Pip motion study rendered by the native Character Studio](docs/media/pip-refined-motion.gif)
+The **Character Studio** includes an articulated Pip study: generated head,
+body, paws and boots with live torso/head proportions, outfit colors, blinking,
+planted walking and bounded fast travel. Editable packs can be imported and
+saved. These are actual Cocoa renderer exports, not live Codex recordings.
 
-The **Character Studio** now opens with **Pip**, a soft otter in a cobalt rain
-hood and orange boots, generated in ChatGPT through Brave. Its full character
-poses preserve the designed face, paws and footwear. It has a matching side-facing six-frame blink
-and an eight-pose walking study, with no tether or procedural face drawn over
-the art. Size, stride, raincoat color and boot color are editable; complete
-animation packs can be imported and saved. Colors retain the artwork's shading
-and highlights. This is the studio's controlled renderer, not live Codex integration.
+![Editable articulated Pip](docs/media/pip-studio-customization.png)
 
-![Pip outfit colors at full and cursor sizes](docs/media/pip-outfit-colors.png)
+The latest user direction is a **smaller retro 8-bit bot**, with soft chunky
+pixel shapes, a simple screen face and substantially better animation. Pip
+remains a customization/motion study. The next original candidate is Bit; see
+[the current brief](docs/art-direction.md).
 
-**Still a motion study.** Pip's direction is awaiting user feedback. Standing now preserves the travel direction. The gait still
-needs stronger leg separation and authored turn/settle poses. Left
-travel currently mirrors the right-facing artwork and its lighting. Sprout,
-Mochi and Orbit are retained as rejected art-direction fixtures, alongside the
-procedural presets. See the [art direction](docs/art-direction.md) and
-[review evidence](artwork/pip/walk-refinement/review.json).
-
-The newer [articulated Pip study](artwork/pip/rig-study/README.md) tests generated
-cutout parts, continuous feet, blink textures and separate head/body proportions.
-Its motion trace uses the native core, including lifted settling and committed
-landings during reversals. It is not yet a selectable Studio pack. See the
-[motion study](docs/media/pip-articulated-study.gif) and
-[proportion comparison](docs/media/pip-articulated-proportions.png).
+[Walking review](docs/media/pip-studio-walk.gif) ·
+[Fast-travel review](docs/media/pip-studio-fast-travel.gif) ·
+[Pack format](docs/characters.md) ·
+[Verification evidence](docs/evidence/articulated-studio.json).
+Instant mirrored turns, joint deformation, production cursor sizing and the
+native service connection remain unfinished. Earlier full-pose Pip and rejected
+Sprout/Mochi/Orbit fixtures remain available for comparison.
 
 ## Additional runtime research
 
@@ -67,9 +61,9 @@ cd Codex-Buddie
 ```
 
 Choose a character, then use **Take a walk**, the three stops, and **Try a click**.
-Changing stops during a walk preserves position and velocity. Pip offers size,
-stride, **Raincoat** and **Boots** controls; click either color well to choose a
-color. The older layered presets also offer body and face controls.
+Changing stops during a walk preserves position and velocity. Articulated Pip
+offers size, body width/height, head size, stride, step height, **Raincoat** and
+**Boots** controls. Click either color well to choose a color.
 **Save a copy…** exports a portable buddy folder; **Import buddy…** opens it again.
 **Native size** compares the small software-cursor layout with the enlarged
 studio view. **Reduced motion** removes autonomous animation and jumps directly

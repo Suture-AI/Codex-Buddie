@@ -1,0 +1,108 @@
+{
+  "status": "Cocoa integration study; not live CUA replacement or user approval",
+  "source_frame_rate": 60,
+  "gif_frame_rate": 30,
+  "slow_frames": 420,
+  "fast_frames": 240,
+  "proportion_corner_bounds": {
+    "limit-0": [
+      341,
+      236,
+      478,
+      414
+    ],
+    "limit-1": [
+      332,
+      236,
+      478,
+      414
+    ],
+    "limit-2": [
+      341,
+      222,
+      478,
+      414
+    ],
+    "limit-3": [
+      332,
+      222,
+      478,
+      414
+    ],
+    "limit-4": [
+      341,
+      203,
+      498,
+      414
+    ],
+    "limit-5": [
+      332,
+      203,
+      498,
+      414
+    ],
+    "limit-6": [
+      341,
+      188,
+      498,
+      414
+    ],
+    "limit-7": [
+      332,
+      188,
+      498,
+      414
+    ]
+  },
+  "checks": [
+    "v1/v2/v3 pack validation and portable editable copies",
+    "120 stop/resume scenarios at 30/60/120 Hz",
+    "15 fast travel/reversal/landing scenarios, 100\u20131600 motion units/sec",
+    "Cocoa contact geometry at six size/zoom combinations",
+    "Reduced Motion and fixed hotspot"
+  ],
+  "limitations": [
+    "Native UI observation still returned cgWindowNotFound; controls were not manually exercised",
+    "Instant mirrored facing still reverses lighting and needs authored turns",
+    "Joint overlap and sprint entry/landing need further visual refinement",
+    "Full cursor-size legibility and live native IPC remain unresolved",
+    "One original character; complete multi-character collection pending"
+  ],
+  "sha256": {
+    "Characters/pip-articulated/body-mask.png": "752d0297574de324ff80dff65bd960dbe9313f572cc622242623743af3ccd804",
+    "Characters/pip-articulated/body.png": "787591abc2bfcd805821e03caee446d81372402785dad3bb455f8617b008ead1",
+    "Characters/pip-articulated/buddy.json": "bfa8d961194ab3b23aef98ac96e969797e9e9dcc1d24dc5cfe2ef1a24e16dcf4",
+    "Characters/pip-articulated/farBoot-mask.png": "5738cd20f3f0b579809df37fd1ea1393182cc680eab86deddbd1f4364129ea03",
+    "Characters/pip-articulated/farBoot.png": "a625e1db126cb2e8990fecd1acd89b34482b5322085840d1649f61dc1a76e78f",
+    "Characters/pip-articulated/farLeg-mask.png": "1c1d6c14c7b9b02892fd31f0d1f05b746bf25bc7e7d0eea2e1d6b74ef6a41d58",
+    "Characters/pip-articulated/farLeg.png": "c900beccdaa4b4762825ed8cff02efbdc7f2d60efeadbe02f4d54ffcfcdf5030",
+    "Characters/pip-articulated/head-closed-mask.png": "b23bae65c94c447ef33298efa6536227644ff96eb527d9014dc3b04e7f003148",
+    "Characters/pip-articulated/head-closed.png": "40c7cfd40fe8bae169bba2f0f8b458a35db567a096340bbb754b6788bf1aaad0",
+    "Characters/pip-articulated/head-half-mask.png": "a957b19c4b63784f0d87348bdf9175dc34ffa0cb92236f347247b0dea32b70d5",
+    "Characters/pip-articulated/head-half.png": "8934881218a80aec15b5ba053b0671b3f1dfed5b19083ddd09a16537f45ca5df",
+    "Characters/pip-articulated/head-open-mask.png": "ce0661ac7b267bbdbd5da164f059aca49f5ee21c0e660e350309c89508339295",
+    "Characters/pip-articulated/head-open.png": "6ca39ca4366cf74aeaf27f2bf7767804bd0ccf7b819a7c29b28290b8d750b983",
+    "Characters/pip-articulated/nearBoot-mask.png": "b70c615be058b79a012c4709e07255643619c26df4e5283cb21ebe46bf767bb7",
+    "Characters/pip-articulated/nearBoot.png": "d382862442b39b1d652a1e837c8844663f3532febde996fdf3aa6346d4dff699",
+    "Characters/pip-articulated/nearLeg-mask.png": "b8f39ae9f45262f48c670bc91bb2339a558d108e9050df13a01103b2ed8e3965",
+    "Characters/pip-articulated/nearLeg.png": "8b1f204593089416134f5475824dd51a1dfa823dfee67f07485a918006b88bc0",
+    "Characters/pip-articulated/paw-mask.png": "9ba2aa3cbfc543c76d01651fa8b000cf692fae63025224b3029382aac86247b6",
+    "Characters/pip-articulated/paw.png": "eedc52886b5cfba4834f812d8c18ed9faffacf89a48924fc2af0e26f238006d4",
+    "Characters/pip-articulated/tail-mask.png": "d9d336a89dbf95a39d660079930abce3d1469fc20ccd4eb6bab1df4f74a2f540",
+    "Characters/pip-articulated/tail.png": "fc6b3d7dd34607d0a7fb7c5eee827b4eb44db0b6b7054cb3a6181f15e7fd7751",
+    "Sources/BuddieCharacter.h": "6accc40b5773bbce819fbc00f5d1c10de7c8285fc6f5e925f5d965d005ecd6c9",
+    "Sources/BuddieCharacter.m": "dd37ec5e2e72bd4decdaf1c0781983114e9016c833092f3f8888dafdfa27f77b",
+    "Sources/BuddieMotion.c": "6a82918058001007cb20414e0060fa9798f25eb8feb7c34492338f2983bf87cc",
+    "Sources/BuddieMotion.h": "b46ad692445455b98e958dfaa01a9e50ffdaf9b570ebfc2ee457c36e75374ad4",
+    "Sources/BuddiePuppet.h": "7cb0039bee11a2f12aea60c3f2cbe0dc7f7416f852faa2ac05751cf848471514",
+    "Sources/BuddiePuppet.m": "12238d97f160362c687a7a9968ac9590dbc64edb5a91bed65711734292e33082",
+    "Sources/BuddieView.h": "a02995b97e876fbde67e28382e85f0e6557e3950f6f2b5075713fdf5cda9a669",
+    "Sources/BuddieView.m": "d8280d74f484b75563173f173d44f5efadd2c75315ac4153274b435d286151f5",
+    "Sources/Preview.m": "bba4653a470c5651d39fd3484a8f14165d18414080d1c5b06fd3292f0fc6cd0b",
+    "docs/media/pip-studio-customization.png": "ab8fa61aa9c112a487ef06c07ee34b6a21fdec95fdd027e914d02d58fbe952bd",
+    "docs/media/pip-studio-fast-travel.gif": "2dc1a2dbf4c02527a48898af6d4d97ae71a86989a440ee4d0ca5cbb4a1bd3ee4",
+    "docs/media/pip-studio-walk.gif": "a421f16306a12db5d7fa2ec73aebb8bcdfb737549ec1b425c5284a83b10335a8",
+    "scripts/build-pip-puppet.py": "8b4ca8df2a1d0154efe1f7ef5c3adddfc090ce09b49dda5b9fc2f6784abadaa5",
+    "scripts/review-pip-puppet.py": "56b2e746cb61c6815d845fe9554a1f5f42b35184b1471769ee480ee026f3dece"
+  }
+}

@@ -2,6 +2,7 @@
 #import <objc/runtime.h>
 #import <dlfcn.h>
 #import "BuddieView.h"
+#import "BuddiePuppet.h"
 
 static Class cursorClass, fogClass;
 static NSColor *Ink(void) { return [NSColor colorWithSRGBRed:.16 green:.22 blue:.19 alpha:1]; }
@@ -17,7 +18,7 @@ static NSButton *Button(NSString *s, id target, SEL action, NSRect frame) {
 static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     NSMutableArray *all=[NSMutableArray new];
     NSURL *root=[NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Characters"];
-    for(NSString *name in @[@"pip",@"sprout",@"mochi",@"orbit"]) {
+    for(NSString *name in @[@"pip",@"pip-articulated",@"sprout",@"mochi",@"orbit"]) {
         NSError *error=nil; BuddieCharacter *c=[BuddieCharacter loadPack:[root URLByAppendingPathComponent:name] error:&error];
         if(c) [all addObject:c];
     }
@@ -76,10 +77,13 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [v addSubview:Label(@"YOUR COLLECTION",11,NSColor.secondaryLabelColor,NSMakeRect(700,643,230,20))];
     self.picker=[[NSPopUpButton alloc] initWithFrame:NSMakeRect(696,599,230,34) pullsDown:NO];
     for(BuddieCharacter *c in self.collection) [self.picker addItemWithTitle:c.name];
+    for(NSUInteger i=0;i<self.collection.count;i++) if([self.collection[i].identifier isEqual:@"pip-articulated"]) {
+        [self.picker selectItemAtIndex:i]; self.character=[self.collection[i] copy]; break;
+    }
     self.picker.target=self; self.picker.action=@selector(selectCharacter:); [v addSubview:self.picker];
     [v addSubview:Button(@"Import buddy…",self,@selector(importPack:),NSMakeRect(696,558,230,32))];
     self.settingsHeading=Label(@"SHAPE & EXPRESSION",11,NSColor.secondaryLabelColor,NSMakeRect(700,508,230,20)); [v addSubview:self.settingsHeading];
-    NSArray *settings=@[@[@"width",@"Body width",@24,@42],@[@"height",@"Body height",@24,@40],@[@"eyeSpacing",@"Eye spacing",@8,@20],@[@"eyeSize",@"Eye size",@3,@7],@[@"faceY",@"Face position",@(-7),@7],@[@"stride",@"Stride",@16,@40],@[@"footLift",@"Step height",@2,@8],@[@"spriteHeight",@"Size",@32,@96]];
+    NSArray *settings=@[@[@"width",@"Body width",@24,@42],@[@"height",@"Body height",@24,@40],@[@"eyeSpacing",@"Eye spacing",@8,@20],@[@"eyeSize",@"Eye size",@3,@7],@[@"faceY",@"Face position",@(-7),@7],@[@"stride",@"Stride",@16,@40],@[@"footLift",@"Step height",@2,@8],@[@"spriteHeight",@"Size",@32,@96],@[@"torsoWidth",@"Body width",@.85,@1.22],@[@"torsoHeight",@"Body height",@.85,@1.18],@[@"headScale",@"Head size",@.85,@1.15]];
     int row=0;
     for(NSArray *setting in settings) {
         CGFloat y=465-row*43;
@@ -113,9 +117,9 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [NSRunLoop.mainRunLoop addTimer:self.timer forMode:NSRunLoopCommonModes];
 }
 - (void)syncSliders {
-    BOOL sprite=self.character.clips.count>0;
+    BOOL sprite=self.character.clips.count>0,puppet=self.character.puppetParts.count>0;
     self.settingsHeading.stringValue=sprite ? @"MAKE IT YOURS":@"SHAPE & EXPRESSION";
-    self.artNote.hidden=!sprite;
+    self.artNote.hidden=!sprite || puppet;
     self.artNote.stringValue=self.character.materials.count ? @"Your colors, with all the original shading. Save a copy to keep this look.":@"The face and outfit belong together. Import another buddy to try a different look.";
     self.artNote.frame=NSMakeRect(700,self.character.materials.count ? 202:315,218,65);
     for(NSView *control in self.materialControls) {
@@ -125,7 +129,7 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
     [self.materialControls removeAllObjects];
     NSUInteger row=0;
     for(NSDictionary *material in self.character.materials) {
-        CGFloat y=369-42*row++;
+        CGFloat y=puppet ? 247-35*row++:369-42*row++;
         NSTextField *label=Label(material[@"name"],12,Ink(),NSMakeRect(700,y+6,130,20));
         NSColorWell *well=[[NSColorWell alloc] initWithFrame:NSMakeRect(858,y,66,30)];
         well.identifier=material[@"id"]; well.accessibilityLabel=material[@"name"];
@@ -133,15 +137,17 @@ static NSArray<BuddieCharacter *> *BuddieCollection(void) {
         [self.materialControls addObjectsFromArray:@[label,well]];
         [self.window.contentView addSubview:label]; [self.window.contentView addSubview:well];
     }
+    NSArray *visible=puppet ? @[@"spriteHeight",@"torsoWidth",@"torsoHeight",@"headScale",@"stride",@"footLift"]:sprite ? @[@"spriteHeight",@"stride"]:@[@"width",@"height",@"eyeSpacing",@"eyeSize",@"faceY",@"stride",@"footLift"];
     for(NSString *key in self.sliders) {
         self.sliders[key].doubleValue=[key isEqual:@"width"] ? self.character.bodySize.width : [key isEqual:@"height"] ? self.character.bodySize.height : [[self.character valueForKey:key] doubleValue];
-        BOOL supported=sprite ? [@[@"stride",@"spriteHeight"] containsObject:key]:![key isEqual:@"spriteHeight"];
+        BOOL supported=[visible containsObject:key];
         self.sliders[key].hidden=!supported; self.settingLabels[key].hidden=!supported;
-        CGFloat y=[key isEqual:@"stride"] ? (sprite ? 422:250):[key isEqual:@"spriteHeight"] ? 465:self.sliders[key].frame.origin.y-4;
+        if(!supported) continue;
+        CGFloat y=465-[visible indexOfObject:key]*(puppet ? 35:43);
         [self.sliders[key] setFrameOrigin:NSMakePoint(809,y+4)];
         [self.settingLabels[key] setFrameOrigin:NSMakePoint(700,y+6)];
     }
-    self.status.stringValue=self.character.clips.count ? @"Complete character poses • motion study • live Codex replacement is still under development":@"Character preview • live Codex replacement is still under development";
+    self.status.stringValue=puppet ? @"Articulated character study • live Codex replacement is still under development":sprite ? @"Complete character poses • motion study • live Codex replacement is still under development":@"Character preview • live Codex replacement is still under development";
 }
 - (void)paint:(NSColorWell *)sender {
     NSColor *color=[[sender.color colorUsingColorSpace:NSColorSpace.sRGBColorSpace] colorWithAlphaComponent:1];
@@ -265,7 +271,8 @@ static int ExportFrames(NSString *path, NSString *identifier) {
             if(i==175) [view press:YES atTime:now];
             if(i==185) [view press:NO atTime:now];
             view.exportHotspot=NSMakePoint(point.x,point.y);
-            [view animateAtTime:now anchor:(BuddiePoint){point.x/2,point.y/2}];
+            double scale=view.drawingScale;
+            [view animateAtTime:now anchor:(BuddiePoint){point.x/scale,point.y/scale}];
             NSBitmapImageRep *rep=[[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL pixelsWide:840 pixelsHigh:480 bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace bytesPerRow:0 bitsPerPixel:0];
             [view cacheDisplayInRect:view.bounds toBitmapImageRep:rep];
             NSString *filename=[path stringByAppendingPathComponent:[NSString stringWithFormat:@"frame-%04d.png",frame]];
@@ -295,6 +302,79 @@ static int ExportPalettes(NSString *path) {
         }
     }
     printf("Exported four palettes, each with all 14 poses, to %s\n",path.UTF8String); return 0;
+}
+
+static BuddieCharacter *ArticulatedPip(void) {
+    for(BuddieCharacter *c in BuddieCollection()) if([c.identifier isEqual:@"pip-articulated"]) return [c copy];
+    return nil;
+}
+static BOOL SaveView(NSView *view, NSString *path) {
+    NSBitmapImageRep *rep=[[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL pixelsWide:view.bounds.size.width pixelsHigh:view.bounds.size.height bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace bytesPerRow:0 bitsPerPixel:0];
+    [view cacheDisplayInRect:view.bounds toBitmapImageRep:rep];
+    return [[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:path atomically:YES];
+}
+static int ExportPuppet(NSString *path) {
+    if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
+    NSWindow *window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,840,480) styleMask:0 backing:NSBackingStoreBuffered defer:NO];
+    ExportView *view=[[ExportView alloc] initWithFrame:NSMakeRect(0,0,840,480)]; view.manualAnimation=YES; view.characterScale=2; window.contentView=view;
+    view.character=ArticulatedPip(); if(!view.character) return 1;
+    for(int i=0;i<420;i++) {
+        double time=i/60.,x=time<.5 ? 0:time<3.5 ? (time-.5)*24:time<4 ? 72:time<5.5 ? 72-(time-4)*24:36;
+        double physical=2*view.character.spriteHeight/view.character.spriteCanvas.height*view.character.puppetMotionScale;
+        view.exportHotspot=NSMakePoint(260+x*physical,190);
+        [view animateAtTime:100+time anchor:(BuddiePoint){view.exportHotspot.x/view.drawingScale,190/view.drawingScale}];
+        if(!SaveView(view,[path stringByAppendingPathComponent:[NSString stringWithFormat:@"slow-%04d.png",i]])) return 1;
+    }
+    BuddieView *still=[[BuddieView alloc] initWithFrame:NSMakeRect(0,0,448,448)]; still.manualAnimation=YES; still.reduceMotion=YES; still.characterScale=3.3; window.contentView=still;
+    NSArray *variants=@[@[@"Original",@1,@1,@1],@[@"Round",@1.22,@.94,@1],@[@"Tall",@.92,@1.18,@.96],@[@"Big-hood",@1,@1,@1.15]];
+    for(NSArray *variant in variants) {
+        still.character=ArticulatedPip(); still.character.torsoWidth=[variant[1] doubleValue]; still.character.torsoHeight=[variant[2] doubleValue]; still.character.headScale=[variant[3] doubleValue];
+        [still animateAtTime:100 anchor:(BuddiePoint){0,0}];
+        if(!SaveView(still,[path stringByAppendingPathComponent:[variant[0] stringByAppendingString:@".png"]])) return 1;
+    }
+    unsigned int coats[]={0xD65378,0x668D4E,0x967AD3},boots[]={0x4A6394,0xF1AF46,0xEAD38E};
+    NSArray *names=@[@"Rose",@"Moss",@"Lilac"];
+    NSColor *(^color)(unsigned int)=^NSColor *(unsigned int n) { return [NSColor colorWithSRGBRed:((n>>16)&255)/255. green:((n>>8)&255)/255. blue:(n&255)/255. alpha:1]; };
+    for(int i=0;i<3;i++) {
+        still.character=ArticulatedPip(); still.character.materialColors=@{@"coat":color(coats[i]),@"boots":color(boots[i])}; [still.character prepareAppearance];
+        [still animateAtTime:100 anchor:(BuddiePoint){0,0}];
+        if(!SaveView(still,[path stringByAppendingPathComponent:[names[i] stringByAppendingString:@".png"]])) return 1;
+    }
+    for(int i=0;i<8;i++) {
+        still.character=ArticulatedPip(); still.character.torsoWidth=i&1 ? 1.22:.85; still.character.torsoHeight=i&2 ? 1.18:.85; still.character.headScale=i&4 ? 1.15:.85;
+        [still animateAtTime:100 anchor:(BuddiePoint){0,0}];
+        if(!SaveView(still,[path stringByAppendingPathComponent:[NSString stringWithFormat:@"limit-%d.png",i]])) return 1;
+    }
+    puts("Exported articulated Cocoa slow gait, proportion variants, palettes and all eight proportion corners."); return 0;
+}
+
+static void TestPuppet(BuddieView *view) {
+    BuddieCharacter *pip=ArticulatedPip(); NSCAssert(pip,@"Bundled articulated Pip loads");
+    for(int height=32;height<=96;height+=32) for(int zoom=1;zoom<=2;zoom++) {
+        view.character=[pip copy]; view.character.spriteHeight=height; view.characterScale=zoom; view.reduceMotion=NO;
+        double scale=view.drawingScale,unit=scale*height/pip.spriteCanvas.height;
+        [view animateAtTime:300 anchor:(BuddiePoint){0,0}];
+        for(int i=1;i<=120;i++) {
+            BuddiePose before=view.motionPose; double oldX=(i-1)*.3*unit*pip.puppetMotionScale,x=i*.3*unit*pip.puppetMotionScale;
+            [view animateAtTime:300+i/60. anchor:(BuddiePoint){x/scale,0}]; BuddiePose after=view.motionPose;
+            for(int f=0;f<2;f++) if(before.footLift[f]<1e-8 && after.footLift[f]<1e-8 && !NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion) {
+                NSPoint a=BuddiePuppetSole(view.character,before,f),b=BuddiePuppetSole(view.character,after,f);
+                NSCAssert(fabs(oldX+a.x*unit-x-b.x*unit)<1e-7,@"Rendered soles stay planted at every display size and zoom");
+            }
+        }
+    }
+    view.character=[pip copy]; view.characterScale=2; view.reduceMotion=YES;
+    NSData *(^snapshot)(void)=^NSData *{
+        NSBitmapImageRep *rep=[view bitmapImageRepForCachingDisplayInRect:view.bounds]; [view cacheDisplayInRect:view.bounds toBitmapImageRep:rep];
+        return [rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+    };
+    [view animateAtTime:400 anchor:(BuddiePoint){0,0}]; NSData *original=snapshot(); NSPoint hotspot=view.hotspot;
+    [view animateAtTime:401 anchor:(BuddiePoint){30,0}]; NSCAssert([original isEqual:snapshot()],@"Articulated Reduced Motion is stable");
+    view.character.torsoWidth=1.22; view.character.torsoHeight=1.18; view.character.headScale=1.15;
+    [view animateAtTime:402 anchor:(BuddiePoint){30,0}]; NSCAssert(![original isEqual:snapshot()],@"Live proportions change actual rendered pixels");
+    [view press:YES atTime:402]; [view animateAtTime:402.1 anchor:(BuddiePoint){30,0}];
+    NSCAssert(NSEqualPoints(hotspot,view.hotspot),@"Proportions and clicks never change the native hotspot");
+    puts("PASS: articulated Cocoa rendering; live proportions; Reduced Motion; six size/zoom combinations preserve planted contacts; exact hotspot");
 }
 
 static int SelfTest(void) {
@@ -347,6 +427,7 @@ static int SelfTest(void) {
     }
     puts("PASS: software + fog replacement, unchanged geometry, detached artwork, repeated assignment, unrelated windows, unknown renderer fallback");
     puts("PASS: complete sprite drawing, timed blink, Reduced Motion stability, stopped facing, unchanged sprite hotspot");
+    TestPuppet(sprite);
     return 0;
 }
 int main(int argc,const char **argv) {
@@ -359,6 +440,7 @@ int main(int argc,const char **argv) {
         if(argc>1 && strcmp(argv[1],"--self-test")==0) return SelfTest();
         if(argc>2 && strcmp(argv[1],"--export-frames")==0) return ExportFrames([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:nil);
         if(argc>2 && strcmp(argv[1],"--export-palettes")==0) return ExportPalettes([NSString stringWithUTF8String:argv[2]]);
+        if(argc>2 && strcmp(argv[1],"--export-puppet")==0) return ExportPuppet([NSString stringWithUTF8String:argv[2]]);
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         Delegate *delegate=[Delegate new]; NSApp.delegate=delegate; [NSApp run];
     }

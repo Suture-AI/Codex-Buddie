@@ -1,5 +1,13 @@
 # Articulated Pip study
 
+The original offline proof below is retained as historical evidence. Its input
+trace and source hashes in `review.json` belong to that revision. The rig is now
+a selectable version-3 Studio pack with real Cocoa rendering, live proportions,
+editable colors and save/import; see the [current pack documentation](../../../docs/characters.md#version-3-articulated-character-parts) and
+[Cocoa review](../../../docs/evidence/articulated-studio.json). The user has since
+steered the visual direction toward a smaller retro pixel bot; Pip remains an
+animation/customization study.
+
 The complete-pose walk study repeats the leading-foot relationship in several
 poses. Extra frames cannot correct that underlying anatomy. This experiment
 uses original, separately generated cutout artwork with the native motion core
@@ -45,9 +53,8 @@ detection uses velocity, so it does not disappear at higher refresh rates.
 
 The renderer independently changes torso width, torso height and head size;
 attachment positions follow the changed proportions. These settings are shown
-in the comparison above. The native Studio does not yet expose this cutout rig
-as an importable/selectable pack. Its existing complete-pose Pip stays the
-default, with the outfit-color controls from the previous update.
+in the comparison above. The initial offline revision did not expose these controls in Studio. They
+are now available in **Pip · Articulated**, alongside size, gait and outfit colors.
 
 ## Reproduce
 
@@ -63,14 +70,13 @@ bash scripts/test-animation.sh
 ```
 
 Review the [contact sheet](../../../docs/media/pip-articulated-contact.png) as
-well as the loop. This prototype intentionally avoids a new public pack schema
-until joint overlap, silhouettes and motion have been reviewed together.
+well as the loop. The initial prototype preceded the version-3 schema. Use the current Cocoa
+exports to assess the integration; these older images remain trace evidence.
 
 ## Remaining quality gates
 
-- Integrate validated cutout parts, masks, settings and rendering in Cocoa and
-  the collection/import/export UI. Existing version-2 frame packs must remain
-  compatible.
+- Cocoa/pack integration is implemented; manual control testing remains
+  pending while native UI observation is unavailable. Version-2 packs still pass.
 - Author actual turning art. The study still mirrors the character instantly
   and reverses the light; a physically stable foot coordinate does not make that
   turn visually seamless.

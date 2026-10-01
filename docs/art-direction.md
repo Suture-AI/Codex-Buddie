@@ -5,6 +5,15 @@ chose a graphic designer-toy direction, then clarified the reference as
 **ChatGPT Pets: still soft, simple and cute, with substantially better design
 than the pear-like first character**. Complex sci-fi machinery is not the target.
 
+**Latest correction:** Pip is cool, but the user wants a **smaller retro 8-bit
+bot**, and substantially better animation. They supplied an image of a compact
+blue Codex pet with a dark screen face, simple cyan eyes, chunky pixel contours,
+a tiny torso and short feet. Use this as a style/motion reference for original
+art. The next candidate is Bit: a compact blue screen-faced robot with an offset
+antenna. Keep the silhouette soft through stepped pixel shapes, a limited
+palette and readable expressions. Prioritize proper steps, blinks and turns.
+Pip remains a renderer/customization study, not the final visual target.
+
 ## Reference review
 
 Reviewed the official [Pets documentation](https://learn.chatgpt.com/docs/pets)
@@ -21,7 +30,7 @@ Observed design strengths to carry into original characters:
 - Compact proportions, readable eyes, restrained detail, and clear color groups.
 - Personality comes from expression, posture and gesture as much as texture.
 
-## New concept: Pip
+## Earlier concept: Pip
 
 An original tiny otter explorer in a cobalt rain hood and tangerine boots, with
 warm cream facial markings, small paws, a curved tail and compact proportions.

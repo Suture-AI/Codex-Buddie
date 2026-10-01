@@ -2,12 +2,48 @@
 
 A buddy is a local directory containing `buddy.json` and optional transparent
 PNG artwork. No executable code, remote URLs, or credentials are needed. The
-studio bundles Pip's complete-pose motion study, three earlier generated rig
+studio bundles Pip's articulated and complete-pose studies, three earlier generated rig
 fixtures and three procedural alternatives.
+
+## Version 3: articulated character parts
+
+[`Characters/pip-articulated/buddy.json`](../Characters/pip-articulated/buddy.json)
+is a working example. This format separates generated artwork into nine named
+parts: `head`, `body`, `tail`, `pawNear`, `pawFar`, `legNear`, `legFar`,
+`bootNear`, `bootFar`. It currently describes a biped with a tail. It is not yet
+a universal rig for arbitrary anatomy.
+
+Use a `puppet` object instead of `sprites`. It shares version 2's `canvas`,
+`hotspot`, `height`, `mirrorWalk` and optional `materials`. `parts` replaces
+`clips`; each part contains its own `frames` array, a source-image `pivot`, a
+canvas-space `anchor` and a `scale` (0.01–4). Legs also require a `cuff` offset
+from the boot's sole and a positive `span`, their neutral displayed length.
+Each part's frames share dimensions, at most 1024 pixels per dimension, and its
+pivot must lie inside that artwork. The whole pack shares the 64-frame/64 MB
+budget, local PNG restrictions and material-mask validation.
+
+`motionScale` (0.25–8) maps motion units to canvas pixels. The renderer removes
+this scale, canvas-to-points scale and view zoom from cursor travel before
+updating the gait. This keeps planted soles fixed at different sizes. The
+hotspot, foot contacts and boot orientation do not inherit torso bob/stretch.
+The head and arm attachment positions follow the torso's proportions.
+
+`proportions` supports `torsoWidth` (0.85–1.22), `torsoHeight` (0.85–1.18) and
+`headScale` (0.85–1.15), each defaulting to 1. Studio exposes these alongside
+size, stride, step height and material colors. Save/import preserves the
+original part pixels, masks, blink timings, attachments and selected values.
+Version 1 and 2 packs remain supported. Reduced Motion holds the first textures
+with neutral feet. The generated eye patches change only the eyelids.
+
+Review [Cocoa customization](media/pip-studio-customization.png),
+[walking](media/pip-studio-walk.gif), [fast travel](media/pip-studio-fast-travel.gif)
+and [verification evidence](evidence/articulated-studio.json). The renderer is
+working in the lab; authored turns, more natural joints, final pixel-bot art,
+production sizing and live native integration remain unfinished.
 
 ## Version 2: complete character poses
 
-Use this format for new characters. Faces, clothing, hands and footwear stay in
+Use this format for complete authored poses. Faces, clothing, hands and footwear stay in
 the artwork. The renderer adds no generic eyes, legs or tether. See
 [`Characters/pip/buddy.json`](../Characters/pip/buddy.json) for a working pack.
 
@@ -42,7 +78,7 @@ exactly to the native view's click coordinate. Mirroring uses this same pivot.
 (1/120–30). At most 64 frames and 64 MB of decoded pixel artwork are accepted.
 Duplicate filenames share the loaded image. Files remain local and data-only.
 
-Idle follows elapsed time. Walking follows distance divided by `rig.stride`;
+Idle follows elapsed time. Ordinary walking follows distance divided by `rig.stride`;
 durations determine each pose's share of a cycle. Missing walking clips leave
 the idle artwork visible. `mirrorWalk: true` explicitly allows the rightward
 clip to serve left travel when no `walkLeft` exists. Mirroring also reverses
@@ -187,6 +223,11 @@ detail, gentle upper-left lighting, and an empty central face area for the rig.
 outputs body, face and independent foot poses; it never writes the cursor
 position. Gait phase advances by distance, contact points remain in world space,
 and a pause or teleport resets safely. Motion is normalized by drawing scale.
+At more than four strides per second the core uses a bounded airborne gait;
+its cycle is capped at 5 Hz so rapid cursor travel does not drag a planted leg
+across the screen. It returns below 2.5 strides per second, landing each foot
+over 0.18/0.24 seconds. This is a stylized fast-travel fallback, not a finished
+authored run cycle. Neither gait changes the input pointer trajectory.
 
 `BuddieJourney` is the **studio-only** motion driver: a smooth curved trajectory
 with continuous position/velocity on retarget and zero velocity at arrival.

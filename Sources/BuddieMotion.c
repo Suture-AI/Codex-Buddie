@@ -35,7 +35,7 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
     double distance=length(delta);
     bool discontinuity=!s->initialized || dt>.25 || distance>180;
     if (discontinuity) {
-        s->phase=0; s->speed=0; s->walkWeight=0; s->moving=false;
+        s->phase=0; s->speed=0; s->walkWeight=0; s->moving=false; s->airborne=false; s->flightPhase=0;
         for (int i=0;i<2;i++) {
             s->foot[i]=(BuddiePoint){(i?1:-1)*rig.footSpacing,0};
             s->planted[i]=add(anchor,s->foot[i]); s->swingStart[i]=s->planted[i]; s->stance[i]=true;
@@ -57,6 +57,21 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
     }
     bool walking=traveling || (s->moving && time-s->lastMotion<.08);
     s->walkWeight=mix(s->walkWeight,walking?1:0,1-exp(-dt/(walking?.06:.14)));
+    // A cursor can cross many body lengths per second. Beyond a readable gait,
+    // take both feet off the ground instead of dragging a planted leg forever.
+    // Hysteresis prevents alternating walk/flight around the speed threshold.
+    bool flight=!reduced && length(raw)>rig.stride*(s->airborne ? 2.5:4);
+    if(flight && !s->airborne) s->flightPhase=s->phase;
+    if(flight) s->flightPhase=fmod(s->flightPhase+dt*clamp(length(raw)/rig.stride,2.5,5),1);
+    if(s->airborne && !flight && !reduced) {
+        for(int i=0;i<2;i++) {
+            s->settling[i]=true; s->swinging[i]=false; s->settleAt[i]=time;
+            s->settleFrom[i]=add(anchor,s->foot[i]);
+            s->settleTo[i]=add(anchor,(BuddiePoint){(i?1:-1)*rig.footSpacing,0});
+            s->settleLift[i]=s->pose.footLift[i]; s->settleDuration[i]=.18+i*.06;
+        }
+    }
+    s->airborne=flight;
     if(!walking && !reduced) {
         if(s->moving) for(int i=0;i<2;i++) { s->planted[i]=add(s->point,s->foot[i]); s->swinging[i]=false; }
         if(!s->settling[0] && !s->settling[1]) {
@@ -85,6 +100,12 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
         if(reduced) {
             s->settling[i]=false; s->swinging[i]=false; s->foot[i]=base; s->pose.footLift[i]=0;
             s->planted[i]=add(anchor,base); stance=true;
+        } else if(flight) {
+            double cycle=2*pi*(s->flightPhase+i*.5);
+            BuddiePoint target=add(base,mul(s->direction,sin(cycle)*rig.stride*.18));
+            s->foot[i]=lerp(s->foot[i],target,1-exp(-dt/.045));
+            s->pose.footLift[i]=mix(s->pose.footLift[i],rig.footLift*(.8+.5*(1-cos(cycle))),1-exp(-dt/.035));
+            s->planted[i]=add(anchor,s->foot[i]); s->settling[i]=false; s->swinging[i]=false; stance=false;
         } else if(s->settling[i]) {
             // Finish this short landing even when travel resumes. A new stride
             // then starts from the actual landing, not a stale swing origin.
@@ -130,15 +151,16 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
         s->pose.feet[i]=s->foot[i];
     }
     s->point=anchor; s->lastTime=time; s->initialized=true; s->moving=walking;
-    s->pose.phase=s->phase; s->pose.walkWeight=s->walkWeight;
-    double cycle=2*pi*s->phase;
+    s->pose.phase=flight ? s->flightPhase:s->phase; s->pose.walkWeight=s->walkWeight;
+    double cycle=2*pi*s->pose.phase;
     double releaseAge=time-s->releasedAt;
     double tap=releaseAge>=0 && releaseAge<.5 ? exp(-releaseAge*12)*sin(releaseAge*22) : 0;
     double blinkClock=fmod(time,4.9);
     double blink=blinkClock<.15 ? pow(sin(pi*blinkClock/.15),2) : 0;
     double desiredSquash=s->pressed?.91:1+tap*.055;
     s->pose.squash=reduced?(s->pressed?.96:1):mix(s->pose.squash,desiredSquash,1-exp(-dt/.045));
-    s->pose.bodyY=reduced?0:-fabs(sin(cycle))*2.1*s->walkWeight+sin(time*2.1)*.45*(1-s->walkWeight);
+    double bob=flight ? -2.1-fabs(sin(2*pi*s->flightPhase))*.7:-fabs(sin(cycle))*2.1*s->walkWeight+sin(time*2.1)*.45*(1-s->walkWeight);
+    s->pose.bodyY=reduced?0:mix(s->pose.bodyY,bob,1-exp(-dt/.05));
     s->pose.lean=reduced?0:clamp(s->velocity.x/700,-.1,.1)*s->walkWeight;
     s->pose.eyeOpen=reduced?1:clamp((1-blink)*(s->pressed?.65:1),.07,1);
     double gazeX=walking?s->direction.x*2.3:sin(time*.57)*.7;

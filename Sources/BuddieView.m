@@ -1,4 +1,5 @@
 #import "BuddieView.h"
+#import "BuddiePuppet.h"
 #import <objc/runtime.h>
 
 static void Oval(NSRect r, NSColor *c) { [c setFill]; [[NSBezierPath bezierPathWithOvalInRect:r] fill]; }
@@ -7,7 +8,7 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 }
 @interface BuddieView () {
     BuddieMotion _motion;
-    double _spriteEpoch, _spriteEventAt;
+    double _spriteEpoch, _spriteEventAt, _puppetElapsed, _lastMotionScale;
     BOOL _spriteFacingLeft, _spriteReleasing;
 }
 @property NSTimer *animationTimer;
@@ -23,12 +24,15 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 }
 - (BOOL)isFlipped { return YES; }
 - (BOOL)isOpaque { return NO; }
+- (BuddiePose)motionPose { return _motion.pose; }
 - (NSView *)hitTest:(NSPoint)p { return nil; }
 - (void)dealloc { [_animationTimer invalidate]; }
 - (void)setCharacter:(BuddieCharacter *)character {
     _character=character ?: [BuddieCharacter new]; BuddieMotionInit(&_motion);
+    _motion.pose.feet[0].x=-_character.footSpacing; _motion.pose.feet[1].x=_character.footSpacing;
     [_character prepareAppearance];
     _spriteFacingLeft=NO; _spriteReleasing=NO; _spriteEpoch=NAN;
+    _puppetElapsed=0; _lastMotionScale=0;
     self.spriteClipName=@"idle"; self.spriteFrame=0; self.needsDisplay=YES;
 }
 - (void)setManualAnimation:(BOOL)value { _manualAnimation=value; [self configureTimer]; }
@@ -63,10 +67,19 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 - (void)animateAtTime:(double)time anchor:(BuddiePoint)anchor {
     BuddieCharacter *c=self.character;
     BOOL reduced=self.reduceMotion || NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;
+    if(c.puppetParts.count) {
+        // Callers remove drawingScale. Remove the remaining canvas -> points
+        // conversion as well, so a planted sole cancels the exact screen travel.
+        double unit=c.spriteHeight/c.spriteCanvas.height*c.puppetMotionScale;
+        double geometry=unit*self.drawingScale;
+        if(fabs(geometry-_lastMotionScale)>1e-8) { BOOL pressed=_motion.pressed; BuddieMotionInit(&_motion); _motion.pressed=pressed; _lastMotionScale=geometry; }
+        anchor.x/=unit; anchor.y/=unit;
+    }
     BuddieMotionUpdate(&_motion,anchor,time,(BuddieRig){c.stride,c.footSpacing,c.footLift},reduced);
     if(c.clips.count && isfinite(time)) {
         if(!isfinite(_spriteEpoch) || time<_spriteEpoch) _spriteEpoch=time;
         if(_motion.moving && fabs(_motion.velocity.x)>3) _spriteFacingLeft=_motion.velocity.x<0;
+        if(c.puppetParts.count) { _puppetElapsed=time-_spriteEpoch; self.needsDisplay=YES; return; }
         NSString *idle=c.directionalIdle && _spriteFacingLeft && c.clips[@"idleLeft"] ? @"idleLeft":@"idle";
         NSString *name=idle; double elapsed=time-_spriteEpoch; BOOL loop=YES;
         if(_motion.pressed && c.clips[@"press"]) { name=@"press"; elapsed=time-_spriteEventAt; loop=NO; }
@@ -106,6 +119,16 @@ static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
 }
 - (void)drawRect:(NSRect)dirty {
     CGFloat scale=self.drawingScale; if(scale<=0) return;
+    if(self.character.puppetParts.count) {
+        BuddieCharacter *c=self.character;
+        [NSGraphicsContext saveGraphicsState];
+        NSGraphicsContext.currentContext.imageInterpolation=NSImageInterpolationHigh;
+        NSAffineTransform *t=[NSAffineTransform transform];
+        [t translateXBy:self.hotspot.x yBy:self.hotspot.y]; [t scaleBy:scale*c.spriteHeight/c.spriteCanvas.height];
+        [t translateXBy:-c.spriteHotspot.x yBy:-c.spriteHotspot.y]; [t concat];
+        BuddieDrawPuppet(c,_motion.pose,_spriteFacingLeft,_puppetElapsed,self.reduceMotion || NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion);
+        [NSGraphicsContext restoreGraphicsState]; return;
+    }
     if(self.character.clips.count) { [self drawSpriteWithScale:scale]; return; }
     BuddieCharacter *c=self.character; BuddiePose p=_motion.pose;
     [NSGraphicsContext saveGraphicsState];

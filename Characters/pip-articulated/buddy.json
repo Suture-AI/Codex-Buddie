@@ -1,0 +1,236 @@
+{
+  "version": 3,
+  "id": "pip-articulated",
+  "name": "Pip \u00b7 Articulated",
+  "rig": {
+    "stride": 16,
+    "footSpacing": 6,
+    "footLift": 3
+  },
+  "puppet": {
+    "canvas": [
+      448,
+      448
+    ],
+    "hotspot": [
+      214,
+      118
+    ],
+    "height": 96,
+    "mirrorWalk": true,
+    "motionScale": 3,
+    "proportions": {
+      "torsoWidth": 1,
+      "torsoHeight": 1,
+      "headScale": 1
+    },
+    "materials": [
+      {
+        "id": "coat",
+        "name": "Raincoat",
+        "channel": 0,
+        "base": "#0850EF"
+      },
+      {
+        "id": "boots",
+        "name": "Boots",
+        "channel": 1,
+        "base": "#FF8000"
+      }
+    ],
+    "parts": {
+      "head": {
+        "pivot": [
+          128,
+          286
+        ],
+        "anchor": [
+          214,
+          236
+        ],
+        "scale": 0.89,
+        "frames": [
+          {
+            "image": "head-open.png",
+            "duration": 1.8,
+            "mask": "head-open-mask.png"
+          },
+          {
+            "image": "head-half.png",
+            "duration": 0.05,
+            "mask": "head-half-mask.png"
+          },
+          {
+            "image": "head-closed.png",
+            "duration": 0.09,
+            "mask": "head-closed-mask.png"
+          },
+          {
+            "image": "head-half.png",
+            "duration": 0.06,
+            "mask": "head-half-mask.png"
+          },
+          {
+            "image": "head-open.png",
+            "duration": 1.7,
+            "mask": "head-open-mask.png"
+          }
+        ]
+      },
+      "body": {
+        "pivot": [
+          216,
+          254
+        ],
+        "anchor": [
+          214,
+          298
+        ],
+        "scale": 0.3,
+        "frames": [
+          {
+            "image": "body.png",
+            "duration": 1,
+            "mask": "body-mask.png"
+          }
+        ]
+      },
+      "tail": {
+        "pivot": [
+          355,
+          110
+        ],
+        "anchor": [
+          180,
+          305
+        ],
+        "scale": 0.24,
+        "frames": [
+          {
+            "image": "tail.png",
+            "duration": 1,
+            "mask": "tail-mask.png"
+          }
+        ]
+      },
+      "pawNear": {
+        "pivot": [
+          105,
+          47
+        ],
+        "anchor": [
+          168,
+          294
+        ],
+        "scale": 0.16,
+        "frames": [
+          {
+            "image": "paw.png",
+            "duration": 1,
+            "mask": "paw-mask.png"
+          }
+        ]
+      },
+      "pawFar": {
+        "pivot": [
+          105,
+          47
+        ],
+        "anchor": [
+          255,
+          287
+        ],
+        "scale": 0.13,
+        "frames": [
+          {
+            "image": "paw.png",
+            "duration": 1,
+            "mask": "paw-mask.png"
+          }
+        ]
+      },
+      "legNear": {
+        "pivot": [
+          88,
+          22
+        ],
+        "anchor": [
+          197,
+          315
+        ],
+        "scale": 0.17,
+        "frames": [
+          {
+            "image": "nearLeg.png",
+            "duration": 1,
+            "mask": "nearLeg-mask.png"
+          }
+        ],
+        "cuff": [
+          -12,
+          -34
+        ],
+        "span": 22
+      },
+      "legFar": {
+        "pivot": [
+          88,
+          22
+        ],
+        "anchor": [
+          231,
+          315
+        ],
+        "scale": 0.17,
+        "frames": [
+          {
+            "image": "farLeg.png",
+            "duration": 1,
+            "mask": "farLeg-mask.png"
+          }
+        ],
+        "cuff": [
+          -10,
+          -31
+        ],
+        "span": 22
+      },
+      "bootNear": {
+        "pivot": [
+          209,
+          238
+        ],
+        "anchor": [
+          214,
+          363
+        ],
+        "scale": 0.17,
+        "frames": [
+          {
+            "image": "nearBoot.png",
+            "duration": 1,
+            "mask": "nearBoot-mask.png"
+          }
+        ]
+      },
+      "bootFar": {
+        "pivot": [
+          193,
+          218
+        ],
+        "anchor": [
+          214,
+          363
+        ],
+        "scale": 0.17,
+        "frames": [
+          {
+            "image": "farBoot.png",
+            "duration": 1,
+            "mask": "farBoot-mask.png"
+          }
+        ]
+      }
+    }
+  }
+}

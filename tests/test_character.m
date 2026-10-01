@@ -9,6 +9,49 @@ static void Reject(NSURL *root,id object) {
     Write(root,object); NSError *error=nil;
     NSCAssert(![BuddieCharacter loadPack:root error:&error] && error,@"Reject invalid pack with useful error: %@",object);
 }
+static NSMutableDictionary *MutableJSON(NSDictionary *json) {
+    return [NSJSONSerialization JSONObjectWithData:[NSJSONSerialization dataWithJSONObject:json options:0 error:nil] options:NSJSONReadingMutableContainers error:nil];
+}
+static void ArticulatedPack(NSURL *root) {
+    NSError *error=nil;
+    BuddieCharacter *pip=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/pip-articulated"] error:&error];
+    NSCAssert(pip && !error && pip.puppetParts.count==9 && pip.clips[@"head"].frames.count==5,@"Articulated pack loads every part: %@",error);
+    NSCAssert(pip.clips[@"head"].frames[0]==pip.clips[@"head"].frames[4],@"Repeated blink poses share decoded pixels");
+    BuddieCharacter *custom=[pip copy]; custom.torsoWidth=1.22; custom.torsoHeight=1.18; custom.headScale=1.15;
+    custom.materialColors=@{@"coat":[NSColor colorWithSRGBRed:.4 green:.6 blue:.3 alpha:1],@"boots":NSColor.whiteColor};
+    [custom prepareAppearance];
+    NSCAssert(pip.torsoWidth==1 && custom.torsoWidth!=pip.torsoWidth,@"Proportions are independent per buddy");
+    NSURL *saved=[root URLByAppendingPathComponent:@"puppet.buddie"];
+    NSCAssert([custom savePack:saved error:&error],@"Save articulated pixels, masks, pivots, clips and proportions: %@",error);
+    BuddieCharacter *restored=[BuddieCharacter loadPack:saved error:&error];
+    NSCAssert(restored && restored.torsoWidth==1.22 && restored.torsoHeight==1.18 && restored.headScale==1.15,@"Proportions round-trip");
+    NSCAssert([restored.puppetParts isEqual:custom.puppetParts] && restored.puppetMotionScale==custom.puppetMotionScale,@"Attachment geometry round-trips");
+    for(NSString *role in custom.clips) for(NSUInteger i=0;i<custom.clips[role].frames.count;i++)
+        NSCAssert([[restored imageForClip:role frame:i].TIFFRepresentation isEqual:[custom imageForClip:role frame:i].TIFFRepresentation],@"Every editable colored part survives save/import: %@",role);
+    NSDictionary *json=[NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:[saved URLByAppendingPathComponent:@"buddy.json"]] options:0 error:nil];
+    for(NSString *key in @[@"parts",@"proportions",@"motionScale"]) {
+        NSMutableDictionary *bad=MutableJSON(json); bad[@"puppet"][key]=NSNull.null; Reject(saved,bad);
+    }
+    for(NSString *key in @[@"torsoWidth",@"torsoHeight",@"headScale",@"unexpected"]) {
+        NSMutableDictionary *bad=MutableJSON(json); bad[@"puppet"][@"proportions"][key]=@99; Reject(saved,bad);
+    }
+    for(NSString *role in pip.puppetParts) {
+        NSMutableDictionary *bad=MutableJSON(json); [bad[@"puppet"][@"parts"] removeObjectForKey:role]; Reject(saved,bad);
+    }
+    for(NSDictionary *change in @[@{@"pivot":@[@999,@999]},@{@"anchor":@[@448,@448]},@{@"scale":@YES},@{@"scale":@0},@{@"script":@"run.js"},@{@"frames":@[]}]) {
+        NSMutableDictionary *bad=MutableJSON(json); [bad[@"puppet"][@"parts"][@"head"] addEntriesFromDictionary:change]; Reject(saved,bad);
+    }
+    for(NSDictionary *change in @[@{@"cuff":@[]},@{@"span":@0},@{@"span":@YES}]) {
+        NSMutableDictionary *bad=MutableJSON(json); [bad[@"puppet"][@"parts"][@"legNear"] addEntriesFromDictionary:change]; Reject(saved,bad);
+    }
+    for(NSString *image in @[@"../escape.png",@"body-00.png"]) {
+        NSMutableDictionary *bad=MutableJSON(json); bad[@"puppet"][@"parts"][@"head"][@"frames"][0][@"image"]=image; Reject(saved,bad);
+    }
+    NSMutableDictionary *bad=MutableJSON(json); bad[@"sprites"]=@{}; Reject(saved,bad);
+    bad=MutableJSON(json); bad[@"version"]=@2; Reject(saved,bad);
+    bad=MutableJSON(json); bad[@"puppet"][@"parts"][@"head"][@"frames"][0][@"mask"]=@"body-00-mask.png"; Reject(saved,bad);
+    puts("PASS: nine-part articulated pack; shared decode; proportions/geometry/colors round-trip; independent customization; missing roles, unsafe files, incompatible dimensions and invalid transforms rejected");
+}
 int main(void) {
     @autoreleasepool {
         for(NSString *name in @[@"sprout",@"mochi",@"orbit"]) {
@@ -22,6 +65,7 @@ int main(void) {
         NSFileManager *fm=NSFileManager.defaultManager;
         NSCAssert([fm createDirectoryAtURL:root withIntermediateDirectories:YES attributes:nil error:nil],@"Fixture directory");
         @try {
+            ArticulatedPack(root);
             BuddieCharacter *source=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/mochi"] error:nil];
             source.eyeSpacing=18; source.stride=20;
             NSURL *saved=[root URLByAppendingPathComponent:@"saved.buddie"];

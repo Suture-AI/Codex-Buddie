@@ -206,7 +206,7 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
             if(!WritePNG(image,[stage URLByAppendingPathComponent:filename],error)) return NO;
             art[key]=filename;
         }
-        NSMutableDictionary *json=[@{@"version":@(self.clips.count ? 2:1),@"id":self.identifier,@"name":self.name,@"colors":colors,@"rig":rig,@"art":art} mutableCopy];
+        NSMutableDictionary *json=[@{@"version":@(self.puppetParts.count ? 3:self.clips.count ? 2:1),@"id":self.identifier,@"name":self.name,@"colors":colors,@"rig":rig,@"art":art} mutableCopy];
         if(self.clips.count) {
             NSMutableDictionary *clips=[NSMutableDictionary new];
             for(NSString *name in [self.clips.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
@@ -236,7 +236,16 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
                 }
                 sprites[@"materials"]=materials;
             }
-            json[@"sprites"]=sprites;
+            if(self.puppetParts.count) {
+                NSMutableDictionary *parts=[NSMutableDictionary new];
+                for(NSString *name in self.puppetParts) {
+                    NSMutableDictionary *part=[self.puppetParts[name] mutableCopy]; part[@"frames"]=clips[name]; parts[name]=part;
+                }
+                [sprites removeObjectForKey:@"clips"]; sprites[@"parts"]=parts;
+                sprites[@"motionScale"]=@(self.puppetMotionScale);
+                sprites[@"proportions"]=@{@"torsoWidth":@(self.torsoWidth),@"torsoHeight":@(self.torsoHeight),@"headScale":@(self.headScale)};
+                json[@"puppet"]=sprites;
+            } else json[@"sprites"]=sprites;
         }
         NSData *data=[NSJSONSerialization dataWithJSONObject:json options:NSJSONWritingPrettyPrinted|NSJSONWritingSortedKeys error:error];
         if(!data || ![data writeToURL:[stage URLByAppendingPathComponent:@"buddy.json"] options:NSDataWritingAtomic error:error]) return NO;
@@ -252,11 +261,12 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
         _bodySize=NSMakeSize(34,32); _cornerRadius=13; _eyeSpacing=13; _eyeSize=5;
         _faceY=0; _footSpacing=10; _footSize=8; _stride=28; _footLift=5;
         _clips=@{}; _spriteHeight=64; _materials=@[]; _materialColors=@{}; _paintedFrames=[NSMutableDictionary new];
+        _puppetParts=@{}; _puppetMotionScale=3; _torsoWidth=1; _torsoHeight=1; _headScale=1;
     } return self;
 }
 - (id)copyWithZone:(NSZone *)zone {
     BuddieCharacter *c=[[[self class] allocWithZone:zone] init];
-    for(NSString *key in @[@"identifier",@"name",@"bodyColor",@"inkColor",@"accentColor",@"bodySize",@"cornerRadius",@"eyeSpacing",@"eyeSize",@"faceY",@"footSpacing",@"footSize",@"stride",@"footLift",@"bodyImage",@"footImage",@"clips",@"spriteCanvas",@"spriteHotspot",@"spriteHeight",@"mirrorWalk",@"directionalIdle",@"materials",@"materialColors"])
+    for(NSString *key in @[@"identifier",@"name",@"bodyColor",@"inkColor",@"accentColor",@"bodySize",@"cornerRadius",@"eyeSpacing",@"eyeSize",@"faceY",@"footSpacing",@"footSize",@"stride",@"footLift",@"bodyImage",@"footImage",@"clips",@"spriteCanvas",@"spriteHotspot",@"spriteHeight",@"mirrorWalk",@"directionalIdle",@"materials",@"materialColors",@"puppetParts",@"puppetMotionScale",@"torsoWidth",@"torsoHeight",@"headScale"])
         [c setValue:[self valueForKey:key] forKey:key];
     return c;
 }
@@ -275,7 +285,9 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
     NSData *data=[NSData dataWithContentsOfURL:manifest options:0 error:error];
     if(!data) return nil;
     NSDictionary *json=[NSJSONSerialization JSONObjectWithData:data options:0 error:error];
-    if(![json isKindOfClass:NSDictionary.class] || !NumberInRange(json[@"version"],1,2) || floor([json[@"version"] doubleValue])!=[json[@"version"] doubleValue]) return Fail(error,@"Unsupported buddy.json version; expected 1 or 2.");
+    if(![json isKindOfClass:NSDictionary.class] || !NumberInRange(json[@"version"],1,3) || floor([json[@"version"] doubleValue])!=[json[@"version"] doubleValue]) return Fail(error,@"Unsupported buddy.json version; expected 1, 2 or 3.");
+    BOOL puppet=[json[@"version"] isEqual:@3];
+    if((puppet && json[@"sprites"]) || (!puppet && json[@"puppet"])) return Fail(error,@"Use puppet only in version 3, without sprites.");
     for(NSString *key in @[@"id",@"name"]) if(![json[key] isKindOfClass:NSString.class] || ![json[key] length] || [json[key] length]>80) return Fail(error,@"The pack needs an id and name of 1–80 characters.");
     BuddieCharacter *c=[self new]; c.identifier=json[@"id"]; c.name=json[@"name"];
     NSDictionary *colors=json[@"colors"] ?: @{};
@@ -302,9 +314,9 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
         NSImage *image=LoadImage(folder,art[key],NULL,error); if(!image) return nil;
         [c setValue:image forKey:[key stringByAppendingString:@"Image"]];
     }
-    if([json[@"version"] isEqual:@2]) {
+    if([json[@"version"] isEqual:@2] || puppet) {
         if(art.count) return Fail(error,@"Sprite packs contain complete poses; omit body/foot artwork.");
-        NSDictionary *sprites=json[@"sprites"];
+        NSDictionary *sprites=json[puppet ? @"puppet":@"sprites"];
         if(![sprites isKindOfClass:NSDictionary.class] || !Pair(sprites[@"canvas"],16,1024)) return Fail(error,@"Sprite canvas must have two dimensions between 16 and 1024 pixels.");
         c.spriteCanvas=NSMakeSize([sprites[@"canvas"][0] doubleValue],[sprites[@"canvas"][1] doubleValue]);
         if(floor(c.spriteCanvas.width)!=c.spriteCanvas.width || floor(c.spriteCanvas.height)!=c.spriteCanvas.height) return Fail(error,@"Sprite canvas dimensions must be whole pixels.");
@@ -329,26 +341,53 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
             [ids addObject:m[@"id"]]; [channels addObject:m[@"channel"]]; materialColors[m[@"id"]]=Color(m[@"color"] ?: m[@"base"]);
         }
         c.materials=materials; c.materialColors=materialColors;
-        NSDictionary *definitions=sprites[@"clips"];
-        if(![definitions isKindOfClass:NSDictionary.class] || !definitions[@"idle"]) return Fail(error,@"Sprite packs need an idle clip.");
-        NSMutableDictionary *clips=[NSMutableDictionary new], *cache=[NSMutableDictionary new];
+        NSArray *roles=@[@"head",@"body",@"tail",@"pawNear",@"pawFar",@"legNear",@"legFar",@"bootNear",@"bootFar"];
+        NSDictionary *definitions=sprites[puppet ? @"parts":@"clips"];
+        if(![definitions isKindOfClass:NSDictionary.class]) return Fail(error,@"Expected a clips or parts object.");
+        if(puppet) {
+            if(sprites[@"clips"] || ![[NSSet setWithArray:definitions.allKeys] isEqual:[NSSet setWithArray:roles]]) return Fail(error,@"Articulated packs need exactly nine named parts: head, body, tail, pawNear, pawFar, legNear, legFar, bootNear and bootFar.");
+            if(!NumberInRange(sprites[@"motionScale"],.25,8)) return Fail(error,@"motionScale must be between 0.25 and 8 canvas pixels per motion unit.");
+            c.puppetMotionScale=[sprites[@"motionScale"] doubleValue];
+            NSDictionary *proportions=sprites[@"proportions"] ?: @{};
+            if(![proportions isKindOfClass:NSDictionary.class]) return Fail(error,@"proportions must be an object.");
+            NSDictionary *ranges=@{@"torsoWidth":@[@.85,@1.22],@"torsoHeight":@[@.85,@1.18],@"headScale":@[@.85,@1.15]};
+            for(NSString *key in proportions) {
+                NSArray *range=ranges[key];
+                if(!range || !NumberInRange(proportions[key],[range[0] doubleValue],[range[1] doubleValue])) return Fail(error,@"Invalid articulated proportion.");
+                [c setValue:proportions[key] forKey:key];
+            }
+        } else if(!definitions[@"idle"] || sprites[@"parts"]) return Fail(error,@"Sprite packs need an idle clip and cannot contain articulated parts.");
+        NSMutableDictionary *clips=[NSMutableDictionary new], *cache=[NSMutableDictionary new], *parts=[NSMutableDictionary new];
         NSUInteger total=0,budget=64*1024*1024;
         for(NSString *name in definitions) {
-            if(![@[@"idle",@"idleLeft",@"walkRight",@"walkLeft",@"press",@"release"] containsObject:name]) return Fail(error,@"Unknown sprite clip.");
-            NSArray *frames=definitions[name];
+            if(!puppet && ![@[@"idle",@"idleLeft",@"walkRight",@"walkLeft",@"press",@"release"] containsObject:name]) return Fail(error,@"Unknown sprite clip.");
+            NSDictionary *part=puppet ? definitions[name]:nil;
+            if(puppet) {
+                if(![part isKindOfClass:NSDictionary.class] || !Pair(part[@"pivot"],0,1024) || !Pair(part[@"anchor"],0,1024) ||
+                   [part[@"anchor"][0] doubleValue]>=c.spriteCanvas.width || [part[@"anchor"][1] doubleValue]>=c.spriteCanvas.height ||
+                   !NumberInRange(part[@"scale"],.01,4)) return Fail(error,@"Each part needs a pivot, an anchor inside the canvas, and a scale between 0.01 and 4.");
+                BOOL leg=[name hasPrefix:@"leg"];
+                if(leg && (!Pair(part[@"cuff"],-1024,1024) || !NumberInRange(part[@"span"],1,1024))) return Fail(error,@"Leg parts need a cuff offset and a positive neutral span.");
+                for(NSString *key in part) if(![@[@"pivot",@"anchor",@"scale",@"frames"] containsObject:key] && !(leg && [@[@"cuff",@"span"] containsObject:key])) return Fail(error,@"Unknown articulated part setting.");
+                NSMutableDictionary *metadata=[part mutableCopy]; [metadata removeObjectForKey:@"frames"]; parts[name]=metadata;
+            }
+            NSArray *frames=puppet ? part[@"frames"]:definitions[name];
             if(![frames isKindOfClass:NSArray.class] || !frames.count || frames.count>64 || total+frames.count>64) return Fail(error,@"Sprite packs support 1–64 frames in total.");
             total+=frames.count; NSMutableArray *images=[NSMutableArray new], *durations=[NSMutableArray new],*masks=[NSMutableArray new];
             for(id frame in frames) {
                 if(![frame isKindOfClass:NSDictionary.class] || ![frame[@"image"] isKindOfClass:NSString.class] || !NumberInRange(frame[@"duration"],1./120,30)) return Fail(error,@"Each sprite frame needs a PNG filename and a duration between 1/120 and 30 seconds.");
                 NSImage *image=cache[frame[@"image"]];
                 if(!image) { image=LoadImage(folder,frame[@"image"],&budget,error); if(!image) return nil; cache[frame[@"image"]]=image; }
-                if(!NSEqualSizes(image.size,c.spriteCanvas)) return Fail(error,@"Every frame must match the shared sprite canvas.");
+                if(puppet) {
+                    if(image.size.width>1024 || image.size.height>1024 || (images.count && !NSEqualSizes(image.size,((NSImage *)images[0]).size))) return Fail(error,@"Part frames must share dimensions no larger than 1024 pixels.");
+                    if([part[@"pivot"][0] doubleValue]>=image.size.width || [part[@"pivot"][1] doubleValue]>=image.size.height) return Fail(error,@"Part pivots must lie inside their artwork.");
+                } else if(!NSEqualSizes(image.size,c.spriteCanvas)) return Fail(error,@"Every frame must match the shared sprite canvas.");
                 [images addObject:image]; [durations addObject:frame[@"duration"]];
                 if(materials.count) {
                     if(![frame[@"mask"] isKindOfClass:NSString.class]) return Fail(error,@"Each frame in a customizable sprite pack needs a material mask.");
                     NSImage *mask=cache[frame[@"mask"]];
                     if(!mask) { mask=LoadImage(folder,frame[@"mask"],&budget,error); if(!mask) return nil; cache[frame[@"mask"]]=mask; }
-                    if(!NSEqualSizes(mask.size,c.spriteCanvas)) return Fail(error,@"Material masks must match the sprite canvas.");
+                    if(!NSEqualSizes(mask.size,image.size)) return Fail(error,@"Material masks must match their artwork dimensions.");
                     NSBitmapImageRep *rep=(NSBitmapImageRep *)mask.representations.firstObject;
                     if(rep.bitsPerSample!=8 || rep.samplesPerPixel!=4 || rep.isPlanar || rep.bitmapFormat!=NSBitmapFormatAlphaNonpremultiplied) return Fail(error,@"Material masks must be 8-bit RGBA PNGs.");
                     for(NSInteger y=0;y<rep.pixelsHigh;y++) for(NSInteger x=0;x<rep.pixelsWide;x++) {
@@ -361,6 +400,7 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
             BuddieSpriteClip *clip=[BuddieSpriteClip new]; clip.frames=images; clip.durations=durations; clip.masks=masks; clips[name]=clip;
         }
         c.clips=clips;
+        c.puppetParts=parts;
     } else if(json[@"sprites"]) return Fail(error,@"Complete sprite poses require version 2.");
     return c;
 }

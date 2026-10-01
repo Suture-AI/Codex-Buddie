@@ -51,7 +51,32 @@ static void stopAndResume(double fps,int offset) {
     time+=dt; BuddieMotionUpdate(&m,(BuddiePoint){x,0},time,rig,true);
     assert(!m.settling[0] && !m.settling[1] && m.pose.footLift[0]==0 && m.pose.footLift[1]==0);
 }
+static void fastTravel(double fps,double speed) {
+    BuddieMotion s; BuddieMotionInit(&s);
+    BuddieRig small={16,6,3}; double x=0,y=0,time=40,dt=1/fps;
+    BuddieMotionUpdate(&s,(BuddiePoint){x,y},time,small,false);
+    for(int i=0;i<(int)(fps*2);i++) {
+        x+=(i<fps ? 1:-1)*speed*dt; y+=speed*.15*dt; time+=dt;
+        BuddieMotionUpdate(&s,(BuddiePoint){x,y},time,small,false);
+        assert(s.airborne && s.point.x==x && s.point.y==y);
+        for(int f=0;f<2;f++) {
+            assert(!s.stance[f] && s.pose.footLift[f]>0);
+            assert(hypot(s.pose.feet[f].x-(f?1:-1)*small.footSpacing,s.pose.feet[f].y)<small.stride*.19);
+        }
+    }
+    for(int i=0;i<(int)fps;i++) {
+        time+=dt; BuddieMotionUpdate(&s,(BuddiePoint){x,y},time,small,false);
+        assert(!s.airborne && s.point.x==x && s.point.y==y);
+    }
+    for(int f=0;f<2;f++) {
+        assert(s.pose.footLift[f]==0 && !s.settling[f]);
+        assert(fabs(s.pose.feet[f].x-(f?1:-1)*small.footSpacing)<1e-8);
+    }
+    time+=dt; x+=speed*dt; BuddieMotionUpdate(&s,(BuddiePoint){x,y},time,small,true);
+    assert(!s.airborne && s.pose.footLift[0]==0 && s.pose.bodyY==0);
+}
 int main(void) {
+    for(int rate=30;rate<=120;rate*=2) for(int speed=100;speed<=1600;speed*=2) fastTravel(rate,speed);
     for(int rate=30;rate<=120;rate*=2) for(int offset=0;offset<20;offset++) stopAndResume(rate,offset);
     rig=(BuddieRig){16,6,3};
     for(int rate=30;rate<=120;rate*=2) for(int offset=0;offset<20;offset++) stopAndResume(rate,offset);
@@ -91,5 +116,5 @@ int main(void) {
     assert(hypot(after.x-mid.x,after.y-mid.y)<1e-9);
     assert(hypot(afterVelocity.x-velocity.x,afterVelocity.y-velocity.y)<1e-9);
     assert(hypot(BuddieJourneyVelocity(&j,10).x,BuddieJourneyVelocity(&j,10).y)==0);
-    puts("PASS: distance-driven gait at 30/60/120 Hz; planted feet; lifted sequential settling across stop phases; interrupted landing/reversal; fixed click anchor; reduced motion; teleport reset; curved arrival; C1 retarget continuity");
+    puts("PASS: distance-driven gait at 30/60/120 Hz; planted feet; lifted sequential settling across stop phases; interrupted landing/reversal; bounded fast travel and landing; fixed click anchor; reduced motion; teleport reset; curved arrival; C1 retarget continuity");
 }

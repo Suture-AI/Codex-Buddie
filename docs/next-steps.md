@@ -19,28 +19,27 @@ and more polished art than the first pear-like Sprout. Detailed sci-fi robots
 are not the current direction. Study the built-in pets' clear silhouettes,
 expressive complete poses and coherent facial/limb design; create original art.
 
-The root Character Studio now opens with **Pip · Motion study**, a complete-pose
-version 2 pack: six matching side-facing blink frames, eight walk poses, size/stride controls,
-mirrored left travel, fixed hood hotspot and import/export of all frames. The
-renderer adds no tether, generic face or feet over its artwork. The studio now
-also edits raincoat and boot colors independently, retaining shading and the
-original alpha. All 14 poses have material masks; save/import preserves editable
-source artwork and colors. See the [palette review](media/pip-outfit-colors.png),
-the [material schema](characters.md#outfit-colors), and
-[`docs/media/pip-refined-motion.gif`](media/pip-refined-motion.gif),
-[the asset review](../artwork/pip/walk-refinement/review.json) and the implemented
-[version 2 pack format](characters.md).
+**Latest user feedback:** Pip is cool, but the intended design is a smaller
+retro 8-bit bot like the provided Codex pet reference. Keep soft chunky pixel
+shapes, a compact body and expressive screen eyes; improve the animation
+substantially. Develop the original Bit candidate, with proper steps, blinks
+and turns. Pip is now a reusable motion/customization study.
 
-The [articulated follow-up](../artwork/pip/rig-study/README.md) now separates
-generated head, torso, tail, paws, upper legs and boots. It demonstrates
-continuous foot motion, stable blink textures and independent body/head
-proportions using the native motion core. It also exposed and fixed sliding on
-stop and airborne-foot jumps on reversal in that core. This is an offline art
-study, not yet a selectable Studio pack. Prioritize joint review and Cocoa/
-pack/UI integration of this route before generating more whole-pose in-betweens:
-the existing sheet repeats leading-foot relationships. Authored turns, leftward
-lighting and real interaction events remain open. Do not mark either study as
-smooth final animation or infer user approval of Pip.
+The root Studio includes **Pip · Articulated**, a version-3 pack with nine
+independent generated parts, stable blink textures, live torso width/height and
+head size, editable outfit colors and portable save/import. Slow feet stay
+planted across six tested size/zoom combinations. Fast cursor travel uses a
+bounded airborne gait with a capped 5 Hz cycle and short landings. It exposed
+and fixed a leg-stretch failure that the earlier offline study did not cover.
+Review [the actual Cocoa outputs](media/pip-studio-customization.png),
+[walking](media/pip-studio-walk.gif), [fast travel](media/pip-studio-fast-travel.gif)
+and [validation evidence](evidence/articulated-studio.json).
+
+The earlier full-pose Pip pack remains compatible. Authored turns, final joint
+quality, production sizing and real interaction events remain open. Native CUA
+UI observation still returns `cgWindowNotFound`; the automated Cocoa harness
+passes, but manual exercise of the new controls is pending. The user's latest
+feedback does not approve Pip as the final character.
 
 The studio also retains three earlier ChatGPT-generated body packs, independent
 animated faces/feet, distance-driven planted gait, continuous curved retargeting,

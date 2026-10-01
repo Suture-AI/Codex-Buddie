@@ -12,8 +12,8 @@ typedef struct {
     double bodyY, lean, squash, eyeOpen, gazeX, gazeY, smile, tap;
 } BuddiePose;
 typedef struct {
-    bool initialized, pressed, moving, stance[2];
-    double lastTime, lastMotion, phase, speed, walkWeight, releasedAt;
+    bool initialized, pressed, moving, airborne, stance[2];
+    double lastTime, lastMotion, phase, speed, walkWeight, releasedAt, flightPhase;
     BuddiePoint point, velocity, direction, planted[2], swingStart[2], foot[2];
     bool settling[2], swinging[2];
     double settleAt[2], settleDuration[2], settleLift[2], swingDistance[2];

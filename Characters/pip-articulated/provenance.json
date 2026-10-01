@@ -1,0 +1,35 @@
+{
+  "sources": [
+    "artwork/pip/rig-study/provenance.json",
+    "artwork/pip/rig-study/blink/provenance.json"
+  ],
+  "processing": [
+    "scripts/prepare-puppet-art.py",
+    "scripts/build-pip-puppet.py"
+  ],
+  "requested_model": "GPT Image 2.5 if available",
+  "verified_model": null,
+  "status": "Selectable articulated study; original generated artwork, user approval pending.",
+  "sha256": {
+    "body-mask.png": "752d0297574de324ff80dff65bd960dbe9313f572cc622242623743af3ccd804",
+    "body.png": "787591abc2bfcd805821e03caee446d81372402785dad3bb455f8617b008ead1",
+    "farBoot-mask.png": "5738cd20f3f0b579809df37fd1ea1393182cc680eab86deddbd1f4364129ea03",
+    "farBoot.png": "a625e1db126cb2e8990fecd1acd89b34482b5322085840d1649f61dc1a76e78f",
+    "farLeg-mask.png": "1c1d6c14c7b9b02892fd31f0d1f05b746bf25bc7e7d0eea2e1d6b74ef6a41d58",
+    "farLeg.png": "c900beccdaa4b4762825ed8cff02efbdc7f2d60efeadbe02f4d54ffcfcdf5030",
+    "head-closed-mask.png": "b23bae65c94c447ef33298efa6536227644ff96eb527d9014dc3b04e7f003148",
+    "head-closed.png": "40c7cfd40fe8bae169bba2f0f8b458a35db567a096340bbb754b6788bf1aaad0",
+    "head-half-mask.png": "a957b19c4b63784f0d87348bdf9175dc34ffa0cb92236f347247b0dea32b70d5",
+    "head-half.png": "8934881218a80aec15b5ba053b0671b3f1dfed5b19083ddd09a16537f45ca5df",
+    "head-open-mask.png": "ce0661ac7b267bbdbd5da164f059aca49f5ee21c0e660e350309c89508339295",
+    "head-open.png": "6ca39ca4366cf74aeaf27f2bf7767804bd0ccf7b819a7c29b28290b8d750b983",
+    "nearBoot-mask.png": "b70c615be058b79a012c4709e07255643619c26df4e5283cb21ebe46bf767bb7",
+    "nearBoot.png": "d382862442b39b1d652a1e837c8844663f3532febde996fdf3aa6346d4dff699",
+    "nearLeg-mask.png": "b8f39ae9f45262f48c670bc91bb2339a558d108e9050df13a01103b2ed8e3965",
+    "nearLeg.png": "8b1f204593089416134f5475824dd51a1dfa823dfee67f07485a918006b88bc0",
+    "paw-mask.png": "9ba2aa3cbfc543c76d01651fa8b000cf692fae63025224b3029382aac86247b6",
+    "paw.png": "eedc52886b5cfba4834f812d8c18ed9faffacf89a48924fc2af0e26f238006d4",
+    "tail-mask.png": "d9d336a89dbf95a39d660079930abce3d1469fc20ccd4eb6bab1df4f74a2f540",
+    "tail.png": "fc6b3d7dd34607d0a7fb7c5eee827b4eb44db0b6b7054cb3a6181f15e7fd7751"
+  }
+}
