@@ -16,6 +16,8 @@ def main():
     parser.add_argument("slow", type=Path)
     parser.add_argument("fast", type=Path)
     parser.add_argument("--turn", type=Path)
+    parser.add_argument("--gait", type=Path)
+    parser.add_argument("--before", type=Path, help="Optional slow export from e0f00e2 for the leg comparison")
     args = parser.parse_args()
     output = ROOT / "docs/media"
     names = ["Original","Round","Tall","Big-head","Original","Rose","Moss","Lilac"]
@@ -42,7 +44,7 @@ def main():
         bounds[path.stem]=b
     for directory,pattern,name in [(args.slow,"slow-%04d.png","bit-studio-walk.gif"),(args.fast,"frame-%04d.png","bit-studio-fast-travel.gif")]:
         subprocess.run(["/opt/homebrew/bin/ffmpeg","-y","-loglevel","error","-framerate","60","-i",str(directory/pattern),"-filter_complex","fps=30,split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=none","-loop","0",str(output/name)],check=True)
-    paths=[*ROOT.glob("Sources/Buddie*.*"),ROOT/"Sources/Preview.m",ROOT/"scripts/build-bit.py",ROOT/"scripts/review-bit.py",*ROOT.glob("Characters/bit/*.png"),ROOT/"Characters/bit/buddy.json"]
+    paths=[*ROOT.glob("Sources/Buddie*.*"),ROOT/"Sources/Preview.m",ROOT/"tests/test_motion.c",ROOT/"tests/test_character.m",ROOT/"scripts/build-bit.py",ROOT/"scripts/review-bit.py",*ROOT.glob("Characters/bit/*.png"),ROOT/"Characters/bit/buddy.json"]
     paths += [output/name for name in ["bit-studio-customization.png","bit-studio-walk.gif","bit-studio-fast-travel.gif"]]
     if args.turn:
         strip=Image.new("RGB",(1100,350),"#f4f3ef"); pen=ImageDraw.Draw(strip)
@@ -54,11 +56,37 @@ def main():
         strip.save(output/"bit-studio-turn.png")
         subprocess.run(["/opt/homebrew/bin/ffmpeg","-y","-loglevel","error","-framerate","60","-i",str(args.turn/"turn-%04d.png"),"-filter_complex","fps=30,split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=none","-loop","0",str(output/"bit-studio-turn.gif")],check=True)
         paths += [output/"bit-studio-turn.png",output/"bit-studio-turn.gif"]
+    if args.gait:
+        subprocess.run(["/opt/homebrew/bin/ffmpeg","-y","-loglevel","error","-framerate","60","-i",str(args.gait/"gait-%04d.png"),"-filter_complex","color=c=0xf4f3ef:s=320x320:r=60[bg];[bg][0:v]overlay=shortest=1,fps=30,split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=none","-loop","0",str(output/"bit-gait-detail.gif")],check=True)
+        paths.append(output/"bit-gait-detail.gif")
+        landing=Image.new("RGB",(880,350),"#f4f3ef"); pen=ImageDraw.Draw(landing)
+        for i,(frame,label) in enumerate([(100,"At full speed"),(110,"Slowing down"),(115,"Landing"),(162,"Settled")]):
+            im=Image.open(args.gait/f"gait-{frame:04d}.png").convert("RGBA").crop((76,0,248,290))
+            landing.paste(im,(i*220+24,34),im); pen.text((i*220+24,12),label,font=font,fill="#293533")
+        pen.text((24,324),"Actual Cocoa gait · airborne feet follow the hips until contact",font=font,fill="#293533")
+        landing.save(output/"bit-landing-sequence.png"); paths.append(output/"bit-landing-sequence.png")
+    if args.before:
+        comparison=Image.new("RGB",(640,780),"#f4f3ef"); pen=ImageDraw.Draw(comparison)
+        for row,n in enumerate([60,90,140,255]):
+            for col,directory in enumerate([args.before,args.slow]):
+                im=Image.open(directory/f"slow-{n:04d}.png").convert("RGB")
+                # Separate the default blue bot from the neutral Studio grid.
+                pts=[(x,y) for y in range(120,im.height-20) for x in range(im.width)
+                     if im.getpixel((x,y))[2]>im.getpixel((x,y))[0]*1.25 and im.getpixel((x,y))[0]<160]
+                box=(min(x for x,y in pts)-3,min(y for x,y in pts)-3,max(x for x,y in pts)+4,max(y for x,y in pts)+4)
+                crop=im.crop(box); crop=crop.crop((0,max(0,crop.height-38),crop.width,crop.height))
+                crop=crop.resize((crop.width*4,crop.height*4),Image.Resampling.NEAREST)
+                comparison.paste(crop,(col*320+24,row*190+24))
+                pen.text((col*320+24,row*190+4),f'{"Before" if col==0 else "After"} · frame {n}',font=font,fill="#263735")
+        comparison.save(output/"bit-leg-comparison.png"); paths.append(output/"bit-leg-comparison.png")
     report={"status":"User approved Bit's visual direction and requested a shorter neck. Updated one-row collar; animation polish and live CUA integration remain unfinished.",
             "source_fps":60,"gif_fps":30,"slow_frames":420,"fast_frames":240,"proportion_corner_bounds":bounds,
             "checks":["v1/v2/v3 regression tests","Bit portable pixel/turn metadata","Localized blink edits with unchanged alpha","Five coordinated head/torso directions; reversal retraces the current turn","Intermediate poses do not change when desired direction reverses","Actual boot pixels remain unchanged during a stationary turn","Independent feet from the motion core; generated walk sheets rejected","Reduced Motion and fixed hotspot","Eight proportion corners fit the review view","Repeated imports and shared display names preserve collection/menu identity"],
-            "limitations":["Directional highlights still vary in the generated art","Pixel joints and fast-travel landing need further visual polish","Native service IPC and true cursor-size legibility remain unresolved","Image model identifier not exposed by ChatGPT"],
+            "leg_checks":["60 actual raster calf extensions/lifts connect both hips to boots without detached pixels","63 moving/short-hop landing cases at 30/60/120 Hz; descent under hips, lower foot first and stationary ground contacts","Cropped calves exclude neighboring boot pixels; nearest-grid rows preserve the original texture"],
+            "limitations":["Directional highlights still vary in the generated art","Legs remain a short articulated biped rig; knee articulation and anatomy variants are unfinished","Native service IPC and true cursor-size legibility remain unresolved","Image model identifier not exposed by ChatGPT"],
             "sha256":{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(paths)}}
+    if args.before:
+        report["leg_comparison"]={"before_revision":"e0f00e279886a68f8a02f697f61a07fc6c24c765", "frames":[60,90,140,255], "retained_artifact":"docs/media/bit-leg-comparison.png", "intermediates":"PNG exports are regenerable; no frame-directory dependency remains."}
     (ROOT/"docs/evidence/bit-studio.json").write_text(json.dumps(report,indent=2)+"\n")
     print("Saved Bit's actual Cocoa motion, customization and geometry review.")
 

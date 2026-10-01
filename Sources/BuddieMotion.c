@@ -15,7 +15,7 @@ static BuddiePoint lerp(BuddiePoint a, BuddiePoint b, double t) { return add(a,m
 
 void BuddieMotionInit(BuddieMotion *s) {
     memset(s,0,sizeof(*s));
-    s->direction=(BuddiePoint){1,0}; s->releasedAt=-1000;
+    s->direction=(BuddiePoint){1,0}; s->releasedAt=-1000; s->landedAt=-1000;
     s->pose.eyeOpen=1; s->pose.squash=1;
 }
 
@@ -35,11 +35,11 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
     double distance=length(delta);
     bool discontinuity=!s->initialized || dt>.25 || distance>180;
     if (discontinuity) {
-        s->phase=0; s->speed=0; s->walkWeight=0; s->moving=false; s->airborne=false; s->flightPhase=0;
+        s->phase=0; s->speed=0; s->walkWeight=0; s->moving=false; s->airborne=false; s->flightPhase=0; s->landedAt=-1000;
         for (int i=0;i<2;i++) {
             s->foot[i]=(BuddiePoint){(i?1:-1)*rig.footSpacing,0};
             s->planted[i]=add(anchor,s->foot[i]); s->swingStart[i]=s->planted[i]; s->stance[i]=true;
-            s->settling[i]=false; s->swinging[i]=false; s->pose.footLift[i]=0; s->swingDistance[i]=0;
+            s->settling[i]=false; s->swinging[i]=false; s->flightLanding[i]=false; s->pose.footLift[i]=0; s->swingDistance[i]=0;
         }
         delta=(BuddiePoint){0,0}; distance=0; dt=1./60.;
         s->velocity=(BuddiePoint){0,0};
@@ -64,11 +64,12 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
     if(flight && !s->airborne) s->flightPhase=s->phase;
     if(flight) s->flightPhase=fmod(s->flightPhase+dt*clamp(length(raw)/rig.stride,2.5,5),1);
     if(s->airborne && !flight && !reduced) {
+        int lead=s->pose.footLift[1]<s->pose.footLift[0] ? 1:0;
         for(int i=0;i<2;i++) {
-            s->settling[i]=true; s->swinging[i]=false; s->settleAt[i]=time;
+            s->settling[i]=true; s->flightLanding[i]=true; s->swinging[i]=false; s->settleAt[i]=time;
             s->settleFrom[i]=add(anchor,s->foot[i]);
             s->settleTo[i]=add(anchor,(BuddiePoint){(i?1:-1)*rig.footSpacing,0});
-            s->settleLift[i]=s->pose.footLift[i]; s->settleDuration[i]=.18+i*.06;
+            s->settleLift[i]=s->pose.footLift[i]; s->settleDuration[i]=i==lead ? .14:.20;
         }
     }
     s->airborne=flight;
@@ -98,24 +99,28 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
         double phase=fmod(s->phase+i*.5,1);
         bool stance=phase<.62;
         if(reduced) {
-            s->settling[i]=false; s->swinging[i]=false; s->foot[i]=base; s->pose.footLift[i]=0;
+            s->settling[i]=false; s->flightLanding[i]=false; s->landedAt=-1000; s->swinging[i]=false; s->foot[i]=base; s->pose.footLift[i]=0;
             s->planted[i]=add(anchor,base); stance=true;
         } else if(flight) {
             double cycle=2*pi*(s->flightPhase+i*.5);
             BuddiePoint target=add(base,mul(s->direction,sin(cycle)*rig.stride*.18));
             s->foot[i]=lerp(s->foot[i],target,1-exp(-dt/.045));
             s->pose.footLift[i]=mix(s->pose.footLift[i],rig.footLift*(.8+.5*(1-cos(cycle))),1-exp(-dt/.035));
-            s->planted[i]=add(anchor,s->foot[i]); s->settling[i]=false; s->swinging[i]=false; stance=false;
+            s->planted[i]=add(anchor,s->foot[i]); s->settling[i]=false; s->flightLanding[i]=false; s->swinging[i]=false; stance=false;
         } else if(s->settling[i]) {
             // Finish this short landing even when travel resumes. A new stride
             // then starts from the actual landing, not a stale swing origin.
             double u=clamp((time-s->settleAt[i])/s->settleDuration[i],0,1);
-            s->foot[i]=sub(lerp(s->settleFrom[i],s->settleTo[i],settleEase(u)),anchor);
-            double lift=fmax(0,rig.footLift*.7-s->settleLift[i]);
+            BuddiePoint shift=s->flightLanding[i] ? sub(add(anchor,base),s->settleTo[i]):(BuddiePoint){0,0};
+            // Airborne landings follow the moving hips until contact. Ordinary
+            // planted-foot settling retains its committed world-space target.
+            s->foot[i]=sub(add(lerp(s->settleFrom[i],s->settleTo[i],settleEase(u)),shift),anchor);
+            double lift=s->flightLanding[i] ? 0:fmax(0,rig.footLift*.7-s->settleLift[i]);
             s->pose.footLift[i]=s->settleLift[i]*(1-settleEase(u))+lift*pow(sin(pi*u),2);
             stance=false;
-            if(u>=1) {
-                s->settling[i]=false; s->planted[i]=s->settleTo[i];
+            if(u>=1-1e-9) {
+                if(s->flightLanding[i] && s->flightLanding[1-i]) s->landedAt=time;
+                s->settling[i]=false; s->flightLanding[i]=false; s->planted[i]=add(anchor,s->foot[i]);
                 s->pose.footLift[i]=0; stance=true;
             }
         } else if (walking) {
@@ -157,9 +162,12 @@ void BuddieMotionUpdate(BuddieMotion *s, BuddiePoint anchor, double time, Buddie
     double tap=releaseAge>=0 && releaseAge<.5 ? exp(-releaseAge*12)*sin(releaseAge*22) : 0;
     double blinkClock=fmod(time,4.9);
     double blink=blinkClock<.15 ? pow(sin(pi*blinkClock/.15),2) : 0;
-    double desiredSquash=s->pressed?.91:1+tap*.055;
+    double landingAge=time-s->landedAt;
+    double impact=landingAge>=0 && landingAge<.24 ? exp(-landingAge*18)*fmax(0,sin(landingAge*26)):0;
+    double desiredSquash=s->pressed?.91:1+tap*.055-impact*.06;
     s->pose.squash=reduced?(s->pressed?.96:1):mix(s->pose.squash,desiredSquash,1-exp(-dt/.045));
     double bob=flight ? -2.1-fabs(sin(2*pi*s->flightPhase))*.7:-fabs(sin(cycle))*2.1*s->walkWeight+sin(time*2.1)*.45*(1-s->walkWeight);
+    if(!flight) bob+=impact*1.5;
     s->pose.bodyY=reduced?0:mix(s->pose.bodyY,bob,1-exp(-dt/.05));
     s->pose.lean=reduced?0:clamp(s->velocity.x/700,-.1,.1)*s->walkWeight;
     s->pose.eyeOpen=reduced?1:clamp((1-blink)*(s->pressed?.65:1),.07,1);

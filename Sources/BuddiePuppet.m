@@ -21,6 +21,25 @@ static void Part(BuddieCharacter *c, NSString *role, NSPoint target, double angl
     [image drawInRect:(NSRect){NSZeroPoint,image.size} fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1 respectFlipped:YES hints:nil];
     [NSGraphicsContext restoreGraphicsState];
 }
+static void PixelLeg(BuddieCharacter *c,NSString *role,NSPoint hip,NSPoint cuff,double elapsed,BOOL reduced) {
+    NSDictionary *part=c.puppetParts[role]; BuddieSpriteClip *clip=c.clips[role];
+    NSImage *image=[c imageForClip:role frame:reduced ? 0:[clip frameIndexAtTime:elapsed loop:YES]];
+    NSPoint pivot=PartPoint(part[@"pivot"]); double scale=[part[@"scale"] doubleValue];
+    double span=MIN(image.size.height-pivot.y,MAX(1,[part[@"span"] doubleValue]/scale));
+    hip=NSMakePoint(round(hip.x),round(hip.y)); cuff=NSMakePoint(round(cuff.x),round(cuff.y));
+    int steps=MAX(1,(int)ceil(MAX(fabs(cuff.x-hip.x),fabs(cuff.y-hip.y))));
+    // Step along the joint on the logical pixel grid, sampling the original
+    // calf texture one row at a time. No rotated pixels or detached diagonals.
+    for(int i=0;i<=steps;i++) {
+        double u=(double)i/steps;
+        NSPoint p=NSMakePoint(round(hip.x+(cuff.x-hip.x)*u),round(hip.y+(cuff.y-hip.y)*u));
+        // NSImage source rectangles use bottom-left coordinates even when
+        // the destination context is flipped for the top-left puppet canvas.
+        NSRect source=NSMakeRect(0,image.size.height-1-floor(pivot.y+u*(span-1)),image.size.width,1);
+        NSRect target=NSMakeRect(p.x-round(pivot.x*scale),p.y,image.size.width*scale,MAX(1,round(scale)));
+        [image drawInRect:target fromRect:source operation:NSCompositingOperationSourceOver fraction:1 respectFlipped:YES hints:nil];
+    }
+}
 NSPoint BuddiePuppetSole(BuddieCharacter *c, BuddiePose p, NSUInteger foot) {
     NSPoint base=PartPoint(c.puppetParts[foot ? @"bootFar":@"bootNear"][@"anchor"]);
     return NSMakePoint(base.x+p.feet[foot].x*c.puppetMotionScale,base.y+(p.feet[foot].y-p.footLift[foot])*c.puppetMotionScale);
@@ -49,7 +68,8 @@ void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double 
         hip.x=c.spriteHotspot.x+facing*(hip.x-c.spriteHotspot.x);
         double dx=foot.x+cuff.x-hip.x,dy=foot.y+cuff.y-hip.y;
         double stretch=MAX(.5,hypot(dx,dy)/[c.puppetParts[leg][@"span"] doubleValue]);
-        Part(c,leg,hip,-atan2(dx,dy),1,stretch,elapsed,reduced);
+        if(c.pixelArt) PixelLeg(c,leg,hip,NSMakePoint(foot.x+cuff.x,foot.y+cuff.y),elapsed,reduced);
+        else Part(c,leg,hip,-atan2(dx,dy),1,stretch,elapsed,reduced);
         Part(c,boot,foot,0,1,1,elapsed,reduced);
     }
     double swing=sin(p.phase*2*M_PI)*.18*p.walkWeight;

@@ -58,9 +58,21 @@ Set `pixelArt: true` in `puppet` (or version 2's `sprites`) for nearest-neighbor
 sampling. Pixel parts snap their local attachments to canvas pixels, avoid
 arbitrary head/body rotation and use small stepped paw motion. Raster contact
 can therefore quantize by one logical pixel; the pointer hotspot never snaps.
+Pixel calves sample their original texture in connected rows between the hip
+and boot cuff, preserving a crisp grid at diagonals. For these parts, `pivot`
+marks the first calf row and `span / scale` its source-row extent. Put only the
+calf in that texture; keep boots in their own parts. Non-pixel rigs retain
+rotated/stretched part rendering. Bit's revised boundaries and renderer have
+60 raster checks for hip/cuff coverage and connected pixels.
 Bit's 80 px canvas displays at a preferred 64 points, leaving the visible
 character about 45 points tall before preview zoom. Studio limits its stride
 slider to 8–16 motion units, where tiny limbs remain readable.
+
+After fast travel, airborne landing feet stay beneath the moving hips until
+touchdown; grounded contacts then remain fixed in world space. The lower foot
+lands first over 0.14 seconds, the other over 0.20 seconds, with a restrained
+body compression at first contact. The motion suite covers 63 moving/short-hop
+landings at 30, 60 and 120 Hz, including the final contact frame.
 
 Version 1 and 2 packs remain supported. Reduced Motion holds the first textures
 with neutral feet. The generated eye patches change only the eyelids.

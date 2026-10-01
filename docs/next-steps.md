@@ -43,8 +43,16 @@ unverified because CUA did not open that panel reliably.
 
 The whole torso now turns with the head, and actual boot pixels stay fixed
 during a stationary turn. See [the turn](media/bit-studio-turn.gif).
-Next improve pixel leg joints and fast-travel landing, add richer expressions,
-and persist the installed collection/settings across launches. Native integration and
+Calf/boot boundaries are now clean, and pixel-grid calf drawing keeps the
+actual raster connected at 60 tested extensions/lifts. Moving landings follow
+the hips until contact and descend without an extra hop; 63 landing scenarios
+also caught and fixed a one-frame contact slip at 30 Hz. See the
+[leg comparison](media/bit-leg-comparison.png) and [close-up gait](media/bit-gait-detail.gif).
+Native CUA observation again returned `cgWindowNotFound` after these changes;
+the Studio process is still running, so its current settings were left intact.
+
+Next add richer expressions and knee articulation, persist the installed
+collection/settings across launches, and expand the approved art collection. Native integration and
 production cursor size remain separate unresolved gates.
 
 The root Studio also includes **Pip · Articulated**, a version-3 pack with nine

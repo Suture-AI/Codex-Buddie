@@ -378,15 +378,32 @@ static BOOL SaveView(NSView *view, NSString *path) {
     [view cacheDisplayInRect:view.bounds toBitmapImageRep:rep];
     return [[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:path atomically:YES];
 }
-static NSBitmapImageRep *TurnImage(BuddieCharacter *character,double progress,BOOL desiredLeft) {
+static NSBitmapImageRep *PuppetImage(BuddieCharacter *character,BuddiePose pose,double progress,BOOL desiredLeft) {
     NSImage *image=[NSImage imageWithSize:NSMakeSize(320,320) flipped:YES drawingHandler:^BOOL(NSRect rect) {
-        BuddiePose pose={0}; pose.squash=1;
-        pose.feet[0].x=-character.footSpacing; pose.feet[1].x=character.footSpacing;
         NSGraphicsContext.currentContext.imageInterpolation=NSImageInterpolationNone;
         NSAffineTransform *scale=[NSAffineTransform transform]; [scale scaleBy:4]; [scale concat];
         BuddieDrawPuppet(character,pose,desiredLeft,progress,0,NO); return YES;
     }];
     return [NSBitmapImageRep imageRepWithData:image.TIFFRepresentation];
+}
+static NSBitmapImageRep *TurnImage(BuddieCharacter *character,double progress,BOOL desiredLeft) {
+    BuddiePose pose={0}; pose.squash=1;
+    pose.feet[0].x=-character.footSpacing; pose.feet[1].x=character.footSpacing;
+    return PuppetImage(character,pose,progress,desiredLeft);
+}
+static int ExportGait(NSString *path) {
+    if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
+    BuddieView *view=[[BuddieView alloc] initWithFrame:NSMakeRect(0,0,240,240)];
+    view.manualAnimation=YES; view.character=ArticulatedNamed(@"bit");
+    for(int i=0;i<300;i++) {
+        double t=i/60.,x=t<.25 ? 0:t<1.25 ? (t-.25)*24:t<1.75 ? 24+(t-1.25)*80:t<2.15 ? 64+(t-1.75)*16:t<2.8 ? 70.4:t<3.8 ? 70.4-(t-2.8)*24:46.4;
+        double unit=view.character.spriteHeight/view.character.spriteCanvas.height*view.character.puppetMotionScale;
+        [view animateAtTime:100+t anchor:(BuddiePoint){x*unit,0}];
+        NSBitmapImageRep *rep=PuppetImage(view.character,view.motionPose,view.facingProgress,t>=2.8);
+        NSString *file=[path stringByAppendingPathComponent:[NSString stringWithFormat:@"gait-%04d.png",i]];
+        if(![[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:file atomically:YES]) return 1;
+    }
+    puts("Exported close-up Cocoa gait: walk, flight, moving landing, stop and reversal."); return 0;
 }
 static int ExportTurn(NSString *path) {
     if(![NSFileManager.defaultManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil]) return 1;
@@ -498,6 +515,37 @@ static void TestPuppet(BuddieView *view) {
     }
     NSCAssert(torsos.count==5,@"Torso visibly passes through five different authored perspectives");
     puts("PASS: five rendered torso directions; direction-independent intermediate poses; stable boot pixels through turns");
+    BuddieCharacter *legs=[bit copy];
+    for(int foot=0;foot<2;foot++) {
+    NSString *role=foot ? @"legFar":@"legNear"; legs.clips=@{role:bit.clips[role]};
+    for(int x=-12;x<=8;x+=4) for(int lift=0;lift<=8;lift+=2) {
+        BuddiePose pose={0}; pose.squash=1; pose.feet[foot].x=x; pose.footLift[foot]=lift;
+        NSBitmapImageRep *rep=PuppetImage(legs,pose,0,NO);
+        NSUInteger pixel[4]; [rep getPixel:pixel atX:(foot ? 45:37)*4+2 y:59*4+2];
+        NSCAssert(pixel[3]>0,@"Pixel calf reaches its hip in actual Cocoa output");
+        [rep getPixel:pixel atX:(42+x)*4+2 y:(63-lift)*4+2];
+        NSCAssert(pixel[3]>0,@"Pixel calf reaches its boot cuff at every extension/lift");
+        // All visible calf pixels must form one connected shape, not isolated
+        // islands produced by rotating sparse cutouts.
+        NSUInteger w=rep.pixelsWide,h=rep.pixelsHigh,total=0,start=0;
+        NSMutableData *mask=[NSMutableData dataWithLength:w*h]; unsigned char *bits=mask.mutableBytes;
+        for(NSUInteger y=0;y<h;y++) for(NSUInteger x=0;x<w;x++) {
+            [rep getPixel:pixel atX:x y:y]; if(pixel[3]) { bits[y*w+x]=1; start=y*w+x; total++; }
+        }
+        NSMutableData *queue=[NSMutableData dataWithLength:w*h*sizeof(NSUInteger)]; NSUInteger *q=queue.mutableBytes,read=0,write=0;
+        q[write++]=start; bits[start]=0;
+        while(read<write) {
+            NSUInteger v=q[read++],x=v%w,y=v/w;
+            NSInteger offsets[]={-1,1,-(NSInteger)w,(NSInteger)w};
+            for(int d=0;d<4;d++) {
+                if((d==0 && x==0)||(d==1 && x==w-1)||(d==2 && y==0)||(d==3 && y==h-1)) continue;
+                NSUInteger next=v+offsets[d]; if(bits[next]) { bits[next]=0; q[write++]=next; }
+            }
+        }
+        NSCAssert(total==write,@"Every rendered calf pixel stays connected");
+    }
+    }
+    puts("PASS: 60 actual raster calf extensions/lifts connect both hips to boots without detached pixels");
 }
 
 static void TestCollection(void) {
@@ -579,6 +627,7 @@ int main(int argc,const char **argv) {
         if(argc>2 && strcmp(argv[1],"--export-palettes")==0) return ExportPalettes([NSString stringWithUTF8String:argv[2]]);
         if(argc>2 && strcmp(argv[1],"--export-puppet")==0) return ExportPuppet([NSString stringWithUTF8String:argv[2]],argc>3 ? [NSString stringWithUTF8String:argv[3]]:@"pip-articulated");
         if(argc>2 && strcmp(argv[1],"--export-turn")==0) return ExportTurn([NSString stringWithUTF8String:argv[2]]);
+        if(argc>2 && strcmp(argv[1],"--export-gait")==0) return ExportGait([NSString stringWithUTF8String:argv[2]]);
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         InstallMenus();
         Delegate *delegate=[Delegate new]; NSApp.delegate=delegate; [NSApp run];

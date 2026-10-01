@@ -75,7 +75,45 @@ static void fastTravel(double fps,double speed) {
     time+=dt; x+=speed*dt; BuddieMotionUpdate(&s,(BuddiePoint){x,y},time,small,true);
     assert(!s.airborne && s.pose.footLift[0]==0 && s.pose.bodyY==0);
 }
+static void movingLanding(double fps,int offset,bool shortHop) {
+    BuddieMotion m; BuddieMotionInit(&m);
+    BuddieRig small={8,5,2}; double dt=1/fps,time=60,x=0;
+    BuddieMotionUpdate(&m,(BuddiePoint){x,0},time,small,false);
+    int flightFrames=shortHop ? 1:(int)(fps*.3)+offset;
+    for(int i=0;i<flightFrames;i++) { x+=80*dt; time+=dt; BuddieMotionUpdate(&m,(BuddiePoint){x,0},time,small,false); }
+    int expectedLead=m.pose.footLift[1]<m.pose.footLift[0] ? 1:0,firstContact=-1;
+    bool sawLanding=false;
+    for(int i=0;i<(int)fps;i++) {
+        double previousLift[2]={m.pose.footLift[0],m.pose.footLift[1]};
+        BuddiePoint previousWorld[2];
+        for(int f=0;f<2;f++) previousWorld[f]=(BuddiePoint){m.point.x+m.pose.feet[f].x,m.point.y+m.pose.feet[f].y};
+        x+=(shortHop ? 0:16)*dt; time+=dt;
+        BuddieMotionUpdate(&m,(BuddiePoint){x,0},time,small,false);
+        assert(m.point.x==x && !m.airborne);
+        for(int f=0;f<2;f++) {
+            if(m.flightLanding[f]) {
+                sawLanding=true;
+                // Airborne boots should stay under the hips during deceleration,
+                // and must descend instead of adding a second takeoff hump.
+                assert(hypot(m.pose.feet[f].x-(f?1:-1)*small.footSpacing,m.pose.feet[f].y)<small.stride*.19);
+                assert(m.pose.footLift[f]<=previousLift[f]+1e-8);
+            }
+            if(previousLift[f]>0 && m.pose.footLift[f]==0 && firstContact<0) firstContact=f;
+            if(previousLift[f]==0 && m.pose.footLift[f]==0) {
+                double slip=hypot(m.point.x+m.pose.feet[f].x-previousWorld[f].x,m.point.y+m.pose.feet[f].y-previousWorld[f].y);
+                if(slip>=1e-7) fprintf(stderr,"Landing contact slipped %.8f fps %.0f phase %d hop %d frame %d foot %d settling %d flying %d swing %d\n",slip,fps,offset,shortHop,i,f,m.settling[f],m.flightLanding[f],m.swinging[f]);
+                assert(slip<1e-7);
+            }
+        }
+        assert(isfinite(m.pose.bodyY) && m.pose.squash>.93 && m.pose.squash<1.07);
+    }
+    assert(sawLanding && firstContact==expectedLead);
+}
 int main(void) {
+    for(int rate=30;rate<=120;rate*=2) {
+        movingLanding(rate,0,true);
+        for(int phase=0;phase<20;phase++) movingLanding(rate,phase,false);
+    }
     for(int rate=30;rate<=120;rate*=2) for(int speed=100;speed<=1600;speed*=2) fastTravel(rate,speed);
     for(int rate=30;rate<=120;rate*=2) for(int offset=0;offset<20;offset++) stopAndResume(rate,offset);
     rig=(BuddieRig){16,6,3};
@@ -116,5 +154,5 @@ int main(void) {
     assert(hypot(after.x-mid.x,after.y-mid.y)<1e-9);
     assert(hypot(afterVelocity.x-velocity.x,afterVelocity.y-velocity.y)<1e-9);
     assert(hypot(BuddieJourneyVelocity(&j,10).x,BuddieJourneyVelocity(&j,10).y)==0);
-    puts("PASS: distance-driven gait at 30/60/120 Hz; planted feet; lifted sequential settling across stop phases; interrupted landing/reversal; bounded fast travel and landing; fixed click anchor; reduced motion; teleport reset; curved arrival; C1 retarget continuity");
+    puts("PASS: distance-driven gait at 30/60/120 Hz; planted feet; sequential settling; interrupted reversal; bounded flight; 63 moving/short-hop landings descend under hips and plant the lower foot first; fixed click anchor; reduced motion; teleport reset; curved arrival; C1 retarget continuity");
 }

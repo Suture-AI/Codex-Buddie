@@ -43,6 +43,16 @@ core; attachment coordinates snap to logical pixels. Fast travel uses its
 bounded airborne gait. Paws move in opposing one-pixel steps. The renderer
 preserves the input hotspot rather than moving the cursor to accommodate art.
 
+The calf cutouts exclude boot highlights and pixels from the inter-leg gap;
+boot cutouts retain their full outer outlines. Pixel legs now sample those
+original calf textures in connected rows on the logical pixel grid, instead
+of rotating and stretching a sparse bitmap. See the
+[leg comparison](../../docs/media/bit-leg-comparison.png), against `e0f00e2`.
+The [close-up gait](../../docs/media/bit-gait-detail.gif) includes a transition
+from fast flight to continued slow travel. Airborne landings follow the hips,
+descend without an extra hop, land the lower foot first, then hold world-space
+contact. A small compression follows touchdown.
+
 Turn heads share one scale and collar registration. The generated head strip
 introduced a 4–5 pixel neck; the builder retains one collar row and registers
 it at the head pivot. This keeps the chin close to the torso at every head size
@@ -55,11 +65,12 @@ pixels, with identical alpha and unchanged surrounding head art.
 
 The torso now follows the head through five authored directions, while limbs
 keep their physical screen-side positions. See the [turn review](../../docs/media/bit-studio-turn.png).
-This remains a motion study: lighting/antenna perspective is imperfect, pixel joints need cleanup,
-and fast-travel entry/landing needs further visual refinement. Native UI
-observation has recovered, and the Studio's size/proportion controls have now
-been exercised through official CUA. These exports still demonstrate the
-Studio renderer, not live cursor replacement.
+This remains a motion study: lighting/antenna perspective is imperfect, richer
+expressions, knee articulation and additional body types remain unfinished.
+The Studio's size/proportion controls were exercised through official CUA
+before this leg update. Native observation currently returns
+`cgWindowNotFound`; this pass uses the actual Cocoa renderer's offline exports
+and tests. Live cursor replacement remains unverified.
 
 ## Reproduce
 
@@ -73,7 +84,8 @@ bash scripts/build.sh
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-puppet .build/bit-review bit
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-frames .build/bit-cocoa bit
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-turn .build/bit-turn
-uv run --with pillow python scripts/review-bit.py .build/bit-review .build/bit-cocoa --turn .build/bit-turn
+".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --export-gait .build/bit-gait
+uv run --with pillow python scripts/review-bit.py .build/bit-review .build/bit-cocoa --turn .build/bit-turn --gait .build/bit-gait
 ```
 
 The PNG frame directories are regenerable intermediates. The retained
