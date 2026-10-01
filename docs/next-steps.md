@@ -8,20 +8,26 @@ The follower in this repository is a feasibility prototype. Shipping an offset c
 
 ## What is ready for Enzo
 
-- A native macOS app that builds with `bash scripts/build.sh`.
+The repository root contains the native renderer experiment already pushed by a collaborator: it substitutes the cursor content view in a lab and stages an isolated service copy. Its documented live blocker is `SkyIPCRequirement.Error.teamNotFound` during native IPC signing validation. Preserve the original service and its authentication requirements.
+
+The independent passive experiment under `experiments/passive-overlay/` adds:
+
+- A native macOS app that builds with `bash experiments/passive-overlay/scripts/build.sh`.
 - Three original character presets and a local PNG sprite-pack loader.
 - Passive tracking of actual native computer-use cursor windows, observed during official CUA actions.
 - An ordinary preview window and click-test control for repeatable UI checks.
-- 26 passing core checks via `bash scripts/test.sh`.
+- 26 passing core checks via `bash experiments/passive-overlay/scripts/test.sh`.
 - Versioned evidence locating native cursor classes, the `SoftwareCursor` asset, browser image renderer and private cursor-location callback.
 
-Read [research.md](research.md) first. The native and browser renderers are different integrations. This code currently uses public macOS APIs to observe a private app's window naming convention; it does not hook the actual renderer.
+Read the [runtime research](../experiments/passive-overlay/docs/research.md) and the root README. The native and browser renderers are different integrations. The passive prototype uses public macOS APIs to observe a private app's window naming convention; it does not hook the actual renderer. Its observed newer service versions have not been certified for the root native shim.
 
 ## Resolve this before polishing animation
 
 Prove a way to suppress or replace the original cursor **at its rendering source** while retaining its exact movement signal. The current 15 Hz window-position follower cannot guarantee this: it can lag, uses an uncalibrated anchor and does not change captured previews.
 
-The installed browser renderer already has position, motion path, arrival timing, visibility and an image asset. Its cursor component is a promising integration point if a supported hook or controlled host is available. The native helper uses compiled cursor/style classes and an asset catalog; no public customization option was found. Directly changing that helper would also involve its code signature and update lifecycle. No installed vendor app has been patched.
+The installed browser renderer already has position, motion path, arrival timing, visibility and an image asset. Its cursor component is a promising integration point if a supported hook or controlled host is available. The native helper uses compiled cursor/style classes and an asset catalog; no public customization option was found. The root experiment illustrates the native code-signing/IPC constraint with an isolated copy. Neither investigation modifies the installed vendor app in place.
+
+Check where native motion actually runs: retaining the original window does not establish that animations applied to a detached original view or layer will transfer to the replacement. Verify curved motion, rotation and scaling before claiming that the shim inherits all native animation. A rendering substitution that preserves the animated view/layer may be necessary.
 
 A renderer we control can implement true replacement directly. That demonstrates the design but must be labeled as a separate integration, not advertised as changing stock ChatGPT/Codex. Keep passive tracking as a diagnostic/fallback mode.
 
@@ -46,4 +52,4 @@ A renderer we control can implement true replacement directly. That demonstrates
 
 ## Release work after the integration is proven
 
-Save preferences, add a size control and robust pack installation, pin the intended agent session, measure latency/CPU/battery use, test multiple monitors, choose a source license, sign and notarize downloadable builds, and publish an explicit compatibility list. Generated character packs can then reuse the validated sprite pipeline.
+Save preferences, add a size control and robust pack installation, pin the intended agent session, measure latency/CPU/battery use, test multiple monitors, sign and notarize downloadable builds, and publish an explicit compatibility list. Generated character packs can then reuse the validated sprite pipeline.

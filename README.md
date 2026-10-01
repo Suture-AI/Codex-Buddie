@@ -11,6 +11,24 @@ modified copy of the native service boots with the renderer library loaded.
 (`SkyIPCRequirement.Error.teamNotFound`). This is a renderer prototype and
 research experiment, not a working Codex cursor skin or an official plugin.
 
+The intended experience is a buddy that **walks along the agent's curved cursor
+path**, stops at the exact hotspot, and animates the click, with no gray arrow or
+glow showing. See the [next implementation brief](docs/next-steps.md).
+
+## Additional runtime research
+
+An independently tested [passive macOS overlay](experiments/passive-overlay/README.md)
+is included under `experiments/passive-overlay/`. It has three presets, custom
+sprite support, and 26 core checks. Its live trace proves that the native cursor's
+window bounds can be observed, but it does **not** replace the original artwork.
+The renderer experiment at the repository root remains the direct-replacement
+track.
+
+Read the [implementation findings](experiments/passive-overlay/docs/research.md)
+and [validation evidence](experiments/passive-overlay/docs/validation.md). The
+passive investigation inspected newer service builds than the native patch's
+compatibility entry; those observations do not certify the patch for newer builds.
+
 ## Try it
 
 Requires macOS 13+ and Xcode Command Line Tools (`xcode-select --install`).

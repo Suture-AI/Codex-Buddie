@@ -2,7 +2,7 @@
 
 A tiny character that follows the computer-use cursor on your Mac.
 
-**Product target:** fully replace the visible agent pointer with an animated character that walks along its curved movement path and animates at the click point. No gray arrow should remain visible. The current follower is a feasibility prototype; see [the next implementation brief](docs/next-steps.md).
+**Product target:** fully replace the visible agent pointer with an animated character that walks along its curved movement path and animates at the click point. No gray arrow should remain visible. The current follower is a feasibility prototype; see [the next implementation brief](../../docs/next-steps.md).
 
 **Research prototype, macOS only.** The current app follows native OpenAI computer-use cursor windows using macOS window metadata. It includes three original characters, a custom PNG sprite loader, a mouse-following demo, and an experimental mode that draws the character over the cursor's approximate location.
 
@@ -18,7 +18,7 @@ Requires macOS 14+, Xcode Command Line Tools, and Git. Tested on Apple Silicon w
 
 ```sh
 git clone https://github.com/Suture-AI/Codex-Buddie.git
-cd Codex-Buddie
+cd Codex-Buddie/experiments/passive-overlay
 bash scripts/build.sh
 open 'build/Codex Buddie.app'
 ```
@@ -73,4 +73,4 @@ No npm packages, model subscription, or API key are required for the character a
 | `tools/inspect-runtime.py` | Read-only, version-specific implementation fingerprint |
 | `docs/` | Research, evidence, sprite format and validation |
 
-This is an independent Suture AI project. It is not affiliated with or endorsed by OpenAI. OpenAI app code and assets are not included. Publication and licensing are still to be finalized; no release has been published from this initial investigation.
+This is an independent Suture AI project. It is not affiliated with or endorsed by OpenAI. OpenAI app code and assets are not included. Project code uses the repository's [MIT license](../../LICENSE); no packaged binary release has been published from this investigation.

@@ -2,6 +2,8 @@
 
 Research date: September 30, 2026, America/Los_Angeles.
 
+This report covers the passive-overlay investigation. A concurrent [native renderer experiment](../../../README.md) now lives at the repository root. It replaces artwork in a lab, with live native integration blocked by IPC signing validation. Its older compatibility entry and this report's newer observed versions are separate evidence.
+
 ## Finding
 
 Yes: the character-rendering portion is straightforward, and an independent native-cursor follower is feasible on this Mac. The difficult part is getting accurate agent activity and replacing every place OpenAI displays the cursor.

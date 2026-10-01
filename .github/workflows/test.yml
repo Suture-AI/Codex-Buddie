@@ -10,3 +10,5 @@ jobs:
       - run: python3 -m unittest discover -s tests -v
       - run: ./scripts/build.sh
       - run: '".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --self-test'
+      - run: bash experiments/passive-overlay/scripts/test.sh
+      - run: bash experiments/passive-overlay/scripts/build.sh
