@@ -1,0 +1,53 @@
+{
+  "appVersion": "26.928.21956",
+  "appBuild": "12404",
+  "archiveSHA256": "3bda98f2265ad23677dfe0163d1cc7855beade6bef11d27f830f6663d7658406",
+  "helperVersion": "26.924.1001281",
+  "helperBundleID": "com.openai.sky.CUAService",
+  "helperSHA256": "d4b1775138342c0df8e9451df3c23dda3fdef44c4ade50a2de382c188cf61b54",
+  "helperSymbolPresence": {
+    "ComputerUseCursor": true,
+    "SoftwareCursorStyle": true,
+    "Computer Use Cursor": true,
+    "computerUseCursorLocationDidChange": true,
+    "cursorMotionCompletionHandler": true
+  },
+  "rendererMarkers": [
+    {
+      "file": ".vite/build/main-BbeJ4AAR.js",
+      "sha256": "1ff5a43bde26ea6c1b77dbcf782625c890e35a836d489163c19d5ba9942d68b4",
+      "markerByteOffsets": {
+        "setRemoteHostedPIPContentComputerUseCursorLocationHandler": 229544,
+        "avatar-overlay-computer-use-cursor-changed": 439523
+      }
+    },
+    {
+      "file": "webview/assets/app-initial-135a4ef2552c.js",
+      "sha256": "8d0cf4d91cf95805808464d43e06ab3106e03924b4f51020e20f143553e746c3",
+      "markerByteOffsets": {
+        "avatar-overlay-computer-use-cursor-changed": 9495286
+      }
+    },
+    {
+      "file": "webview/assets/avatar-overlay-native-page-caa507f161db.js",
+      "sha256": "a5e3b35f78d9bb75ccedcc39b68cc93682299f5ac6c5b6ca18a55d766ca3b261",
+      "markerByteOffsets": {
+        "avatar-overlay-computer-use-cursor-changed": 192454
+      }
+    },
+    {
+      "file": "webview/assets/cursor-chat-ee8bc43f95fa.js",
+      "sha256": "aaa818a44ca4887b4c824527f4220e237c14311440c78cfb0df22b4e37564528",
+      "markerByteOffsets": {
+        "browserAgentCursorAsset": 1961
+      }
+    },
+    {
+      "file": "webview/assets/tab-content-fb71e07e7fbe.js",
+      "sha256": "84112e40c0b15c3c125bf5bc9929d577faa85f0812466ce5553d86ed92664b6b",
+      "markerByteOffsets": {
+        "browser-agent-cursor-overlay": 32082
+      }
+    }
+  ]
+}

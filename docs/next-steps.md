@@ -1,0 +1,49 @@
+# Next implementation brief
+
+## User's intended experience
+
+The buddy completely replaces the visible computer-use mouse. The gray arrow must never peek out from underneath. When Codex moves along its curved, swooping path to another control, the buddy walks or runs along that path, turns with its direction, stops at the destination and performs a click animation.
+
+The follower in this repository is a feasibility prototype. Shipping an offset companion, hiding a pointer behind a larger sprite, or demonstrating replacement only in our own canvas does not fulfill the full product requirement.
+
+## What is ready for Enzo
+
+- A native macOS app that builds with `bash scripts/build.sh`.
+- Three original character presets and a local PNG sprite-pack loader.
+- Passive tracking of actual native computer-use cursor windows, observed during official CUA actions.
+- An ordinary preview window and click-test control for repeatable UI checks.
+- 26 passing core checks via `bash scripts/test.sh`.
+- Versioned evidence locating native cursor classes, the `SoftwareCursor` asset, browser image renderer and private cursor-location callback.
+
+Read [research.md](research.md) first. The native and browser renderers are different integrations. This code currently uses public macOS APIs to observe a private app's window naming convention; it does not hook the actual renderer.
+
+## Resolve this before polishing animation
+
+Prove a way to suppress or replace the original cursor **at its rendering source** while retaining its exact movement signal. The current 15 Hz window-position follower cannot guarantee this: it can lag, uses an uncalibrated anchor and does not change captured previews.
+
+The installed browser renderer already has position, motion path, arrival timing, visibility and an image asset. Its cursor component is a promising integration point if a supported hook or controlled host is available. The native helper uses compiled cursor/style classes and an asset catalog; no public customization option was found. Directly changing that helper would also involve its code signature and update lifecycle. No installed vendor app has been patched.
+
+A renderer we control can implement true replacement directly. That demonstrates the design but must be labeled as a separate integration, not advertised as changing stock ChatGPT/Codex. Keep passive tracking as a diagnostic/fallback mode.
+
+## Animation contract
+
+1. Input coordinates and the visual hotspot are exact and independent of the body animation.
+2. Position and arrival time come from the actual motion driver. Preserve its curve instead of adding a second trailing spring.
+3. Select facing from the curve's tangent. Animate feet according to distance traveled so they do not slide during speed changes.
+4. Idle, locomotion, turning, pointer-down, dragging, pointer-up and hidden are separate states. Trigger click poses only from actual input events.
+5. Pause/approval/error states need real session events; do not infer them from an unmoving pointer.
+6. Reduced Motion uses a still character with immediate positioning and clear click feedback.
+7. Character rendering must remain outside model screenshots unless deliberately tested as part of an integration.
+
+## Acceptance gates
+
+- A recording of a real CUA task shows the buddy moving between three controls and clicking correctly.
+- No gray arrow, outline or glow appears at rest, through transparent parts of the sprite, during motion, at arrival, on hide/show or after errors.
+- The original curve and arrival timing are preserved; the buddy visibly walks/runs rather than gliding as a static image.
+- Pointer input still lands exactly on the intended control; the buddy cannot intercept input or take keyboard focus.
+- State explicitly whether native desktop, built-in browser and picture-in-picture each pass. A passing result on one surface does not establish the others.
+- Installation and uninstall work on a clean Mac, with no disabled system protections and no persistent process left behind.
+
+## Release work after the integration is proven
+
+Save preferences, add a size control and robust pack installation, pin the intended agent session, measure latency/CPU/battery use, test multiple monitors, choose a source license, sign and notarize downloadable builds, and publish an explicit compatibility list. Generated character packs can then reuse the validated sprite pipeline.

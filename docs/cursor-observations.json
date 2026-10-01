@@ -1,0 +1,310 @@
+{
+  "description": "Cursor-only metadata from a live CUA Calculator sidebar test. Array order is observation order, not timing.",
+  "observations": [
+    [
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 1527,
+          "Y": -10
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 77400,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      }
+    ],
+    [
+      {
+        "kCGWindowAlpha": 0.010748694650828838,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 828,
+          "Y": 139
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 79371,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      },
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 1527,
+          "Y": -10
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 77400,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      }
+    ],
+    [
+      {
+        "kCGWindowAlpha": 0.08746111392974854,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 828,
+          "Y": 139
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 79371,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      },
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 1527,
+          "Y": -10
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 77400,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      }
+    ],
+    [
+      {
+        "kCGWindowAlpha": 0.2676468789577484,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 828,
+          "Y": 139
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 79371,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      },
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 1527,
+          "Y": -10
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 77400,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      }
+    ],
+    [
+      {
+        "kCGWindowAlpha": 0.5169211626052856,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 828,
+          "Y": 139
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 79371,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      },
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 1527,
+          "Y": -10
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 77400,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      }
+    ],
+    [
+      {
+        "kCGWindowAlpha": 0.7607409358024597,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 828,
+          "Y": 139
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 79371,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      },
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 1527,
+          "Y": -10
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 77400,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      }
+    ],
+    [
+      {
+        "kCGWindowAlpha": 0.9131414890289307,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 828,
+          "Y": 139
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 79371,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      },
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 1527,
+          "Y": -10
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 77400,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      }
+    ],
+    [
+      {
+        "kCGWindowAlpha": 0.989454448223114,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 828,
+          "Y": 139
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 79371,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      },
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 1527,
+          "Y": -10
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 77400,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      }
+    ],
+    [
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 828,
+          "Y": 139
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 79371,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      },
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 1527,
+          "Y": -10
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 77400,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      }
+    ],
+    [
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 908,
+          "Y": 139
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 79371,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      },
+      {
+        "kCGWindowAlpha": 1,
+        "kCGWindowBounds": {
+          "Height": 126,
+          "Width": 126,
+          "X": 1527,
+          "Y": -10
+        },
+        "kCGWindowIsOnscreen": true,
+        "kCGWindowLayer": 0,
+        "kCGWindowName": "Software Cursor",
+        "kCGWindowNumber": 77400,
+        "kCGWindowOwnerName": "ChatGPT Computer Use",
+        "kCGWindowOwnerPID": 3229
+      }
+    ]
+  ]
+}

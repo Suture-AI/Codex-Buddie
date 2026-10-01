@@ -1,0 +1,48 @@
+Buddie started; Screen Recording permission: true
+Tracking cursor window 79371; bounds (908.0, 139.0, 126.0, 126.0)
+Following agent cursor
+Waiting for agent cursor…
+Waiting for agent cursor…
+Preview click received: 1
+Waiting for agent cursor…
+Waiting for agent cursor…
+Waiting for agent cursor…
+Following agent cursor
+Anchor 971.0,915.0
+Anchor 970.5,915.5
+Anchor 971.0,915.0
+Waiting for agent cursor…
+Following agent cursor
+Anchor 971.0,915.0
+Tracking cursor window 79776; bounds (801.0, 476.0, 126.0, 126.0)
+Anchor 864.0,578.0
+Preview click received: 2
+Anchor 863.0,578.0
+Anchor 533.0,578.0
+Anchor -153.0,578.0
+Anchor -917.0,578.0
+Waiting for agent cursor…
+Following agent cursor
+Waiting for agent cursor…
+Following agent cursor
+Anchor 107.0,578.0
+Anchor -597.0,578.0
+Anchor -916.0,578.0
+Waiting for agent cursor…
+Following agent cursor
+Anchor 864.5,577.5
+Anchor 864.0,578.0
+Waiting for agent cursor…
+Following agent cursor
+Anchor 864.5,577.5
+Anchor 864.0,578.0
+Following agent cursor
+Following agent cursor
+Waiting for agent cursor…
+Waiting for agent cursor…
+Following agent cursor
+Anchor 12.0,578.0
+Anchor -805.0,578.0
+Waiting for agent cursor…
+Following agent cursor
+Waiting for agent cursor…
