@@ -12,7 +12,12 @@ The follower in this repository is a feasibility prototype. Shipping an offset c
 direction as too generic and insufficiently polished. Keep these as rig fixtures,
 not approved final characters. The next direction needs a distinctive silhouette,
 coherent materials and facial design, and no dangling cursor tether. Develop a
-complete character concept before separating it into animation parts.
+complete character concept before separating it into animation parts. The user
+then selected a graphic designer-toy direction and clarified the key reference:
+ChatGPT Pets. Keep it **soft, simple and cute**, with a much stronger identity
+and more polished art than the first pear-like Sprout. Detailed sci-fi robots
+are not the current direction. Study the built-in pets' clear silhouettes,
+expressive complete poses and coherent facial/limb design; create original art.
 
 The root Character Studio now has three ChatGPT-generated body packs, independent
 animated faces/feet, distance-driven planted gait, continuous curved retargeting,
