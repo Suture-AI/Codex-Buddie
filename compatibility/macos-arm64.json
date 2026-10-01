@@ -1,0 +1,13 @@
+{
+  "601ef43e176438bb88883f82a162dab3f95a7224573c7683589695a449aa6aa2": {
+    "version": "26.913.1001067",
+    "build": "1001067",
+    "status": "blocked-native-ipc-team-validation",
+    "cursorClass": "ComputerUse.ComputerUseCursor.Window",
+    "softwareHotspot": [
+      4,
+      4
+    ],
+    "fogHotspot": "view centre"
+  }
+}
