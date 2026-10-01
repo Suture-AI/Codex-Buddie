@@ -86,6 +86,28 @@ def expressions(head):
     return result, boxes
 
 
+def tail_strip():
+    source = Image.open(ART / "tail-turn-source.png").convert("RGBA")
+    boxes = []
+    for i in range(5):
+        left, right = round(i * source.width / 5), round((i + 1) * source.width / 5)
+        b = source.crop((left, 0, right, source.height)).getchannel("A").point(lambda a: 255 if a >= 128 else 0).getbbox()
+        assert b and b[0] > 2 and b[2] < right - left - 2
+        boxes.append((left + b[0], b[1], left + b[2], b[3]))
+    scale = 14 / max(b[3] - b[1] for b in boxes)
+    frames, roots = [], []
+    for b in boxes:
+        part = source.crop(b)
+        part = pixel_image(part.resize((round(part.width * scale), round(part.height * scale)), Image.Resampling.NEAREST))
+        root = part.getchannel("A").crop((0, part.height - 1, part.width, part.height)).getbbox()
+        assert root, "The last row must contain the continuous attachment stem."
+        x = (root[0] + root[2] - 1) // 2
+        frame = Image.new("RGBA", (64, 64))
+        frame.alpha_composite(part, (34 - x, 54 - part.height))
+        frames.append(frame); roots.append([x, part.height - 1])
+    return frames, {"source_boxes": boxes, "shared_scale": scale, "source_roots_after_resize": roots, "registered_root": [34, 53], "height": 14}
+
+
 def main():
     PACK.mkdir(parents=True, exist_ok=True)
     source = Image.open(ART / "concept-source.png").convert("RGBA")
@@ -98,7 +120,6 @@ def main():
         "body": ((26, 41, 43, 54), (34, 53), (34, 53)),
         "pawNear": ((19, 43, 27, 53), (25, 44), (25, 44)),
         "pawFar": ((42, 44, 47, 53), (43, 45), (43, 45)),
-        "tail": ((11, 38, 22, 50), (20, 49), (20, 49)),
         "legNear": ((25, 53, 31, 55), (28, 53), (29, 52)),
         "legFar": ((35, 53, 41, 55), (38, 53), (39, 52)),
         "bootNear": ((23, 54, 32, 60), (28, 59), (34, 59)),
@@ -112,20 +133,20 @@ def main():
         parts[role] = {"pivot": pivot, "anchor": [anchor[0] + 8, anchor[1] + 8], "scale": 1, "frames": [frame(role)]}
         if role.startswith("leg"):
             parts[role].update(cuff=[0, -5], span=2)
-    # Remove neighboring head/hand pixels from the curled tail cutout.
-    for y in range(38, 50):
-        for x in range(11, 22):
-            if (y < 43 and x >= 20) or (y >= 44 and x >= (19 if y < 47 else 20)):
-                images["tail"].putpixel((x, y), (0, 0, 0, 0))
-    images["tail"].putpixel((21, 43), (0, 0, 0, 0))
-    # A one-pixel flex at the tip, tapering to zero at its attachment.
-    for name, amount in (("tail-in", 1), ("tail-out", -1)):
-        out = Image.new("RGBA", (64, 64))
-        for y in range(38, 50):
-            dx = round(amount * (49 - y) / 11)
-            out.alpha_composite(images["tail"].crop((0, y, 64, y + 1)), (dx, y))
-        images[name] = out
-    parts["tail"]["frames"] = [frame("tail", 1), frame("tail-in", .28), frame("tail", .2), frame("tail-out", .28), frame("tail", .8)]
+    tails, tail_geometry = tail_strip()
+    for i, im in enumerate(tails):
+        images["tail" if i == 0 else f"tail-turn-{i}"] = im
+    # The two endpoint timelines keep the same gentle flex, fixed at the root.
+    for role, name, index in (("tail", "tail", 0), ("tailLeft", "tail-turn-4", 4)):
+        for suffix, amount in (("in", 1), ("out", -1)):
+            out = Image.new("RGBA", (64, 64))
+            for y in range(40, 54):
+                dx = round(amount * (53 - y) / 13)
+                out.alpha_composite(tails[index].crop((0, y, 64, y + 1)), (dx, y))
+            images[f"{name}-{suffix}"] = out
+        parts[role] = {"pivot": [34, 53], "anchor": [37, 61], "scale": 1,
+                       "frames": [frame(name, 1), frame(name + "-in", .28), frame(name, .2), frame(name + "-out", .28), frame(name, .8)]}
+    parts["tailTurn"] = dict(parts["tail"], frames=[frame("tail" if i == 0 else f"tail-turn-{i}", .055) for i in range(5)])
     heads, head_geometry = strip("turn-source.png", 38, 42)
     bodies, body_geometry = strip("body-turn-source.png", 13, 54)
     eye_boxes = {}
@@ -159,11 +180,11 @@ def main():
                                          {"id": "suit", "name": "Coral suit", "channel": 1, "base": "#FF8068"},
                                          {"id": "face", "name": "Screen lights", "channel": 2, "base": "#B4F0B9"}], "parts": parts}}
     (PACK / "buddy.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    sources = [ART / name for name in ("concept-source.png", "turn-source.png", "body-turn-source.png")]
+    sources = [ART / name for name in ("concept-source.png", "turn-source.png", "body-turn-source.png", "tail-turn-source.png")]
     provenance = {"sources": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources},
                   "requested_model": "GPT Image 2.5 if available", "verified_model": None, "builder": "scripts/build-miso.py",
-                  "source_bounds": bounds, "parts": definitions, "head_geometry": head_geometry, "body_geometry": body_geometry, "eye_boxes": eye_boxes,
-                  "processing": "Nearest-neighbor common-scale registration; 16-color palette; separate reviewed limbs; localized eye variants; one-pixel tail flex; material masks.",
+                  "source_bounds": bounds, "concept_cutouts": definitions, "head_geometry": head_geometry, "body_geometry": body_geometry, "tail_geometry": tail_geometry, "eye_boxes": eye_boxes,
+                  "processing": "Nearest-neighbor common-scale registration; 16-color palette; separate reviewed limbs; localized eye variants; five root-registered tail perspectives with one-pixel endpoint flex; material masks.",
                   "status": "Selectable original cat-bot rig; actual Cocoa motion/customization reviewed; no user design approval or native cursor integration claimed."}
     (PACK / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
     print(json.dumps({"parts": len(parts), "frames": sum(len(p["frames"]) for p in parts.values()), "eye_boxes": eye_boxes}))

@@ -15,7 +15,7 @@ static NSMutableDictionary *MutableJSON(NSDictionary *json) {
 static void MisoPack(NSURL *root) {
     NSError *error=nil;
     BuddieCharacter *miso=[BuddieCharacter loadPack:[NSURL fileURLWithPath:@"Characters/miso"] error:&error];
-    NSCAssert(miso && !error && miso.puppetParts.count==18 && miso.materials.count==3,@"Miso loads as a complete editable character: %@",error);
+    NSCAssert(miso && !error && miso.puppetParts.count==20 && miso.materials.count==3,@"Miso loads as a complete editable character: %@",error);
     NSUInteger total=0,weights[3]={0};
     for(NSString *role in miso.clips) {
         BuddieSpriteClip *clip=miso.clips[role]; total+=clip.frames.count;
@@ -28,7 +28,7 @@ static void MisoPack(NSURL *root) {
             }
         }
     }
-    NSCAssert(total==58 && weights[0]>0 && weights[1]>0 && weights[2]>0,@"58 frames within the shared budget; all three paint channels present");
+    NSCAssert(total==68 && weights[0]>0 && weights[1]>0 && weights[2]>0,@"68 frames within the articulated budget; all three paint channels present");
     for(NSString *role in @[@"headFocus",@"headPress",@"headRelease",@"headHalf",@"headClosed"]) for(int i=0;i<5;i++) {
         NSBitmapImageRep *a=[NSBitmapImageRep imageRepWithData:miso.clips[@"headTurn"].frames[i].TIFFRepresentation];
         NSBitmapImageRep *b=[NSBitmapImageRep imageRepWithData:miso.clips[role].frames[i].TIFFRepresentation]; NSUInteger changed=0;
@@ -47,7 +47,20 @@ static void MisoPack(NSURL *root) {
     NSCAssert(restored && restored.torsoWidth==1.12 && restored.torsoHeight==.92 && restored.headScale==1.08,@"Miso proportions survive import");
     for(NSString *role in custom.clips) for(NSUInteger i=0;i<custom.clips[role].frames.count;i++)
         NSCAssert([[restored imageForClip:role frame:i].TIFFRepresentation isEqual:[custom imageForClip:role frame:i].TIFFRepresentation],@"Every recolored Miso frame survives round-trip");
-    puts("PASS: Miso 58-frame pack; separate shell/suit/face masks; 25 localized expression textures; every custom frame and proportion survives export/import");
+    NSDictionary *json=[NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:[saved URLByAppendingPathComponent:@"buddy.json"]] options:0 error:nil];
+    for(NSString *role in @[@"tailTurn",@"tailLeft",@"bodyTurn"]) {
+        NSMutableDictionary *bad=MutableJSON(json); [bad[@"puppet"][@"parts"] removeObjectForKey:role]; Reject(saved,bad);
+    }
+    for(NSString *role in @[@"tailTurn",@"tailLeft"]) for(NSDictionary *change in @[@{@"pivot":@[@33,@53]},@{@"anchor":@[@36,@61]},@{@"scale":@.9}]) {
+        NSMutableDictionary *bad=MutableJSON(json); [bad[@"puppet"][@"parts"][role] addEntriesFromDictionary:change]; Reject(saved,bad);
+    }
+    NSMutableDictionary *bad=MutableJSON(json); bad[@"puppet"][@"parts"][@"tailTurn"][@"frames"][0][@"duration"]=@.1; Reject(saved,bad);
+    NSMutableDictionary *limit=MutableJSON(json); NSMutableArray *frames=limit[@"puppet"][@"parts"][@"tail"][@"frames"];
+    while(frames.count<33) [frames addObject:frames[0]];
+    Write(saved,limit); BuddieCharacter *atLimit=[BuddieCharacter loadPack:saved error:nil];
+    NSCAssert(atLimit && atLimit.clips[@"tail"].frames[0]==atLimit.clips[@"tail"].frames[32],@"96 logical articulated frames accepted; repeated artwork still shares decoded memory");
+    [frames addObject:frames[0]]; Reject(saved,limit);
+    puts("PASS: Miso 68-frame pack; all custom frames round-trip; paired tail directions, matching geometry/timing and 96-frame articulated limit enforced");
 }
 static void ArticulatedPack(NSURL *root) {
     NSError *error=nil;
@@ -212,6 +225,10 @@ int main(void) {
             Write(spriteCopy,legacy);
             BuddieCharacter *legacyPack=[BuddieCharacter loadPack:spriteCopy error:nil];
             NSCAssert(legacyPack && !legacyPack.materials.count && [legacyPack imageForClip:@"idle" frame:0]==legacyPack.clips[@"idle"].frames[0],@"Existing version-2 packs need no materials or masks");
+            NSMutableDictionary *legacyLimit=MutableJSON(legacy); NSMutableArray *legacyFrames=legacyLimit[@"sprites"][@"clips"][@"idle"];
+            while(legacyFrames.count<64) [legacyFrames addObject:legacyFrames[0]];
+            Write(spriteCopy,legacyLimit); NSCAssert([BuddieCharacter loadPack:spriteCopy error:nil],@"Version 2 still accepts 64 frames");
+            [legacyFrames addObject:legacyFrames[0]]; Reject(spriteCopy,legacyLimit);
             for(NSString *key in @[@"canvas",@"hotspot",@"height",@"mirrorWalk",@"directionalIdle",@"pixelArt",@"clips",@"materials"]) {
                 NSMutableDictionary *bad=[spriteJSON mutableCopy], *sprites=[spriteJSON[@"sprites"] mutableCopy];
                 sprites[key]=NSNull.null; bad[@"sprites"]=sprites; Reject(spriteCopy,bad);

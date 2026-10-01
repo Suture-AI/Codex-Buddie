@@ -851,19 +851,46 @@ static void TestPuppet(BuddieView *view) {
         }
         NSCAssert(faces.count==4,@"Idle, travel, press and release remain distinct across Miso's five directions");
     }
-    NSMutableSet *tails=[NSMutableSet new]; NSBitmapImageRep *tailBase=PuppetImage(miso,neutral,0,NO);
+    for(int direction=0;direction<=1;direction++) {
+    NSMutableSet *tails=[NSMutableSet new]; NSBitmapImageRep *tailBase=PuppetImage(miso,neutral,direction,NO);
     for(NSNumber *time in @[@0,@1.1,@1.55]) {
-        NSBitmapImageRep *rep=PuppetImageAtTime(miso,neutral,0,NO,time.doubleValue,NO);
+        NSBitmapImageRep *rep=PuppetImageAtTime(miso,neutral,direction,NO,time.doubleValue,NO);
         [tails addObject:[rep representationUsingType:NSBitmapImageFileTypePNG properties:@{}]];
         for(int y=0;y<320;y++) for(int x=0;x<320;x++) {
             NSUInteger p[4],q[4]; [tailBase getPixel:p atX:x y:y]; [rep getPixel:q atX:x y:y];
-            if(memcmp(p,q,sizeof(p))) NSCAssert(x>=60 && x<120 && y>=180 && y<236,@"Tail motion leaves head, body and foot contact unchanged");
+            if(memcmp(p,q,sizeof(p))) NSCAssert(x>=96 && x<244 && y>=188 && y<248,@"Tail flex stays above the boots and within its reviewed area");
         }
     }
     NSCAssert(tails.count==3,@"Miso's tail has three visibly distinct positions");
-    NSData *stillA=[PuppetImageAtTime(miso,neutral,0,NO,0,YES) representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
-    NSData *stillB=[PuppetImageAtTime(miso,neutral,0,NO,2.2,YES) representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+    NSData *stillA=[PuppetImageAtTime(miso,neutral,direction,NO,0,YES) representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+    NSData *stillB=[PuppetImageAtTime(miso,neutral,direction,NO,2.2,YES) representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
     NSCAssert([stillA isEqual:stillB],@"Reduced Motion holds Miso's tail and eyes still");
+    }
+    BuddieCharacter *tailOnly=[miso copy];
+    BuddieSpriteClip *blank=[BuddieSpriteClip new]; blank.durations=@[@1];
+    blank.frames=@[[NSImage imageWithSize:NSMakeSize(64,64) flipped:YES drawingHandler:^BOOL(NSRect rect) { return YES; }]];
+    tailOnly.clips=@{@"tail":miso.clips[@"tail"],@"tailTurn":miso.clips[@"tailTurn"],@"tailLeft":miso.clips[@"tailLeft"],@"body":blank,@"bodyTurn":blank,@"bodyLeft":blank};
+    NSMutableSet *perspectives=[NSMutableSet new]; NSData *previousFeet=nil;
+    for(int i=0;i<=20;i++) {
+        double progress=i/20.; NSBitmapImageRep *a=PuppetImage(tailOnly,neutral,progress,NO),*b=PuppetImage(tailOnly,neutral,progress,YES);
+        NSData *pixels=[a representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+        NSCAssert([pixels isEqual:[b representationUsingType:NSBitmapImageFileTypePNG properties:@{}]],@"Reversing a tail retraces current progress without mirroring or jumping");
+        if(i%5==0) [perspectives addObject:pixels];
+        NSUInteger root[4]; [a getPixel:root atX:(NSInteger)round(37+10*progress)*4+2 y:61*4+2];
+        NSCAssert(root[3]>0,@"Every tail perspective reaches the moving hip attachment");
+        NSBitmapImageRep *full=PuppetImage(miso,neutral,progress,NO); NSMutableData *soles=[NSMutableData new];
+        for(int y=252;y<280;y++) for(int x=100;x<240;x++) { NSUInteger p[4]; [full getPixel:p atX:x y:y]; [soles appendBytes:p length:sizeof(p)]; }
+        if(previousFeet) NSCAssert([previousFeet isEqual:soles],@"A complete tail/body turn preserves every boot pixel");
+        previousFeet=soles;
+        if(i==10) {
+            BuddieCharacter *withoutTail=[miso copy]; NSMutableDictionary *clips=[miso.clips mutableCopy];
+            [clips removeObjectsForKeys:@[@"tail",@"tailTurn",@"tailLeft"]]; withoutTail.clips=clips;
+            NSBitmapImageRep *hidden=PuppetImage(withoutTail,neutral,progress,NO);
+            NSCAssert([[full representationUsingType:NSBitmapImageFileTypePNG properties:@{}] isEqual:[hidden representationUsingType:NSBitmapImageFileTypePNG properties:@{}]],@"The front-facing tail is fully occluded behind the head and torso");
+        }
+    }
+    NSCAssert(perspectives.count==5,@"Five tail perspectives remain distinct in the actual renderer");
+    puts("PASS: 21 tail turns retain root contact and fixed boots; reversal is continuous; front tail stays contained; both endpoint flexes and Reduced Motion pass");
     puts("PASS: Miso collection entry; 20 directional Cocoa faces preserve all non-eye pixels; tail moves locally; Reduced Motion stays still");
 }
 

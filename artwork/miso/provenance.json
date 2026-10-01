@@ -4,16 +4,19 @@
   "requested_model": "GPT Image 2.5 if available",
   "verified_model": null,
   "source_sha256": "06a8ee169e6f8620d2cab3c912c00c3ef7db8b7751e8bb63d62b99a637517843",
-  "status": "Selectable 58-frame articulated pixel cat bot; actual Cocoa and live Studio reviewed; user design approval remains pending.",
+  "status": "Selectable 68-frame articulated pixel cat bot; current tail turns reviewed in Cocoa; earlier live Studio evidence predates this tail change; user design approval remains pending.",
   "generated_sources": {
     "concept-source.png": "06a8ee169e6f8620d2cab3c912c00c3ef7db8b7751e8bb63d62b99a637517843",
     "turn-attempt-1.png": "254ba7005f2d16004c40714fe31bda6d83777e4acb7e4586a5b93cd7278847ad",
     "turn-source.png": "e46b337f73d60856ed3e9926f6c01b497bc59165553b63d13a9bfee4b5bd3392",
-    "body-turn-source.png": "44f94b4aaa269d032f5965f5be68e600612e96414c1d451c4ce9edea43672af6"
+    "body-turn-source.png": "44f94b4aaa269d032f5965f5be68e600612e96414c1d451c4ce9edea43672af6",
+    "tail-turn-attempt-1.png": "a9ea5325bb59393b304e2cee7aeda7109f9921b442a8ea5b9f5dd43ce30a029c",
+    "tail-turn-source.png": "96389d6edbf21d7bded69a05e0c4d59db41c5ded40529a5fa994a26e9038f8ac"
   },
   "prompts": [
     "artwork/miso/prompt.md",
-    "artwork/miso/turn-prompts.md"
+    "artwork/miso/turn-prompts.md",
+    "artwork/miso/tail-prompts.md"
   ],
-  "rejected": "turn-attempt-1.png: mirrored shell highlight in left-facing views; corrected by a targeted follow-up."
+  "rejected": "turn-attempt-1.png: mirrored shell highlight in left-facing views; corrected by a targeted follow-up. tail-turn-attempt-1.png: fourth/fifth tails mirrored the cream highlight; corrected by a targeted follow-up."
 }

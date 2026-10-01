@@ -69,19 +69,21 @@ def main():
     files = [*ROOT.glob("Sources/Buddie*.*"), ROOT / "Sources/Preview.m", ROOT / "tests/test_character.m", ROOT / "tests/test_motion.c",
              ROOT / "scripts/build-miso.py", Path(__file__), *ROOT.glob("Characters/miso/*"), *ROOT.glob("artwork/miso/*"), *artifacts]
     if (output / "miso-live.png").exists(): files.append(output / "miso-live.png")
+    parts = json.loads((ROOT / "Characters/miso/buddy.json").read_text())["puppet"]["parts"]
     report = {"status": "Selectable Miso rig with actual Cocoa export review; no user design approval or live Codex replacement claimed.",
-              "pack": {"parts": 18, "frames": 58, "materials": ["shell", "suit", "face"]}, "source_fps": 60, "gif_fps": 30,
-              "checks": ["58 frames and every recolored frame/proportion survive portable export/import", "Three material masks do not overlap",
+              "pack": {"parts": len(parts), "frames": sum(len(p["frames"]) for p in parts.values()), "materials": ["shell", "suit", "face"]}, "source_fps": 60, "gif_fps": 30,
+              "checks": ["Every recolored frame/proportion survives portable export/import", "Three material masks do not overlap",
                          "25 expression textures preserve every alpha sample and non-eye pixel", "20 Cocoa face/perspective combinations preserve the whole character outside its eyes",
                          "Three tail positions change only tail pixels; Reduced Motion holds eyes and tail still", "Eight extreme proportion corners fit the renderer",
                          "Switching from an actively edited buddy cannot copy its colors; obsolete text fields and wells are ignored"],
               "proportion_corner_bounds": bounds,
-              "live_ui": {"tool": "official CUA", "bundled_collection": "Miso present after restarting the Studio",
+              "live_ui": {"historical_source_commit": "d0d183da3dd7c1763b1aa0ce8508b4dd2e296c86", "current_build_verified": False,
+                          "tool": "official CUA", "bundled_collection": "Miso present after restarting the Studio",
                           "color_isolation": "Edited Bit shell to #EB504D, switched while the field was active: Miso retained #FCEFD5",
                           "customization": {"suit": "#7C9A80", "torsoWidth": 1.12, "headScale": 0.93},
                           "observed": ["walking with travel eyes", "release sparkle", "live suit and proportion changes", "reset to original palette/proportions"],
                           "screenshot": "docs/media/miso-live.png", "screenshot_processing": "Full CUA app-window screenshot, downsampled to 960 px wide and saved as PNG"},
-              "limitations": ["Native helper IPC and true cursor replacement remain unfinished", "Collection persistence across launches remains unfinished", "Miso design approval is pending", "Tail retains its screen-side attachment through the torso turn", "ChatGPT did not expose the image model identifier"],
+              "limitations": ["Native helper IPC and true cursor replacement remain unfinished", "Live collection restart verification is pending; automated persistence checks pass", "Miso design approval is pending", "Arms retain screen-side artwork through the torso turn", "ChatGPT did not expose the image model identifier"],
               "sha256": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(files)}}
     (ROOT / "docs/evidence/miso-studio.json").write_text(json.dumps(report, indent=2) + "\n")
     print("Saved Miso's Cocoa customization, turn, gait and face reviews.")

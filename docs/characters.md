@@ -19,8 +19,10 @@ Use a `puppet` object instead of `sprites`. It shares version 2's `canvas`,
 canvas-space `anchor` and a `scale` (0.01–4). Legs also require a `cuff` offset
 from the boot's sole and a positive `span`, their neutral displayed length.
 Each part's frames share dimensions, at most 1024 pixels per dimension, and its
-pivot must lie inside that artwork. The whole pack shares the 64-frame/64 MB
-budget, local PNG restrictions and material-mask validation.
+pivot must lie inside that artwork. Version 3 supports up to 96 logical frames;
+version 2 retains its 64-frame limit. Both retain a 64 MB shared decoded-image
+budget, local PNG restrictions and material-mask validation. Reused images and
+masks are decoded once, including repeated timeline entries.
 
 `motionScale` (0.25–8) maps motion units to canvas pixels. The renderer removes
 this scale, canvas-to-points scale and view zoom from cursor travel before
@@ -78,8 +80,8 @@ perspectives, not a time-based emotion cycle. The renderer selects the
 current turn progress, including during a mid-turn reversal. Neutral blinking
 continues through turns. Missing expression tracks preserve the older renderer.
 Reduced Motion retains static press feedback and omits the travel, release
-and blink embellishments. Bit includes 54 frames across 18 parts, within the
-unchanged pack budget. See [the face animation](media/bit-face-reactions.gif),
+and blink embellishments. Bit includes 54 frames across 18 parts. See
+[the face animation](media/bit-face-reactions.gif),
 [poses](media/bit-face-sequence.png) and [live Studio evidence](evidence/bit-faces.json).
 
 Optional `bodyTurn` and `bodyLeft` must be supplied together. Their frames use
@@ -90,6 +92,18 @@ their screen-side attachments and highlights while the torso changes perspective
 Bit supplies five head and five torso directions; a direction reversal cannot
 flip an intermediate pose. Older packs retain their mirrored-limb rendering.
 Review the [Cocoa turn](media/bit-studio-turn.gif) and [five poses](media/bit-studio-turn.png).
+
+Optional `tailTurn` and `tailLeft` require both torso direction tracks.
+All three tail tracks share the neutral tail's pivot, anchor, scale and image
+dimensions. `tailTurn` uses the same frame count and durations as `bodyTurn`;
+invalid pairs, geometry and timing are rejected at import. Its anchor represents
+the right-facing root. During a turn, that root crosses the body's anchor
+continuously before torso proportions, lean and bob are applied. Authored tail
+pixels preserve their lighting and remain behind the head, torso and limbs.
+Endpoint tail tracks may contain their own idle flex; Reduced Motion holds the
+appropriate endpoint still. See [Miso's turn](media/miso-tail-turn.gif) and
+[the review](tail-review.md). This is still a biped rig; arms retain screen-side
+artwork through torso turns.
 
 Reimporting a saved identity reloads its collection entry. Different identities
 can share a display name without losing menu entries or selection. Imported

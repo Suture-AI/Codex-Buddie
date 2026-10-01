@@ -55,12 +55,14 @@ collar, alpha, body and feet in actual Cocoa output. Timing and interrupted
 clicks pass at 30/60/120 Hz. See [the animation](media/bit-face-reactions.gif)
 and [source-pinned evidence](evidence/bit-faces.json).
 
-Native CUA observation is working again. Bit's travel/release faces and Miso's
-customization were observed in the live Studio; this is still separate from
+In the original Miso pass, native CUA observation recovered and Bit's
+travel/release faces and Miso's customization were observed in the live Studio.
+That evidence predates the library, limb-control and tail updates; subsequent
+Studio lookup again returned `cgWindowNotFound`. This is separate from
 the modified Codex helper.
 
-[Miso](../artwork/miso/README.md) is now bundled in the collection: 18 parts,
-58 frames, three independent material masks, authored head/torso turns,
+[Miso](../artwork/miso/README.md) is now bundled in the collection: 20 parts,
+68 frames, three independent material masks, authored head/torso/tail turns,
 localized expressions and a small tail flex. The first head strip was rejected
 for mirrored lighting, then corrected in ChatGPT. Sources, exact prompts and
 provenance are retained. Review [customization](media/miso-customization.png),
@@ -101,7 +103,15 @@ four-connected, and all 128 extremes of seven proportions fit both tested
 viewport layouts at idle and in flight. These checks exercise the renderer;
 they do not establish native integration or small-cursor legibility.
 
-Next refine directional limb/tail artwork and non-pixel knee articulation.
+Miso's tail now follows the torso through five generated perspectives. Its
+registered root moves around the hips; the front view is fully occluded, and
+both endpoint views keep their idle flex. Twenty-one Cocoa turn samples retain
+root contact and fixed boot pixels. Version 3 permits 96 logical frames while
+retaining the 64 MB decoded-art limit; version 2 still permits 64 frames.
+See [the turn](media/miso-tail-turn.gif), [gait](media/miso-tail-gait.gif),
+[review](tail-review.md) and [source-pinned checks](evidence/miso-tail.json).
+
+Next refine directional arm artwork and non-pixel knee articulation.
 Live Studio interaction/restart, native integration and production cursor size
 remain unresolved gates. The broader anatomy goal still includes more than
 the current biped rig and scalar controls.

@@ -353,8 +353,9 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
         if(![definitions isKindOfClass:NSDictionary.class]) return Fail(error,@"Expected a clips or parts object.");
         if(puppet) {
             NSSet *keys=[NSSet setWithArray:definitions.allKeys];
-            if(sprites[@"clips"] || ![[NSSet setWithArray:roles] isSubsetOfSet:keys] || ![keys isSubsetOfSet:[NSSet setWithArray:[roles arrayByAddingObjectsFromArray:@[@"headTurn",@"headLeft",@"bodyTurn",@"bodyLeft",@"headFocus",@"headPress",@"headRelease",@"headHalf",@"headClosed"]]]]) return Fail(error,@"Articulated packs need nine body parts, with optional head/body directions and expression heads.");
+            if(sprites[@"clips"] || ![[NSSet setWithArray:roles] isSubsetOfSet:keys] || ![keys isSubsetOfSet:[NSSet setWithArray:[roles arrayByAddingObjectsFromArray:@[@"headTurn",@"headLeft",@"bodyTurn",@"bodyLeft",@"tailTurn",@"tailLeft",@"headFocus",@"headPress",@"headRelease",@"headHalf",@"headClosed"]]]]) return Fail(error,@"Articulated packs need nine body parts, with optional head/body/tail directions and expression heads.");
             if((definitions[@"bodyTurn"]!=nil)!=(definitions[@"bodyLeft"]!=nil)) return Fail(error,@"Provide bodyTurn and bodyLeft together.");
+            if((definitions[@"tailTurn"]!=nil)!=(definitions[@"tailLeft"]!=nil) || (definitions[@"tailTurn"] && !definitions[@"bodyTurn"])) return Fail(error,@"Provide tailTurn and tailLeft together with bodyTurn and bodyLeft.");
             if(!NumberInRange(sprites[@"motionScale"],.25,8)) return Fail(error,@"motionScale must be between 0.25 and 8 canvas pixels per motion unit.");
             c.puppetMotionScale=[sprites[@"motionScale"] doubleValue];
             NSDictionary *proportions=sprites[@"proportions"] ?: @{};
@@ -367,7 +368,7 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
             }
         } else if(!definitions[@"idle"] || sprites[@"parts"]) return Fail(error,@"Sprite packs need an idle clip and cannot contain articulated parts.");
         NSMutableDictionary *clips=[NSMutableDictionary new], *cache=[NSMutableDictionary new], *parts=[NSMutableDictionary new];
-        NSUInteger total=0,budget=64*1024*1024;
+        NSUInteger total=0,budget=64*1024*1024,frameLimit=puppet ? 96:64;
         for(NSString *name in definitions) {
             if(!puppet && ![@[@"idle",@"idleLeft",@"walkRight",@"walkLeft",@"turn",@"press",@"release"] containsObject:name]) return Fail(error,@"Unknown sprite clip.");
             NSDictionary *part=puppet ? definitions[name]:nil;
@@ -381,7 +382,7 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
                 NSMutableDictionary *metadata=[part mutableCopy]; [metadata removeObjectForKey:@"frames"]; parts[name]=metadata;
             }
             NSArray *frames=puppet ? part[@"frames"]:definitions[name];
-            if(![frames isKindOfClass:NSArray.class] || !frames.count || frames.count>64 || total+frames.count>64) return Fail(error,@"Sprite packs support 1–64 frames in total.");
+            if(![frames isKindOfClass:NSArray.class] || !frames.count || frames.count>frameLimit || total+frames.count>frameLimit) return Fail(error,[NSString stringWithFormat:@"%@ packs support 1–%lu frames in total.",puppet ? @"Articulated":@"Sprite",(unsigned long)frameLimit]);
             total+=frames.count; NSMutableArray *images=[NSMutableArray new], *durations=[NSMutableArray new],*masks=[NSMutableArray new];
             for(id frame in frames) {
                 if(![frame isKindOfClass:NSDictionary.class] || ![frame[@"image"] isKindOfClass:NSString.class] || !NumberInRange(frame[@"duration"],1./120,30)) return Fail(error,@"Each sprite frame needs a PNG filename and a duration between 1/120 and 30 seconds.");
@@ -413,6 +414,13 @@ static BOOL WritePNG(NSImage *image, NSURL *url, NSError **error) {
             if(!turn || !clips[@"headLeft"] || ![expression.durations isEqual:turn.durations] ||
                ![parts[name] isEqual:parts[@"headTurn"]] || !NSEqualSizes(expression.frames[0].size,turn.frames[0].size))
                 return Fail(error,@"Expression heads must match headTurn geometry and directional frame timings, with headLeft provided.");
+        }
+        if(clips[@"tailTurn"]) {
+            BuddieSpriteClip *tail=clips[@"tail"],*turn=clips[@"tailTurn"],*left=clips[@"tailLeft"];
+            if(![turn.durations isEqual:((BuddieSpriteClip *)clips[@"bodyTurn"]).durations] ||
+               ![parts[@"tail"] isEqual:parts[@"tailTurn"]] || ![parts[@"tail"] isEqual:parts[@"tailLeft"]] ||
+               !NSEqualSizes(tail.frames[0].size,turn.frames[0].size) || !NSEqualSizes(tail.frames[0].size,left.frames[0].size))
+                return Fail(error,@"Tail directions must share tail geometry and image size; tailTurn timings must match bodyTurn.");
         }
         c.clips=clips;
         c.puppetParts=parts;

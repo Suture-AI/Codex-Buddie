@@ -35,13 +35,14 @@ lift while soles remain planted through contact.
 [Verification evidence](docs/evidence/bit-faces.json).
 
 **Miso · Cat bot** joins the collection with cream/coral generated artwork,
-separate limbs and a gently moving curled tail, five head/torso directions,
+separate limbs and a gently moving curled tail, five coordinated head/torso/tail directions,
 click/travel expressions, and independently editable shell, suit and lights.
 See [Miso's customization](docs/media/miso-customization.png),
-[walking](docs/media/miso-walk.gif) and [source/review](artwork/miso/README.md).
+[walking](docs/media/miso-walk.gif), [tail turns](docs/media/miso-tail-turn.gif)
+and [source/review](artwork/miso/README.md).
 
 **Still a motion study.** Bit's visual direction was approved and his neck
-shortened; Miso is a new candidate. Directional limb/tail artwork, non-pixel knee articulation,
+shortened; Miso is a new candidate. Directional arm artwork, non-pixel knee articulation,
 production cursor sizing and the native service
 connection remain unfinished. These exports do not show a live Codex task.
 

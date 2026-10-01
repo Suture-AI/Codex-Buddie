@@ -27,6 +27,8 @@ reversal and click feedback. [Selected gait frames](media/anatomy-gait-sequence.
 retain readable joint/contact detail. Pip still uses a straight textured calf;
 physical limbs and Miso's tail retain screen-side attachments during torso turns.
 Those are remaining motion findings, not final-quality approvals.
+The subsequent [tail review](tail-review.md) resolves Miso's tail finding;
+these original anatomy media and their source-pinned evidence are retained.
 
 Interruptibility and timing: stance changes are handled by the existing step
 planner. Tests cover 288 combinations of anatomy, size and 30/60/120 Hz, with

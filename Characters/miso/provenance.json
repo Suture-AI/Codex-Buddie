@@ -2,7 +2,8 @@
   "sources": {
     "artwork/miso/concept-source.png": "06a8ee169e6f8620d2cab3c912c00c3ef7db8b7751e8bb63d62b99a637517843",
     "artwork/miso/turn-source.png": "e46b337f73d60856ed3e9926f6c01b497bc59165553b63d13a9bfee4b5bd3392",
-    "artwork/miso/body-turn-source.png": "44f94b4aaa269d032f5965f5be68e600612e96414c1d451c4ce9edea43672af6"
+    "artwork/miso/body-turn-source.png": "44f94b4aaa269d032f5965f5be68e600612e96414c1d451c4ce9edea43672af6",
+    "artwork/miso/tail-turn-source.png": "96389d6edbf21d7bded69a05e0c4d59db41c5ded40529a5fa994a26e9038f8ac"
   },
   "requested_model": "GPT Image 2.5 if available",
   "verified_model": null,
@@ -13,7 +14,7 @@
     1039,
     1196
   ],
-  "parts": {
+  "concept_cutouts": {
     "head": [
       [
         0,
@@ -76,22 +77,6 @@
       [
         43,
         45
-      ]
-    ],
-    "tail": [
-      [
-        11,
-        38,
-        22,
-        50
-      ],
-      [
-        20,
-        49
-      ],
-      [
-        20,
-        49
       ]
     ],
     "legNear": [
@@ -233,6 +218,68 @@
     "bottom": 54,
     "height": 13
   },
+  "tail_geometry": {
+    "source_boxes": [
+      [
+        74,
+        233,
+        378,
+        566
+      ],
+      [
+        561,
+        237,
+        773,
+        565
+      ],
+      [
+        981,
+        237,
+        1180,
+        566
+      ],
+      [
+        1398,
+        237,
+        1611,
+        566
+      ],
+      [
+        1794,
+        233,
+        2098,
+        566
+      ]
+    ],
+    "shared_scale": 0.042042042042042045,
+    "source_roots_after_resize": [
+      [
+        9,
+        13
+      ],
+      [
+        3,
+        13
+      ],
+      [
+        4,
+        13
+      ],
+      [
+        4,
+        13
+      ],
+      [
+        2,
+        13
+      ]
+    ],
+    "registered_root": [
+      34,
+      53
+    ],
+    "height": 14
+  },
   "eye_boxes": {
     "0": [
       [
@@ -305,6 +352,6 @@
       ]
     ]
   },
-  "processing": "Nearest-neighbor common-scale registration; 16-color palette; separate reviewed limbs; localized eye variants; one-pixel tail flex; material masks.",
+  "processing": "Nearest-neighbor common-scale registration; 16-color palette; separate reviewed limbs; localized eye variants; five root-registered tail perspectives with one-pixel endpoint flex; material masks.",
   "status": "Selectable original cat-bot rig; actual Cocoa motion/customization reviewed; no user design approval or native cursor integration claimed."
 }

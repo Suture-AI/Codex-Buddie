@@ -69,7 +69,16 @@ void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double 
     [NSGraphicsContext saveGraphicsState];
     NSAffineTransform *mirror=[NSAffineTransform transform];
     [mirror translateXBy:c.spriteHotspot.x yBy:0]; [mirror scaleXBy:facing yBy:1]; [mirror translateXBy:-c.spriteHotspot.x yBy:0]; [mirror concat];
-    Part(c,@"tail",attach(@"tail"),lean+sin(p.phase*2*M_PI)*.04*p.walkWeight,1,1,elapsed,reduced);
+    BOOL inTurn=turnProgress>1e-8 && turnProgress<1-1e-8;
+    BOOL directionalTail=c.clips[@"tailTurn"] && c.clips[@"tailLeft"];
+    NSString *tail=directionalTail ? (inTurn ? @"tailTurn":turnProgress>=.5 ? @"tailLeft":@"tail"):@"tail";
+    NSPoint tailRoot=PartPoint(c.puppetParts[@"tail"][@"anchor"]);
+    // Move the attachment around the back of the hips. Authored perspective
+    // changes the curl while the tail remains behind the torso in every view.
+    if(directionalTail) tailRoot.x=origin.x+(tailRoot.x-origin.x)*(1-2*turnProgress);
+    tailRoot=Attachment(tailRoot,origin,width,height,lean,bob);
+    double tailTime=directionalTail && inTurn ? MIN(1-1e-9,turnProgress)*c.clips[tail].duration:elapsed;
+    Part(c,tail,tailRoot,lean+sin(p.phase*2*M_PI)*.04*p.walkWeight,1,1,tailTime,directionalTail && inTurn ? NO:reduced);
     // World-space feet counter the artwork's mirror. The contacts cannot inherit
     // torso stretch, bob, lean or click squash.
     for(int i=1;i>=0;i--) {
@@ -86,7 +95,6 @@ void BuddieDrawPuppet(BuddieCharacter *c, BuddiePose p, BOOL facingLeft, double 
     }
     double swing=sin(p.phase*2*M_PI)*.18*p.walkWeight;
     Part(c,@"pawFar",attach(@"pawFar"),lean-swing,1,c.armLength,elapsed,reduced);
-    BOOL inTurn=turnProgress>1e-8 && turnProgress<1-1e-8;
     NSString *body=directionalBody ? (inTurn ? @"bodyTurn":turnProgress>=.5 ? @"bodyLeft":@"body"):@"body";
     Part(c,body,NSMakePoint(origin.x,origin.y+bob),lean,width,height,[body isEqual:@"bodyTurn"] ? turnProgress*c.clips[body].duration:elapsed,reduced);
     Part(c,@"pawNear",attach(@"pawNear"),lean+swing,1,c.armLength,elapsed,reduced);

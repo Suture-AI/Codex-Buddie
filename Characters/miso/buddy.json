@@ -138,44 +138,6 @@
           }
         ]
       },
-      "tail": {
-        "pivot": [
-          20,
-          49
-        ],
-        "anchor": [
-          28,
-          57
-        ],
-        "scale": 1,
-        "frames": [
-          {
-            "image": "tail.png",
-            "mask": "tail-mask.png",
-            "duration": 1
-          },
-          {
-            "image": "tail-in.png",
-            "mask": "tail-in-mask.png",
-            "duration": 0.28
-          },
-          {
-            "image": "tail.png",
-            "mask": "tail-mask.png",
-            "duration": 0.2
-          },
-          {
-            "image": "tail-out.png",
-            "mask": "tail-out-mask.png",
-            "duration": 0.28
-          },
-          {
-            "image": "tail.png",
-            "mask": "tail-mask.png",
-            "duration": 0.8
-          }
-        ]
-      },
       "legNear": {
         "pivot": [
           28,
@@ -255,6 +217,120 @@
             "image": "bootFar.png",
             "mask": "bootFar-mask.png",
             "duration": 1
+          }
+        ]
+      },
+      "tail": {
+        "pivot": [
+          34,
+          53
+        ],
+        "anchor": [
+          37,
+          61
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "tail.png",
+            "mask": "tail-mask.png",
+            "duration": 1
+          },
+          {
+            "image": "tail-in.png",
+            "mask": "tail-in-mask.png",
+            "duration": 0.28
+          },
+          {
+            "image": "tail.png",
+            "mask": "tail-mask.png",
+            "duration": 0.2
+          },
+          {
+            "image": "tail-out.png",
+            "mask": "tail-out-mask.png",
+            "duration": 0.28
+          },
+          {
+            "image": "tail.png",
+            "mask": "tail-mask.png",
+            "duration": 0.8
+          }
+        ]
+      },
+      "tailLeft": {
+        "pivot": [
+          34,
+          53
+        ],
+        "anchor": [
+          37,
+          61
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "tail-turn-4.png",
+            "mask": "tail-turn-4-mask.png",
+            "duration": 1
+          },
+          {
+            "image": "tail-turn-4-in.png",
+            "mask": "tail-turn-4-in-mask.png",
+            "duration": 0.28
+          },
+          {
+            "image": "tail-turn-4.png",
+            "mask": "tail-turn-4-mask.png",
+            "duration": 0.2
+          },
+          {
+            "image": "tail-turn-4-out.png",
+            "mask": "tail-turn-4-out-mask.png",
+            "duration": 0.28
+          },
+          {
+            "image": "tail-turn-4.png",
+            "mask": "tail-turn-4-mask.png",
+            "duration": 0.8
+          }
+        ]
+      },
+      "tailTurn": {
+        "pivot": [
+          34,
+          53
+        ],
+        "anchor": [
+          37,
+          61
+        ],
+        "scale": 1,
+        "frames": [
+          {
+            "image": "tail.png",
+            "mask": "tail-mask.png",
+            "duration": 0.055
+          },
+          {
+            "image": "tail-turn-1.png",
+            "mask": "tail-turn-1-mask.png",
+            "duration": 0.055
+          },
+          {
+            "image": "tail-turn-2.png",
+            "mask": "tail-turn-2-mask.png",
+            "duration": 0.055
+          },
+          {
+            "image": "tail-turn-3.png",
+            "mask": "tail-turn-3-mask.png",
+            "duration": 0.055
+          },
+          {
+            "image": "tail-turn-4.png",
+            "mask": "tail-turn-4-mask.png",
+            "duration": 0.055
           }
         ]
       },
