@@ -1,0 +1,82 @@
+{
+  "scope": "Browser cursor research and local closed-shadow-root fixture; actual companion extension installation pending.",
+  "recorded_at_utc": "2026-10-01T15:47:40.996591+00:00",
+  "inspected_chatgpt_extension_version": "1.26.901.11451",
+  "inspected_file_sha256": {
+    "manifest.json": "43c407d46765d3f85754a516b4500b7f491c067548456ba211fa82fca5bd209b",
+    "codex.js": "d01bc3fd8c98fb5c7a42cf6f465a8e27e24d436b2d4304df2ef38c027f54cc70",
+    "background.js": "83b7b7708ab82ecc9aa2ccad20a2167941a706b38a9467dee0bb124d13f0033e",
+    "browser-service.mjs": "64b3e6758957d209c58755c9d198237021124f14060b14edb4f9b74288851667"
+  },
+  "vendor_files_unchanged": true,
+  "official_reference": "https://developer.chrome.com/docs/extensions/reference/api/dom",
+  "prototype": {
+    "manifest_version": 3,
+    "default_buddy": "bit",
+    "atlas_frames": 305,
+    "atlas_bytes": 164085,
+    "declared_api_permissions": [],
+    "page_matches": [
+      "http://*/*",
+      "https://*/*"
+    ],
+    "background_worker": false,
+    "input_injection": false,
+    "remote_requests": false
+  },
+  "verification": {
+    "node_motion_tests": "passed 30/60/120 Hz, reversal, facing, press/release and Reduced Motion",
+    "official_CUA_Brave_fixture_checks": 12,
+    "checked_anchors": [
+      [
+        200.25,
+        280.5
+      ],
+      [
+        800.75,
+        410.125
+      ],
+      [
+        420,
+        340
+      ]
+    ],
+    "anchor_error_tolerance_css_pixels": 0.001,
+    "fixture_uses_closed_root": true,
+    "real_cross_extension_access_verified": false,
+    "actual_browser_action_replacement_verified": false,
+    "install_confirmation": "requested; pending"
+  },
+  "source_sha256": {
+    "Sources/BuddieCharacter.m": "7b351cfe6d035a6ca659fc6527edbfa758fe54dba00f1f0bfc82c67feaec1eb1",
+    "Sources/BuddieMotion.c": "c7cf84d642960df7b3a5dda50970c502028227fab71b6d1d9a30cd30bc694506",
+    "Sources/BuddiePuppet.m": "49fd12c02236e80c3aa5358ec6b88b5ade3a4eafeb68b4bdebe74defa542af6c",
+    "browser-extension/README.md": "da71e389bdc22b5efec8406bc27a37a08adfeec2f1fd2cfe94a93224dc67d496",
+    "browser-extension/adapter.js": "a72c923f0de96d4aa43c47ff8c389b59a9138b0b9a4088a7780f0609d1f39e99",
+    "browser-extension/assets/atlas.js": "1e21c6d27161f52e85611a39d79fca2eb7a4276cd19a09e49c23bb1122e18832",
+    "browser-extension/assets/bit-atlas.json": "37c568da750b29950a131cc8993aa2fe88f29899173fa79b27b6792b83c87188",
+    "browser-extension/assets/bit-atlas.png": "fc5ed59e146cdb128d63e27dab77f9a8d0552c1503bc7a54a3ee1c9ac02ea0a3",
+    "browser-extension/content.js": "571a2a960b534a142a94661954dcb92e9d03b9bcc78b8e65a47d218ec3cc1060",
+    "browser-extension/manifest.json": "314d4322d37c221105262881e4950eb2d5e24e3752c92cfb7146881bc068b058",
+    "browser-extension/preview/index.html": "ca91a6fbf1f321d7653753da1903ec064112c71d3bc6807f9ec9f363586d14c6",
+    "browser-extension/preview/preview.js": "c8a7801bf68e6ea44e46a1d2f6846b495f18d61609e5bdbfadebad0cee547d7b",
+    "scripts/build-browser-art.sh": "e334b0a5c8230df10cc1680a57a9305065c84a11e154ecbf76e3a34e8e840084",
+    "scripts/export-browser-bit.m": "f7268581ed8c2eb4bde887f36aecbc827fc2a3d9557a9afc887e235c12531426",
+    "tests/test_browser_motion.cjs": "9c70c271299811a3850dd987f63a5c01c128afb19afbc902af3417d1fcb352b1",
+    "browser-extension/preview/live.html": "a3c4c73ea0fced90807154b4fa7c5a8b05b6e152f08e07edd43293f95b0b96ae"
+  },
+  "published_artifacts_sha256": {
+    "docs/media/browser-companion-preview.jpg": "aa920dcedb3b55835a9eb93e1581cdb9defeddbfe8fbfc727d9350c5fdb56c4f"
+  },
+  "local_input_sha256": {
+    ".build/browser-companion/inspected-files.json": "1d496ea24f22c2bc62c3a53e7b8e586431f0acdd3de1abc285a93bc516259544"
+  },
+  "limits": [
+    "No model-release attribution for changed tab grouping.",
+    "Fixture results do not prove access to the real extension closed root.",
+    "The native cursor implementation remains separate and unchanged.",
+    "Live install, disable/uninstall recovery, arrival timing, click attribution and performance remain to be checked.",
+    "Default Bit only; no Studio settings synchronization.",
+    "No embedded-browser, internal-page, PDF or other-provider support."
+  ]
+}

@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buddie · Live browser action test</title>
+<style>
+body{margin:64px auto;max-width:1000px;padding:0 32px;background:#f5f5ef;color:#233237;font:17px/1.6 system-ui}h1{font-size:38px;letter-spacing:-.04em}p{max-width:740px;color:#5d6b70}.targets{display:flex;justify-content:space-between;align-items:center;height:350px;border-radius:24px;background:#e8eee7;padding:24px}button{border:0;border-radius:12px;padding:16px 24px;font:inherit;background:#fff;color:inherit}button:nth-child(2){align-self:flex-start;margin-top:36px}button:nth-child(3){align-self:flex-end;margin-bottom:36px}output{display:block;margin-top:24px}
+</style>
+<h1>Real browser actions.</h1><p>This page draws no cursor and loads no buddy scripts. Any agent cursor here comes from your installed browser extensions.</p>
+<div class="targets"><button>First target</button><button>Second target</button><button>Third target</button></div>
+<output aria-live="polite">No targets clicked yet.</output>
+<script>
+let count=0;
+for(const button of document.querySelectorAll('button'))button.addEventListener('click',()=>{document.querySelector('output').textContent=`${button.textContent} clicked. Total: ${++count}.`;});
+</script></html>

@@ -1,0 +1,1 @@
+globalThis.BuddieBitAtlas = {"cell":80,"columns":16,"directions":5,"frames":305,"height":64,"hotspot":[42,24],"states":{"blink":{"count":3,"start":5},"idle":{"count":1,"start":0},"press":{"count":1,"start":260},"release":{"count":8,"start":265},"run":{"count":24,"start":140},"walk":{"count":24,"start":20}}};

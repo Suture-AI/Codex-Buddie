@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bit · Browser companion preview</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#f5f5ef;color:#233237;font:16px/1.5 system-ui,sans-serif}main{max-width:1050px;margin:56px auto;padding:0 32px}small{letter-spacing:.14em;color:#627276;font-size:11px}h1{font-size:46px;line-height:1.1;letter-spacing:-.05em;margin:14px 0}p{max-width:720px;color:#5d6b70}.stage{height:320px;background:#e9eee8;border-radius:24px;display:flex;justify-content:space-around;align-items:center;margin:30px 0;background-image:radial-gradient(#d5ded4 1px,transparent 1px);background-size:22px 22px}button{font:inherit;color:inherit;border:0;border-radius:12px;padding:12px 20px;background:#fff;box-shadow:0 1px 3px #16252418;cursor:pointer}button:active{transform:translateY(1px)}.controls{display:flex;flex-wrap:wrap;gap:12px}.controls button{background:#e1e7e5}#report{white-space:pre-wrap;font:13px/1.6 ui-monospace,monospace;color:#244b46}#status{font-size:14px}
+</style>
+<main><small>SUTURE / BUDDIE BROWSER</small><h1>Same path. A little more character.</h1>
+<p>Local compatibility preview. Bit follows a simulated browser cursor inside a closed shadow root. The real ChatGPT extension has not been connected to this preview.</p>
+<div class="stage"><button id="left">Look here</button><button id="middle">This way</button><button id="right">Over here</button></div>
+<div class="controls"><button id="hide">Hide agent</button><button id="recreate">Restart overlay</button><button id="toggle">Show original arrow</button><button id="checks">Run compatibility checks</button></div>
+<p id="status" role="status">Preparing Bit…</p><pre id="report"></pre></main>
+<script src="../assets/atlas.js"></script><script src="../adapter.js"></script><script src="preview.js"></script>
+</html>

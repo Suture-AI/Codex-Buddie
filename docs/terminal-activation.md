@@ -18,8 +18,8 @@ starts the prepared Buddie service on a private socket, then the unmodified
 official CUA runtime. On exit it stops only its own subprocess groups and removes
 its temporary socket directory. Diagnostic frame capture is disabled.
 
-Use native computer input to see the character. DOM-based browser actions have
-no visible native pointer movement. This activation does not resolve the renderer's
+Use native computer input to see the character. DOM-based browser actions can draw a separate in-page cursor, but do not move
+the native cursor window. See [the browser companion](../browser-extension/README.md). This activation does not resolve the renderer's
 remaining [smooth travel, click animation and compatibility gaps](native-layout.md).
 
 ## Verification

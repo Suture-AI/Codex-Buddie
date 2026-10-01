@@ -151,7 +151,8 @@ not need to be open. Its saved character selection still controls the cursor.
 This updates the main Codex profile and existing Orca account/shared profiles.
 It preserves official browser providers, tool settings and per-app permissions.
 Existing sessions keep their old connection until restarted. Browser actions
-that use DOM automation do not move a native cursor and will not show the buddy.
+that use DOM automation may draw a separate in-page cursor. The native renderer
+switch does not skin that cursor; see the browser companion below.
 The service path must remain available; moving or deleting that prepared copy
 breaks the registration until restored.
 
@@ -166,6 +167,19 @@ Restart affected sessions after disabling too. The script saves the original
 CUA registration and preserves unrelated later settings. It refuses to overwrite
 a CUA stanza that has been edited since activation. The live renderer's
 [motion and compatibility limits](docs/native-layout.md) still apply.
+
+## Browser tab cursor companion
+
+The ChatGPT browser extension can draw its own animated cursor inside an ordinary
+web tab. That is a separate renderer from the native macOS cursor. The earlier
+blanket statement that browser DOM actions never show a cursor was incorrect.
+
+A [companion extension prototype](browser-extension/README.md) now replaces that
+in-page arrow's artwork with Bit while following the existing position and
+visibility. It has 305 poses from the native renderer and passes 12 local browser
+fixture checks. Installation beside the actual ChatGPT extension and real browser
+actions are still pending; this is not yet a live browser-integration claim.
+The current prototype uses default Bit without syncing Studio settings.
 
 ## Prepare an isolated native experiment
 
