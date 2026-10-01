@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "sprout",
+  "name": "Sprout",
+  "colors": {
+    "body": "#D4E7AC",
+    "ink": "#304531",
+    "accent": "#EEAFA2"
+  },
+  "rig": {
+    "width": 29,
+    "height": 40,
+    "faceY": 2,
+    "eyeSpacing": 12
+  },
+  "art": {
+    "body": "body.png"
+  }
+}

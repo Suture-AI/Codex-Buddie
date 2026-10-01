@@ -1,44 +1,109 @@
 #import "BuddieView.h"
 #import <objc/runtime.h>
 
-static NSColor *Ink(void) { return [NSColor colorWithSRGBRed:.10 green:.16 blue:.14 alpha:1]; }
-static NSColor *Lime(void) { return [NSColor colorWithSRGBRed:.76 green:.95 blue:.46 alpha:1]; }
 static void Oval(NSRect r, NSColor *c) { [c setFill]; [[NSBezierPath bezierPathWithOvalInRect:r] fill]; }
-
+static void Stroke(NSBezierPath *p, NSColor *c, CGFloat width) {
+    p.lineWidth=width; p.lineCapStyle=NSLineCapStyleRound; [c setStroke]; [p stroke];
+}
+@interface BuddieView () {
+    BuddieMotion _motion;
+}
+@property NSTimer *animationTimer;
+@end
 @implementation BuddieView
+- (instancetype)initWithFrame:(NSRect)frame {
+    if((self=[super initWithFrame:frame])) {
+        _character=[BuddieCharacter new]; _characterScale=1;
+        BuddieMotionInit(&_motion);
+    } return self;
+}
 - (BOOL)isFlipped { return YES; }
 - (BOOL)isOpaque { return NO; }
 - (NSView *)hitTest:(NSPoint)p { return nil; }
+- (void)dealloc { [_animationTimer invalidate]; }
+- (void)setCharacter:(BuddieCharacter *)character {
+    _character=character ?: [BuddieCharacter new]; BuddieMotionInit(&_motion); self.needsDisplay=YES;
+}
+- (void)setManualAnimation:(BOOL)value { _manualAnimation=value; [self configureTimer]; }
+- (void)viewDidMoveToWindow { [super viewDidMoveToWindow]; [self configureTimer]; }
+- (void)configureTimer {
+    [self.animationTimer invalidate]; self.animationTimer=nil;
+    if(!self.window || self.manualAnimation) return;
+    __weak BuddieView *weak=self;
+    self.animationTimer=[NSTimer timerWithTimeInterval:1./60 repeats:YES block:^(NSTimer *timer) {
+        BuddieView *s=weak; if(!s || !s.window.visible || s.window.miniaturized) return;
+        NSPoint anchor=[s.window convertPointToScreen:[s convertPoint:s.hotspot toView:nil]];
+        CGFloat scale=s.drawingScale;
+        if(scale>0) [s animateAtTime:NSProcessInfo.processInfo.systemUptime anchor:(BuddiePoint){anchor.x/scale,-anchor.y/scale}];
+    }];
+    [NSRunLoop.mainRunLoop addTimer:self.animationTimer forMode:NSRunLoopCommonModes];
+}
+- (NSPoint)hotspot { return self.softwareStyle ? NSMakePoint(4,4) : NSMakePoint(NSMidX(self.bounds),NSMidY(self.bounds)); }
+- (CGFloat)drawingScale {
+    NSPoint h=self.hotspot;
+    return MAX(0,MIN(self.characterScale,MIN((NSWidth(self.bounds)-h.x)/64.,(NSHeight(self.bounds)-h.y)/66.)));
+}
+- (void)animateAtTime:(double)time anchor:(BuddiePoint)anchor {
+    BuddieCharacter *c=self.character;
+    BuddieMotionUpdate(&_motion,anchor,time,(BuddieRig){c.stride,c.footSpacing,c.footLift},self.reduceMotion || NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion);
+    self.needsDisplay=YES;
+}
+- (void)press:(BOOL)down atTime:(double)time { BuddieMotionPress(&_motion,down,time); }
 - (void)drawRect:(NSRect)dirty {
+    CGFloat scale=self.drawingScale; if(scale<=0) return;
+    BuddieCharacter *c=self.character; BuddiePose p=_motion.pose;
     [NSGraphicsContext saveGraphicsState];
-    // SoftwareCursorStyle's native hotspot is (4, 4). FogCursorStyle's is
-    // the centre of its view. Neither the window frame nor the hotspot changes.
-    NSPoint hotspot = self.softwareStyle ? NSMakePoint(4, 4) : NSMakePoint(NSMidX(self.bounds), NSMidY(self.bounds));
-    CGFloat scale = MIN(1., MIN((self.bounds.size.width-hotspot.x)/26., (self.bounds.size.height-hotspot.y)/32.));
-    if (scale <= 0) { [NSGraphicsContext restoreGraphicsState]; return; }
-    NSAffineTransform *t = [NSAffineTransform transform];
-    [t translateXBy:hotspot.x - 4*scale yBy:hotspot.y - 4*scale];
-    [t scaleBy:scale];
-    [t concat];
-    // The antenna tip is the exact click point. Body extends down and right.
-    NSBezierPath *antenna = [NSBezierPath bezierPath];
-    [antenna moveToPoint:NSMakePoint(4, 4)];
-    [antenna lineToPoint:NSMakePoint(12, 13)];
-    antenna.lineWidth = 2.4; antenna.lineCapStyle = NSLineCapStyleRound;
-    [Ink() setStroke]; [antenna stroke];
-    Oval(NSMakeRect(1.5, 1.5, 5, 5), Ink());
-    Oval(NSMakeRect(2.5, 2.5, 3, 3), Lime());
-    NSBezierPath *body = [NSBezierPath bezierPathWithRoundedRect:NSMakeRect(5, 11, 25, 23) xRadius:9 yRadius:9];
-    [Lime() setFill]; [body fill]; body.lineWidth = 1.8; [Ink() setStroke]; [body stroke];
-    Oval(NSMakeRect(10, 18, 4, 6), Ink());
-    Oval(NSMakeRect(21, 18, 4, 6), Ink());
-    Oval(NSMakeRect(10.9, 18.5, 1.3, 1.6), NSColor.whiteColor);
-    Oval(NSMakeRect(21.9, 18.5, 1.3, 1.6), NSColor.whiteColor);
-    NSBezierPath *smile = [NSBezierPath bezierPath];
-    [smile moveToPoint:NSMakePoint(15, 27)];
-    [smile curveToPoint:NSMakePoint(20, 27) controlPoint1:NSMakePoint(16, 30) controlPoint2:NSMakePoint(19, 30)];
-    smile.lineWidth = 1.5; [Ink() setStroke]; [smile stroke];
-    Oval(NSMakeRect(8, 32, 7, 4), Ink()); Oval(NSMakeRect(22, 32, 7, 4), Ink());
+    NSGraphicsContext.currentContext.imageInterpolation=NSImageInterpolationHigh;
+    NSAffineTransform *t=[NSAffineTransform transform];
+    [t translateXBy:self.hotspot.x-8*scale yBy:self.hotspot.y-8*scale]; [t scaleBy:scale]; [t concat];
+    // This marker and the actual window never inherit gait, squash or lean.
+    CGFloat top=54-c.bodySize.height;
+    NSBezierPath *tether=[NSBezierPath bezierPath]; [tether moveToPoint:NSMakePoint(8,8)];
+    [tether curveToPoint:NSMakePoint(28,top+8+p.bodyY) controlPoint1:NSMakePoint(9,top+2) controlPoint2:NSMakePoint(19,top+4)];
+    Stroke(tether,[c.inkColor colorWithAlphaComponent:.72],1.5);
+    Oval(NSMakeRect(5.6,5.6,4.8,4.8),c.inkColor); Oval(NSMakeRect(6.8,6.8,2.4,2.4),c.bodyColor);
+    // Feet are world-planted. Do not include them in the body's bob transform.
+    for(int i=0;i<2;i++) {
+        double x=34+p.feet[i].x, y=55+p.feet[i].y;
+        if(!_motion.initialized) x=34+(i ? c.footSpacing:-c.footSpacing);
+        NSBezierPath *leg=[NSBezierPath bezierPath];
+        [leg moveToPoint:NSMakePoint(34+(i?1:-1)*c.footSpacing*.65,51+p.bodyY)];
+        [leg curveToPoint:NSMakePoint(x,y-p.footLift[i]) controlPoint1:NSMakePoint(x,52+p.bodyY) controlPoint2:NSMakePoint(x,y-2-p.footLift[i])];
+        Stroke(leg,c.inkColor,2.2);
+        Oval(NSMakeRect(x-c.footSize*.55,y+1,c.footSize*1.1,2),[c.inkColor colorWithAlphaComponent:.10*(1-p.footLift[i]/12)]);
+        NSRect foot=NSMakeRect(x-c.footSize/2,y-2.5-p.footLift[i],c.footSize,5);
+        if(c.footImage) [c.footImage drawInRect:foot fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1 respectFlipped:YES hints:nil];
+        else {
+            Oval(foot,c.inkColor);
+            Oval(NSMakeRect(foot.origin.x+1,foot.origin.y+.5,foot.size.width-2,1.5),[NSColor.whiteColor colorWithAlphaComponent:.16]);
+        }
+    }
+    [NSGraphicsContext saveGraphicsState];
+    NSAffineTransform *bodyTransform=[NSAffineTransform transform];
+    [bodyTransform translateXBy:34 yBy:54+p.bodyY]; [bodyTransform rotateByRadians:p.lean];
+    [bodyTransform scaleXBy:1/sqrt(MAX(.5,p.squash)) yBy:p.squash]; [bodyTransform translateXBy:-34 yBy:-54]; [bodyTransform concat];
+    NSRect body=NSMakeRect(34-c.bodySize.width/2,top,c.bodySize.width,c.bodySize.height);
+    if(c.bodyImage) [c.bodyImage drawInRect:body fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1 respectFlipped:YES hints:nil];
+    else {
+        NSBezierPath *shape=[NSBezierPath bezierPathWithRoundedRect:body xRadius:c.cornerRadius yRadius:c.cornerRadius];
+        NSColor *light=[c.bodyColor blendedColorWithFraction:.2 ofColor:NSColor.whiteColor];
+        NSColor *dark=[c.bodyColor blendedColorWithFraction:.1 ofColor:c.inkColor];
+        [[[NSGradient alloc] initWithStartingColor:light endingColor:dark] drawInBezierPath:shape angle:90];
+        Stroke(shape,[c.inkColor colorWithAlphaComponent:.65],1.2);
+    }
+    CGFloat faceY=38+c.faceY;
+    for(int i=0;i<2;i++) {
+        CGFloat x=34+(i ? c.eyeSpacing/2:-c.eyeSpacing/2)+p.gazeX;
+        CGFloat height=MAX(.65,c.eyeSize*1.25*p.eyeOpen);
+        Oval(NSMakeRect(x-c.eyeSize/2,faceY+p.gazeY-height/2,c.eyeSize,height),c.inkColor);
+        if(p.eyeOpen>.55) Oval(NSMakeRect(x-c.eyeSize*.17,faceY+p.gazeY-height*.35,c.eyeSize*.23,height*.25),[NSColor.whiteColor colorWithAlphaComponent:.85]);
+        Oval(NSMakeRect(x-3.5,faceY+5,7,3),[c.accentColor colorWithAlphaComponent:.35]);
+    }
+    NSBezierPath *smile=[NSBezierPath bezierPath];
+    [smile moveToPoint:NSMakePoint(31,faceY+6)];
+    [smile curveToPoint:NSMakePoint(37,faceY+6) controlPoint1:NSMakePoint(32,faceY+6+4*p.smile) controlPoint2:NSMakePoint(36,faceY+6+4*p.smile)];
+    Stroke(smile,c.inkColor,1.25);
+    [NSGraphicsContext restoreGraphicsState];
     [NSGraphicsContext restoreGraphicsState];
 }
 @end

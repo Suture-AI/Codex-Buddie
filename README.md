@@ -15,6 +15,17 @@ The intended experience is a buddy that **walks along the agent's curved cursor
 path**, stops at the exact hotspot, and animates the click, with no gray arrow or
 glow showing. See the [next implementation brief](docs/next-steps.md).
 
+![Three generated buddies walking, turning and clicking in the studio](docs/media/buddies-walking.gif)
+
+The **Character Studio** includes Sprout, Mochi and Orbit, generated individually
+in ChatGPT, plus three lightweight procedural presets. Body artwork, animated
+eyes, mouth and feet are separate layers. Blinks, gaze, planted steps, gentle body
+motion and click poses all share a fixed hotspot. This recording is the studio's
+controlled renderer; it does not establish live Codex integration.
+
+**Art direction is being reworked.** This first generated set is retained as rig
+test artwork; it is not the approved final character collection.
+
 ## Additional runtime research
 
 An independently tested [passive macOS overlay](experiments/passive-overlay/README.md)
@@ -39,11 +50,18 @@ cd Codex-Buddie
 ./scripts/run.sh
 ```
 
-The Renderer Lab opens with a small green buddy. Click **Look**, **Move**, or
-**Click** to move its hotspot to that target. **Play / pause movement** animates
-the cursor between targets. **Switch cursor style** tests both native layouts.
-The lab simulates the native window; it does not perform computer-use actions.
-Close the window to quit. Nothing is installed globally.
+Choose a character, then use **Take a walk**, the three stops, and **Try a click**.
+Changing stops during a walk preserves position and velocity. Tune body shape,
+eye size and spacing, face position, stride and step height with the sliders.
+**Save a copy…** exports a portable buddy folder; **Import buddy…** opens it again.
+**Native size** compares the small software-cursor layout with the enlarged
+studio view. **Reduced motion** removes autonomous animation and jumps directly
+to targets. The system accessibility preference is also respected.
+
+The studio simulates the native window; it does not perform computer-use actions.
+Close the window to quit. Nothing is installed globally. Imported/customized
+buddies stay in the current session until explicitly saved. See the
+[character pack format and artwork workflow](docs/characters.md).
 
 ## How the experiment works
 
@@ -139,9 +157,16 @@ Run checks with:
 
 ```sh
 python3 -m unittest discover -s tests -v
+bash scripts/test-animation.sh
 ./scripts/build.sh
 ".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --self-test
 ```
+
+Animation checks cover frame-rate-independent gait, planted contact, the fixed
+click anchor, reduced motion, teleport recovery, curved arrival and interruption
+continuity. Pack checks cover the three real PNGs, export/import, independent
+customization, invalid settings, missing files and paths that escape a pack.
+See [the animation validation notes](docs/animation-validation.md).
 
 ## Next milestone
 

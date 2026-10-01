@@ -1,0 +1,8 @@
+{
+  "source": "ChatGPT image generation in Brave, requested by user",
+  "date": "2026-09-30",
+  "model": "GPT Image 2.5 requested; exact model not exposed by the ChatGPT image UI",
+  "original_filename": "Blank Pink Mochi Cat Shell.png",
+  "original_sha256": "96c3d8340ec818712a09e0ba6267829e03a04ef183b5792858c1678b8f5fd465",
+  "processing": "Remove alpha <8 noise; crop to alpha bounds with 3px margin; downsample to maximum 512px with Lanczos. Face and feet animate independently."
+}

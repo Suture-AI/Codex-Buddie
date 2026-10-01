@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "orbit",
+  "name": "Orbit",
+  "colors": {
+    "body": "#C6CCF5",
+    "ink": "#383F65",
+    "accent": "#EBAE73"
+  },
+  "rig": {
+    "width": 36,
+    "height": 35,
+    "faceY": -1,
+    "eyeSpacing": 14,
+    "stride": 24,
+    "footLift": 4
+  },
+  "art": {
+    "body": "body.png"
+  }
+}

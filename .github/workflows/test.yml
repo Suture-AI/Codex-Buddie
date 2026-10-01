@@ -8,6 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m unittest discover -s tests -v
+      - run: bash scripts/test-animation.sh
       - run: ./scripts/build.sh
       - run: '".build/Codex Buddie Lab.app/Contents/MacOS/BuddieLab" --self-test'
       - run: bash experiments/passive-overlay/scripts/test.sh

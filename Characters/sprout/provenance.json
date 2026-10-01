@@ -1,0 +1,8 @@
+{
+  "source": "ChatGPT image generation in Brave, requested by user",
+  "date": "2026-09-30",
+  "model": "GPT Image 2.5 requested; exact model not exposed by the ChatGPT image UI",
+  "original_filename": "Cute Blank Sprout Creature.png",
+  "original_sha256": "2b01f71300679a7187f5cba7140d5176cec43e81ab643aa8b5101c9b8291314d",
+  "processing": "Remove alpha <8 noise; crop to alpha bounds with 3px margin; downsample to maximum 512px with Lanczos. Face and feet animate independently."
+}

@@ -8,6 +8,20 @@ The follower in this repository is a feasibility prototype. Shipping an offset c
 
 ## What is ready for Enzo
 
+**Art direction update:** the user rejected the first Sprout/Mochi/Orbit visual
+direction as too generic and insufficiently polished. Keep these as rig fixtures,
+not approved final characters. The next direction needs a distinctive silhouette,
+coherent materials and facial design, and no dangling cursor tether. Develop a
+complete character concept before separating it into animation parts.
+
+The root Character Studio now has three ChatGPT-generated body packs, independent
+animated faces/feet, distance-driven planted gait, continuous curved retargeting,
+live proportions/face/gait controls, and pack import/export. `BuddieMotion.c` is
+plain C; `BuddieCharacter.m` owns pack validation and `BuddieView.m` renders poses.
+Run `bash scripts/test-animation.sh`. Review `docs/media/buddies-walking.gif` and
+[the pack specification](characters.md). These components are independent of the
+blocked live service connection and can be reused by a supported integration.
+
 The repository root contains the native renderer experiment already pushed by a collaborator: it substitutes the cursor content view in a lab and stages an isolated service copy. Its documented live blocker is `SkyIPCRequirement.Error.teamNotFound` during native IPC signing validation. Preserve the original service and its authentication requirements.
 
 The independent passive experiment under `experiments/passive-overlay/` adds:
@@ -21,7 +35,7 @@ The independent passive experiment under `experiments/passive-overlay/` adds:
 
 Read the [runtime research](../experiments/passive-overlay/docs/research.md) and the root README. The native and browser renderers are different integrations. The passive prototype uses public macOS APIs to observe a private app's window naming convention; it does not hook the actual renderer. Its observed newer service versions have not been certified for the root native shim.
 
-## Resolve this before polishing animation
+## Resolve this before claiming live replacement
 
 Prove a way to suppress or replace the original cursor **at its rendering source** while retaining its exact movement signal. The current 15 Hz window-position follower cannot guarantee this: it can lag, uses an uncalibrated anchor and does not change captured previews.
 

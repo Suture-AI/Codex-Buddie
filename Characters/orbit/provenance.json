@@ -1,0 +1,8 @@
+{
+  "source": "ChatGPT image generation in Brave, requested by user",
+  "date": "2026-09-30",
+  "model": "GPT Image 2.5 requested; exact model not exposed by the ChatGPT image UI",
+  "original_filename": "Lavender Alien Pod with Blank Visor.png",
+  "original_sha256": "405730c76fa4e2ef54c0c7cefab06333009dcc9e7f16321345de5d3ff8ec3d71",
+  "processing": "Remove alpha <8 noise; crop with 3px margin; Lanczos downsample to max512px. Independent face and feet."
+}

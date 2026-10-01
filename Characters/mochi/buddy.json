@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "mochi",
+  "name": "Mochi",
+  "colors": {
+    "body": "#F3D0CA",
+    "ink": "#684953",
+    "accent": "#E599A4"
+  },
+  "rig": {
+    "width": 38,
+    "height": 30,
+    "faceY": 0,
+    "eyeSpacing": 14,
+    "cornerRadius": 15,
+    "stride": 23
+  },
+  "art": {
+    "body": "body.png"
+  }
+}
